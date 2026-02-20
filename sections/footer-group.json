@@ -1,0 +1,93 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "t:sections.footer.name",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "link_list_jzQMKR": {
+          "type": "link_list",
+          "settings": {
+            "heading": "",
+            "menu": "footer-quick-links"
+          }
+        },
+        "link_list_yrpkXD": {
+          "type": "link_list",
+          "settings": {
+            "heading": "",
+            "menu": "footer-socials"
+          }
+        },
+        "link_list_XDexeE": {
+          "type": "link_list",
+          "settings": {
+            "heading": "",
+            "menu": "footer-categories-1"
+          }
+        },
+        "link_list_bVMKWy": {
+          "type": "link_list",
+          "settings": {
+            "heading": "",
+            "menu": "footer-categories-2"
+          }
+        }
+      },
+      "block_order": [
+        "link_list_jzQMKR",
+        "link_list_yrpkXD",
+        "link_list_XDexeE",
+        "link_list_bVMKWy"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "newsletter_enable": true,
+        "newsletter_heading": "",
+        "enable_follow_on_shop": false,
+        "show_social": false,
+        "enable_country_selector": false,
+        "enable_language_selector": false,
+        "payment_enable": false,
+        "show_policy": true,
+        "margin_top": 0,
+        "padding_top": 36,
+        "padding_bottom": 16
+      }
+    },
+    "1713663149bdd9de7b": {
+      "type": "apps",
+      "blocks": {
+        "instafeed_app_block_99nVYp": {
+          "type": "shopify://apps/instafeed/blocks/app-block/c447db20-095d-4a10-9725-b5977662c9d5",
+          "settings": {
+            "title": "",
+            "title_color": "",
+            "alignment": "center",
+            "html_area": ""
+          }
+        }
+      },
+      "block_order": [
+        "instafeed_app_block_99nVYp"
+      ],
+      "disabled": true,
+      "settings": {
+        "include_margins": true
+      }
+    }
+  },
+  "order": [
+    "footer",
+    "1713663149bdd9de7b"
+  ]
+}

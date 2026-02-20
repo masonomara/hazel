@@ -1,0 +1,387 @@
+{% comment %}
+  Renders a standard dropdown style menu for the header.
+
+  Usage:
+  {% render 'header-dropdown-menu' %}
+{% endcomment %}
+
+<nav class="header__inline-menu">
+  <ul class="list-menu list-menu--inline" role="list">
+    {%- for link in section.settings.menu.links -%}
+      <li>
+        {%- if link.links != blank -%}
+          <header-menu>
+            <details id="Details-HeaderMenu-{{ forloop.index }}">
+              <summary
+                id="HeaderMenu-{{ link.handle }}-header-dropdown-menu"
+                class="header__menu-item list-menu__item link focus-inset"
+              >
+                <a
+                  id="HeaderMenu-{{ link.handle }}-header-dropdown-menu"
+                  href="{{ link.url }}"
+                  class="header__menu-item list-menu__item link link--text focus-inset"
+                  {% if link.current %}
+                    aria-current="page"
+                  {% endif %}
+                >
+                  <span
+                    {%- if link.child_active %}
+                      class="header__active-menu-item"
+                    {% endif %}
+                  >
+                    {{- link.title | escape -}}
+                  </span>
+                  {% render 'icon-caret' %}
+                </a>
+              </summary>
+              <ul
+                id="HeaderMenu-MenuList-{{ forloop.index }}-header-dropdown-menu"
+                class="header__submenu list-menu list-menu--disclosure color-{{ section.settings.menu_color_scheme }} gradient caption-large motion-reduce global-settings-popup"
+                role="list"
+                tabindex="-1"
+              >
+                <div class="hazelMegaMenuLinkList">
+                  {%- for childlink in link.links -%}
+                    <li>
+                      {%- if childlink.links == blank -%}
+                        <a
+                          id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-header-dropdown-menu"
+                          href="{{ childlink.url }}"
+                          class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if childlink.current %} list-menu__item--active{% endif %} {{ childlink.title }}"
+                          {% if childlink.current %}
+                            aria-current="page"
+                          {% endif %}
+                        >
+                          {{ childlink.title | escape }}
+                        </a>
+                      {%- else -%}
+                        <details id="Details-HeaderSubMenu-{{ link.handle }}-{{ childlink.handle }}">
+                          <summary
+                            id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-header-dropdown-menu"
+                            class="header__menu-item link link--text list-menu__item focus-inset caption-large"
+                          >
+                            <span>{{ childlink.title | escape }}</span>
+                            {% render 'icon-caret' %}
+                          </summary>
+                          <ul
+                            id="HeaderMenu-SubMenuList-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}-header-dropdown-menu"
+                            class="header__submenu page-width list-menu motion-reduce"
+                          >
+                            {%- for grandchildlink in childlink.links -%}
+                              <li>
+                                <a
+                                  id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}-header-dropdown-menu"
+                                  href="{{ grandchildlink.url }}"
+                                  class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if grandchildlink.current %} list-menu__item--active{% endif %}"
+                                  {% if grandchildlink.current %}
+                                    aria-current="page"
+                                  {% endif %}
+                                >
+                                  {{ grandchildlink.title | escape }}
+                                </a>
+                              </li>
+                            {%- endfor -%}
+                          </ul>
+                        </details>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </div>
+
+                {% if section.settings.megamenu_title_one == link.title %}
+                  <div class="megaMenuCollectionWrapper">
+                    {% if section.settings.link_one_a != blank %}
+                      <a class="megaMenuCollection" href="{{ section.settings.link_one_a }}" target="_top">
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_one_a.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_one_a.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_one_a }}</span>
+                      </a>
+                    {% endif %}
+                    {% if section.settings.link_one_b != blank %}
+                      <a
+                        class="megaMenuCollection megaMenuCollectionTwo"
+                        href="{{ section.settings.link_one_b }}"
+                        target="_top"
+                      >
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_one_b.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_one_b.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_one_b }}</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if section.settings.megamenu_title_two == link.title %}
+                  <div class="megaMenuCollectionWrapper">
+                    {% if section.settings.link_two_a != blank %}
+                      <a class="megaMenuCollection" href="{{ section.settings.link_two_a }}" target="_top">
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_two_a.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_two_a.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_two_a }}</span>
+                      </a>
+                    {% endif %}
+                    {% if section.settings.link_two_b != blank %}
+                      <a
+                        class="megaMenuCollection megaMenuCollectionTwo"
+                        href="{{ section.settings.link_two_b }}"
+                        target="_top"
+                      >
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_two_b.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_two_b.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_two_b }}</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if section.settings.megamenu_title_three == link.title %}
+                  <div class="megaMenuCollectionWrapper">
+                    {% if section.settings.link_three_a != blank %}
+                      <a class="megaMenuCollection" href="{{ section.settings.link_three_a }}" target="_top">
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_three_a.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_three_a.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_three_a }}</span>
+                      </a>
+                    {% endif %}
+                    {% if section.settings.link_three_b != blank %}
+                      <a
+                        class="megaMenuCollection megaMenuCollectionTwo"
+                        href="{{ section.settings.link_three_b }}"
+                        target="_top"
+                      >
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_three_b.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_three_b.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_three_b }}</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if section.settings.megamenu_title_four == link.title %}
+                  <div class="megaMenuCollectionWrapper">
+                    {% if section.settings.link_four_a != blank %}
+                      <a class="megaMenuCollection" href="{{ section.settings.link_four_a }}" target="_top">
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_four_a.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_four_a.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_four_a }}</span>
+                      </a>
+                    {% endif %}
+                    {% if section.settings.link_four_b != blank %}
+                      <a
+                        class="megaMenuCollection megaMenuCollectionTwo"
+                        href="{{ section.settings.link_four_b }}"
+                        target="_top"
+                      >
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_four_b.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_four_b.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_four_b }}</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if section.settings.megamenu_title_five == link.title %}
+                  <div class="megaMenuCollectionWrapper">
+                    {% if section.settings.link_five_a != blank %}
+                      <a class="megaMenuCollection" href="{{ section.settings.link_five_a }}" target="_top">
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_five_a.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_five_a.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_five_a }}</span>
+                      </a>
+                    {% endif %}
+                    {% if section.settings.link_five_b != blank %}
+                      <a
+                        class="megaMenuCollection megaMenuCollectionTwo"
+                        href="{{ section.settings.link_five_b }}"
+                        target="_top"
+                      >
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_five_b.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_five_b.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_five_b }}</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if section.settings.megamenu_title_six == link.title %}
+                  <div class="megaMenuCollectionWrapper">
+                    {% if section.settings.link_six_a != blank %}
+                      <a class="megaMenuCollection" href="{{ section.settings.link_six_a }}" target="_top">
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_six_a.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_six_a.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_six_a }}</span>
+                      </a>
+                    {% endif %}
+                    {% if section.settings.link_six_b != blank %}
+                      <a
+                        class="megaMenuCollection megaMenuCollectionTwo"
+                        href="{{ section.settings.link_six_b }}"
+                        target="_top"
+                      >
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_six_b.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_six_b.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_six_b }}</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+
+                {% if section.settings.megamenu_title_seven == link.title %}
+                  <div class="megaMenuCollectionWrapper">
+                    {% if section.settings.link_seven_a != blank %}
+                      <a class="megaMenuCollection" href="{{ section.settings.link_seven_a }}" target="_top">
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_seven_a.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_seven_a.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_seven_a }}</span>
+                      </a>
+                    {% endif %}
+                    {% if section.settings.link_seven_b != blank %}
+                      <a
+                        class="megaMenuCollection megaMenuCollectionTwo"
+                        href="{{ section.settings.link_seven_b }}"
+                        target="_top"
+                      >
+                        <div class="megaMenuCollection__photo__wrapper">
+                          <img
+                            src="{{ section.settings.image_seven_b.image | image_url: width: 300 }}"
+                            class="megaMenuCollection__photo"
+                            alt="{{ section.settings.image_seven_b.image.alt | escape }}"
+                            loading="lazy"
+                            width="150"
+                            height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
+                          >
+                        </div>
+                        <span class="megaMenuCollection__text">{{ section.settings.text_seven_b }}</span>
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </ul>
+            </details>
+          </header-menu>
+        {%- else -%}
+          <a
+            id="HeaderMenu-{{ link.handle }}-header-dropdown-menu"
+            href="{{ link.url }}"
+            class="header__menu-item list-menu__item link link--text focus-inset"
+            {% if link.current %}
+              aria-current="page"
+            {% endif %}
+          >
+            <span
+              {%- if link.current %}
+                class="header__active-menu-item"
+              {% endif %}
+            >
+              {{- link.title | escape -}}
+            </span>
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>

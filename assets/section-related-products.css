@@ -1,0 +1,12 @@
+.related-products {
+  display: block;
+}
+
+.related-products__heading {
+  margin: 0 0 1.6rem;
+}
+@media screen and (min-width: 750px) {
+  .related-products__heading {
+    margin-bottom: 2.4rem;
+  }
+}

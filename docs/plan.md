@@ -1080,9 +1080,9 @@ Code changes — require more care, affect visible UI.
 
 New files and code additions.
 
-- [ ] **3.1** Create `templates/page.returns.json` with `main-page` and `returns-form` sections (Task 3A)
-- [ ] **3.2** Create `sections/returns-form.liquid` with the return request form, return slip generator, and print styles (Task 3B)
-- [ ] **3.3** Add "Returns" link to mobile drawer in `snippets/header-drawer.liquid` after the Sizing Guide link (Task 3D)
+- [x] **3.1** Create `templates/page.returns.json` with `main-page` and `returns-form` sections (Task 3A)
+- [x] **3.2** Create `sections/returns-form.liquid` with the return request form, return slip generator, and print styles (Task 3B)
+- [x] **3.3** Add "Returns" link to mobile drawer in `snippets/header-drawer.liquid` after the Sizing Guide link (Task 3D)
 
 ### Phase 4 — Shopify Admin tasks (manual, in browser)
 
@@ -1121,7 +1121,7 @@ All done at `hazelboutique.myshopify.com/admin`. No code editor needed.
 
 **Store settings:**
 
-- [ ] **4.22** Go to **Settings > Store details** — update the store address to 1709 Rt 34, Suite 3, Farmingdale, NJ 07719. Save
+- [x] **4.22** ~~Go to Settings > Store details — update the store address.~~ **SKIPPED** — store locations haven't changed, only the shipping/returns warehouse address. Changing Store details risks breaking third-party integrations. The warehouse address is already set correctly in the returns form section settings.
 
 **Verification:**
 

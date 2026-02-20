@@ -963,7 +963,7 @@ Then handle the link navigation via JavaScript (the hover-open behavior already 
 
 Recommended sequence, grouped by risk and dependency:
 
-**Phase 1 — Low risk, high impact (do first)**
+### Phase 1 — Low risk, high impact (do first)
 
 1. Enable default `page.json` template (Task 1A)
 2. Enable contact form on contact page (Task 2B)
@@ -973,34 +973,54 @@ Recommended sequence, grouped by risk and dependency:
 6. Clean up console.logs (Task 7C)
 7. Remove debug class (Task 7D)
 
-**Phase 2 — Medium complexity**
+### Phase 2 — Medium complexity
 
-8. Fix Instagram label (Task 5)
-9. Fix `aria-labelledby` and `<span href>` in product cards (Tasks 6C, 7B)
-10. Add alt text to recently viewed images (Task 6D)
-11. Fix duplicate header IDs (Task 6E)
-12. Add accessibility labels to swatches and landmarks (Tasks 6H, 6I, 6J)
+1. Fix Instagram label (Task 5)
+2. Fix `aria-labelledby` and `<span href>` in product cards (Tasks 6C, 7B)
+3. Add alt text to recently viewed images (Task 6D)
+4. Fix duplicate header IDs (Task 6E)
+5. Add accessibility labels to swatches and landmarks (Tasks 6H, 6I, 6J)
 
-**Phase 3 — New features**
+### Phase 3 — New features
 
-13. Create returns form section and template (Tasks 3A, 3B)
-14. Add returns link to mobile drawer (Task 3D)
+1. Create returns form section and template (Tasks 3A, 3B)
+2. Add returns link to mobile drawer (Task 3D)
 
-**Phase 4 — Shopify Admin tasks (no code)**
+### Phase 4 — Shopify Admin tasks (no code, done in browser)
 
-15. Update Contact Us page content with new address (Task 2A)
-16. Update Store Locations page content (Task 2C)
-17. Create returns page in admin (Task 3C)
-18. Create Mock Necks collection (Task 4A)
-19. Create Perfume collection (Task 4B)
-20. Move Mini Cherub to Bottoms (Task 4C)
-21. Update navigation menus (Tasks 1C, 4D)
-22. Verify page handles match hardcoded links (Task 1B)
+These are all done in the Shopify Admin dashboard at `hazelboutique.myshopify.com/admin`. No code editor needed.
 
-**Phase 5 — Structural HTML fixes (test carefully)**
+**Pages:**
 
-23. Fix `<a>` inside `<summary>` in mega menu (Task 6F)
-24. Fix `<div>` inside `<ul>` in mega menu (Task 6G)
+1. Verify page handles and templates for Our Story, Store Locations, Contact Us, Sizing Guide (Task 1B)
+2. Update the Contact Us page body with new address, email, phone, hours (Task 2A)
+3. Update the Store Locations page body with new address (Task 2C)
+4. Check all other pages for stale address references (Task 2D)
+5. Create the Returns page, assign the `page.returns` template (Task 3C)
+
+**Collections:**
+
+6. Create "Mock Necks" automated collection with `mock neck` tag condition (Task 4A)
+7. Tag all mock neck products with `mock neck` (Task 4A)
+8. Create "Perfume" automated collection with `perfume` tag condition (Task 4B)
+9. Tag the two perfume products with `perfume` (Task 4B)
+10. Add Mini Cherub to the Bottoms collection (Task 4C)
+
+**Navigation:**
+
+11. Edit `navbar-menu`: add Mock Necks under Clothing, Perfume under Accessories (Task 4D)
+12. Edit `navbar-menu`: add pages (Our Story, Store Locations, Contact Us, Sizing Guide, Returns) if not already present (Task 1C)
+13. Edit `footer-quick-links`: add Returns link (Task 3D)
+14. Verify all footer menus have the right links (Task 1C)
+
+**Store settings:**
+
+15. Update store address in **Settings > Store details** to the new address (Task 2D)
+
+### Phase 5 — Structural HTML fixes (test carefully)
+
+1. Fix `<a>` inside `<summary>` in mega menu (Task 6F)
+2. Fix `<div>` inside `<ul>` in mega menu (Task 6G)
 
 ---
 
@@ -1025,3 +1045,107 @@ Recommended sequence, grouped by risk and dependency:
 | `layout/theme.liquid`                            | 6J                 | Edit                     |
 | `templates/index.json`                           | 5                  | Edit (if needed)         |
 | All other `.liquid` files with `visually-hidden` | 6A                 | Edit (bulk find-replace) |
+
+---
+
+## Todo List
+
+### Phase 1 — Low risk, high impact
+
+Code changes — simple edits, safe to do first.
+
+- [ ] **1.1** Enable default page template — remove `"disabled": true` from `templates/page.json` (Task 1A)
+- [ ] **1.2** Enable contact form — remove `"disabled": true` from `templates/page.contact.json`, set heading to "Send Us a Message" (Task 2B)
+- [ ] **1.3** Fix CSS typo — change `900spx` to `900px` in `sections/header.liquid` line 41 (Task 7A)
+- [ ] **1.4** Remove `aria-hidden="true"` from all `visually-hidden` elements — bulk find-and-replace `class="visually-hidden" aria-hidden="true"` with `class="visually-hidden"` across all `.liquid` files (Task 6A)
+- [ ] **1.5** Fix nested `<h3>` — change inner `<h3>` to `<span>` in `snippets/card-product.liquid` around line 124 (Task 6B)
+- [ ] **1.6** Remove `console.log` statements from `sections/footer.liquid` recently-viewed JS (Task 7C)
+- [ ] **1.7** Remove `console.log` statements from `snippets/cart-drawer.liquid` upsell JS (Task 7C)
+- [ ] **1.8** Rename `nutTestTest` class to `header-dropdown-menu-helper` in `snippets/header-dropdown-menu-helper.liquid` (Task 7D)
+
+### Phase 2 — Medium complexity
+
+Code changes — require more care, affect visible UI.
+
+- [ ] **2.1** Fix Instagram heading and link in `templates/index.json` rich text section `rich_text_niFCNN` — or fix via theme editor (Task 5)
+- [ ] **2.2** Fix `aria-labelledby` on product card — change from text value to element ID in `snippets/card-product.liquid` line 43 (Task 6C)
+- [ ] **2.3** Fix `<span href>` — change to `<a href>` in `snippets/card-product.liquid` around line 193 (Task 7B)
+- [ ] **2.4** Add `alt` attribute to recently-viewed product images in `sections/footer.liquid` JS template literals (Task 6D)
+- [ ] **2.5** Fix duplicate IDs in second header — suffix all IDs in `masonHeaderModifierTwo` block of `sections/header.liquid` (Task 6E)
+- [ ] **2.6** Add `role="img"` and `aria-label` to color swatch dots in `snippets/card-product.liquid` around line 263 (Task 6H)
+- [ ] **2.7** Add `aria-label="Primary navigation"` to first `<header>` and `aria-label="Secondary navigation"` to second `<header>` in `sections/header.liquid` (Task 6I)
+- [ ] **2.8** Add `aria-hidden="true"` to `#follower` div in `layout/theme.liquid` line 421 (Task 6J)
+
+### Phase 3 — New features
+
+New files and code additions.
+
+- [ ] **3.1** Create `templates/page.returns.json` with `main-page` and `returns-form` sections (Task 3A)
+- [ ] **3.2** Create `sections/returns-form.liquid` with the return request form, return slip generator, and print styles (Task 3B)
+- [ ] **3.3** Add "Returns" link to mobile drawer in `snippets/header-drawer.liquid` after the Sizing Guide link (Task 3D)
+
+### Phase 4 — Shopify Admin tasks (manual, in browser)
+
+All done at `hazelboutique.myshopify.com/admin`. No code editor needed.
+
+**Pages:**
+
+- [ ] **4.1** Go to **Online Store > Pages**, open "Our Story" — confirm handle is `our-story`, template is `page.about`. Save
+- [ ] **4.2** Open "Store Locations" — confirm handle is `store-locations`, template is `page`. Update body with new address (1709 Rt 34, Suite 3, Farmingdale, NJ 07719). Save
+- [ ] **4.3** Open "Contact Us" — confirm handle is `contact-us`, template is `page.contact`. Replace body with consolidated contact info: new address, email, phone, hours. Save
+- [ ] **4.4** Open "Sizing Guide" (or "Sizing") — confirm handle is `sizing`, template is `page.contact`. Save
+- [ ] **4.5** Create any of the above pages if they don't exist yet (Add Page, set title, handle, template, body content)
+- [ ] **4.6** Create new "Returns" page — title: "Returns", handle: `returns`, template: `page.returns`, paste returns policy text into body. Save and publish
+- [ ] **4.7** Open every other page in the Pages list — search each body for old address text. Remove or update any stale references
+
+**Collections:**
+
+- [ ] **4.8** Go to **Products > Collections > Create collection** — title: "Mock Necks", type: Automated, condition: Product tag is equal to `mock neck`. Save
+- [ ] **4.9** Go to **Products > All products** — find each mock neck product, add tag `mock neck`, save each one
+- [ ] **4.10** Go to **Products > Collections > Create collection** — title: "Perfume", type: Automated, condition: Product tag is equal to `perfume`. Save
+- [ ] **4.11** Find the two perfume products, add tag `perfume`, save each one
+- [ ] **4.12** Find the "Bottoms" collection, check whether it's automated (note the tag) or manual
+- [ ] **4.13** Find the "Mini Cherub" product — if Bottoms is automated, add the matching tag; if manual, add Mini Cherub to the Bottoms collection directly. Save
+- [ ] **4.14** Optionally upload collection images for Mock Necks and Perfume
+
+**Navigation:**
+
+- [ ] **4.15** Go to **Online Store > Navigation**, open `navbar-menu`
+- [ ] **4.16** Expand "Clothing" submenu — add "Mock Necks" linked to the Mock Necks collection. Drag to desired position. Save
+- [ ] **4.17** Expand "Accessories" submenu — add "Perfume" linked to the Perfume collection. Save
+- [ ] **4.18** Check if Our Story, Store Locations, Contact Us, Sizing Guide, Returns are in the main menu. Add any that are missing
+- [ ] **4.19** Save `navbar-menu`
+- [ ] **4.20** Open `footer-quick-links` — add "Returns" linked to the Returns page. Save
+- [ ] **4.21** Review all four footer menus (`footer-quick-links`, `footer-socials`, `footer-categories-1`, `footer-categories-2`) — confirm links are correct and none point to dead pages. Save any changes
+
+**Store settings:**
+
+- [ ] **4.22** Go to **Settings > Store details** — update the store address to 1709 Rt 34, Suite 3, Farmingdale, NJ 07719. Save
+
+**Verification:**
+
+- [ ] **4.23** Visit the live site — click every link in the header nav and confirm each page loads (not blank, not 404)
+- [ ] **4.24** Open the mobile menu (hamburger) — click each link in the utility section and confirm pages load
+- [ ] **4.25** Visit `/pages/returns` — confirm the returns form renders and the "Generate Return Slip" button works
+- [ ] **4.26** Hover over "Clothing" in the desktop nav — confirm "Mock Necks" appears
+- [ ] **4.27** Hover over "Accessories" in the desktop nav — confirm "Perfume" appears
+- [ ] **4.28** Visit the Bottoms collection — confirm Mini Cherub appears in the product grid
+- [ ] **4.29** Check the footer — confirm all four link columns render correct links including Returns
+
+### Phase 5 — Structural HTML fixes (test carefully)
+
+These change interactive navigation behavior. Test thoroughly on desktop and mobile after each change.
+
+- [ ] **5.1** Remove `<a>` from inside `<summary>` in `snippets/header-dropdown-menu.liquid` — replace with `<span>`, add `data-href` attribute to `<summary>`, handle navigation via JS (Task 6F)
+- [ ] **5.2** Move `<div class="hazelMegaMenuLinkList">` outside the `<ul>` in `snippets/header-dropdown-menu.liquid` — wrap `<ul>` inside the `<div>` instead (Task 6G)
+- [ ] **5.3** Test desktop nav: hover over each menu item, confirm dropdowns open, confirm clicking a parent item navigates to its page
+- [ ] **5.4** Test mobile nav: open drawer, navigate through all menu levels, confirm back buttons work
+- [ ] **5.5** Test keyboard nav: Tab through the header menu items, confirm Enter opens dropdowns, Escape closes them
+
+### Post-launch
+
+- [ ] **6.1** Run a screen reader test (VoiceOver on Mac, or NVDA on Windows) across homepage, product page, collection page, and cart drawer
+- [ ] **6.2** Run Lighthouse accessibility audit on homepage, product page, and collection page — target score 90+
+- [ ] **6.3** Forward accessibility findings and contact info to the accessibility reviewer mentioned in goals.md
+- [ ] **6.4** Review Shopify Inbox settings — decide whether to re-enable the chat widget (currently disabled in theme settings)
+- [ ] **6.5** Review Instafeed footer block — decide whether to re-enable it (currently disabled in footer-group.json)

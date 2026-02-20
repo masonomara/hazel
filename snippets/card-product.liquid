@@ -40,7 +40,7 @@
     class="card-wrapper product-card-wrapper underline-links-hover"
     href="{{ card_product.url }}"
     id="CardLink-{{ section_id }}-{{ card_product.id }}"
-    aria-labelledby="{{ card_product.title | escape }}"
+    aria-labelledby="CardLink-{{ section_id }}-{{ card_product.id }}"
   >
     <div
       class="
@@ -190,14 +190,14 @@
               id="title-{{ section_id }}-{{ card_product.id }}"
             {% endif %}
           >
-            <span
+            <a
               href="{{ card_product.url }}"
               id="CardLink-{{ section_id }}-{{ card_product.id }}"
               class="full-unstyled-link"
               aria-labelledby="CardLink-{{ section_id }}-{{ card_product.id }} Badge-{{ section_id }}-{{ card_product.id }}"
             >
               {{ card_product.title | escape }}
-            </span>
+            </a>
           </h3>
           <div class="card-information">
             {%- if show_vendor -%}
@@ -260,13 +260,9 @@
                   {% break %}
                 {% endif %}
                 {% if value.variant.metafields.custom.hex_color != blank %}
-                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5); background-color:{{ value.variant.metafields.custom.hex_color }}">
-                    &nbsp;
-                  </div>
+                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5); background-color:{{ value.variant.metafields.custom.hex_color }}" role="img" aria-label="{{ value }} color swatch"></div>
                 {% elsif value %}
-                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5);  background-color:{{ value | split: ' ' | last | handle }}">
-                    &nbsp;
-                  </div>
+                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5); background-color:{{ value | split: ' ' | last | handle }}" role="img" aria-label="{{ value }} color swatch"></div>
                 {% endif %}
               {%- endfor %}
               {% if option.values.size > 3 %}

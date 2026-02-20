@@ -12,149 +12,160 @@
     }
   }
 
-  .returns-form { max-width: 580px; margin: 0 auto; }
+  .returns-section { max-width: 580px; margin: 0 auto; }
+  .returns-section .title { margin-bottom: 8px; }
+  .returns-section__intro { margin-bottom: 28px; color: rgba(var(--color-foreground-rgb), 0.7); font-size: 15px; line-height: 1.6; }
+
   .returns-form .field { margin-bottom: 16px; }
-  .returns-slip { display: none; max-width: 580px; margin: 0 auto; padding: 40px; border: 2px dashed var(--color-foreground); }
+  .returns-form__buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+  .returns-slip { display: none; margin-top: 40px; padding: 40px; border: 2px dashed rgba(var(--color-foreground-rgb), 0.3); }
   .returns-slip.active { display: block; }
-  .returns-slip__header { text-align: center; margin-bottom: 24px; }
-  .returns-slip__address { margin-bottom: 24px; line-height: 1.6; }
+  .returns-slip__header { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid rgba(var(--color-foreground-rgb), 0.1); }
+  .returns-slip__header h2 { margin-bottom: 4px; }
   .returns-slip__order { margin-bottom: 24px; }
-  .returns-slip__policy { font-size: 14px; opacity: 0.7; margin-bottom: 24px; }
-  .returns-slip__cut-line { border-top: 1px dashed var(--color-foreground); padding-top: 16px; margin-top: 24px; text-align: center; font-size: 13px; opacity: 0.5; }
+  .returns-slip__order p { margin: 4px 0; }
+  .returns-slip__address { margin-bottom: 24px; line-height: 1.7; }
+  .returns-slip__items { margin-bottom: 24px; }
+  .returns-slip__policy { font-size: 14px; color: rgba(var(--color-foreground-rgb), 0.6); margin-bottom: 24px; line-height: 1.5; }
+  .returns-slip__cut-line { border-top: 2px dashed rgba(var(--color-foreground-rgb), 0.25); padding-top: 16px; margin-top: 28px; text-align: center; font-size: 13px; color: rgba(var(--color-foreground-rgb), 0.4); }
+  .returns-slip__print { margin-top: 24px; text-align: center; }
 
   @media print {
-    .returns-form, .site-header, .site-footer,
-    header, footer, .announcement-bar, .header-wrapper,
-    .section-header, .footer, #shopify-section-header,
-    #shopify-section-footer, #shopify-section-announcement-bar,
-    .returns-slip__no-print { display: none !important; }
-    .returns-slip { display: block !important; border: 2px dashed #000; }
-    .returns-slip.active { display: block !important; }
+    body * { visibility: hidden !important; }
+    .returns-slip, .returns-slip * { visibility: visible !important; }
+    .returns-slip { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 40px; border: 2px dashed #000; }
+    .returns-slip__print { display: none !important; }
   }
 {%- endstyle -%}
 
 <div class="color-{{ section.settings.color_scheme }} gradient">
   <div class="page-width page-width--narrow section-{{ section.id }}-padding">
+    <div class="returns-section">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="title title-wrapper--no-top-margin {{ section.settings.heading_size }}">
+          {{ section.settings.heading }}
+        </h2>
+      {%- endif -%}
 
-    {%- if section.settings.heading != blank -%}
-      <h2 class="title title-wrapper--no-top-margin {{ section.settings.heading_size }}">
-        {{ section.settings.heading }}
-      </h2>
-    {%- endif -%}
-
-    <div class="returns-form" id="ReturnsForm">
-      <p style="margin-bottom: 24px;">
-        Enter your order number and email address below. We'll generate a return slip you can print and include in your package.
-      </p>
-
-      {%- form 'contact', id: 'ReturnsContactForm', class: 'isolate' -%}
-        {%- if form.posted_successfully? -%}
-          <h2 class="form-status form-status-list form__message" tabindex="-1" autofocus>
-            {% render 'icon-success' %}
-            Your return request has been submitted. Please print the return slip below.
-          </h2>
-        {%- elsif form.errors -%}
-          <div class="form__message">
-            <h2 class="form-status caption-large text-body" role="alert" tabindex="-1" autofocus>
-              {% render 'icon-error' %}
-              {{ 'templates.contact.form.error_heading' | t }}
-            </h2>
-          </div>
-        {%- endif -%}
-
-        <input type="hidden" name="contact[subject]" value="Return Request">
-        <input type="hidden" name="contact[tags]" value="return-request">
-
-        <div class="field">
-          <input
-            class="field__input"
-            type="text"
-            id="ReturnsForm-order"
-            name="contact[Order Number]"
-            required
-            placeholder="Order Number (e.g. #1001)"
-          >
-          <label class="field__label" for="ReturnsForm-order">Order Number</label>
-        </div>
-
-        <div class="field">
-          <input
-            class="field__input"
-            type="email"
-            id="ReturnsForm-email"
-            name="contact[email]"
-            required
-            autocomplete="email"
-            spellcheck="false"
-            autocapitalize="off"
-            value="{% if customer %}{{ customer.email }}{% endif %}"
-            placeholder="Email Address"
-          >
-          <label class="field__label" for="ReturnsForm-email">Email Address</label>
-        </div>
-
-        <div class="field">
-          <textarea
-            rows="5"
-            id="ReturnsForm-reason"
-            class="text-area field__input"
-            name="contact[Return Reason]"
-            placeholder="Which item(s) are you returning and why?"
-          >{{- form.body -}}</textarea>
-          <label class="form__label field__label" for="ReturnsForm-reason">Items &amp; Reason for Return</label>
-        </div>
-
-        <div class="contact__button" style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button type="submit" class="button">Submit Return Request</button>
-          <button type="button" class="button button--secondary" id="GenerateReturnSlip">
-            Generate Return Slip
-          </button>
-        </div>
-      {%- endform -%}
-    </div>
-
-    <div class="returns-slip" id="ReturnSlip">
-      <div class="returns-slip__header">
-        <h2>Return Slip</h2>
-        <p><strong>{{ shop.name }}</strong></p>
-      </div>
-
-      <div class="returns-slip__order">
-        <p><strong>Order Number:</strong> <span id="SlipOrderNumber">—</span></p>
-        <p><strong>Email:</strong> <span id="SlipEmail">—</span></p>
-        <p><strong>Date Generated:</strong> <span id="SlipDate">—</span></p>
-      </div>
-
-      <div class="returns-slip__address">
-        <p><strong>Return to:</strong></p>
-        <p>
-          {{ shop.name }}<br>
-          {{ section.settings.return_address_line_1 }}<br>
-          {%- if section.settings.return_address_line_2 != blank -%}
-            {{ section.settings.return_address_line_2 }}<br>
-          {%- endif -%}
-          {{ section.settings.return_address_city_state_zip }}
+      <div class="returns-form" id="ReturnsForm">
+        <p class="returns-section__intro">
+          Enter your order number and email address below. We'll generate a return slip you can print and include in
+          your package.
         </p>
+
+        {%- form 'contact', id: 'ReturnsContactForm', class: 'isolate' -%}
+          {%- if form.posted_successfully? -%}
+            <h2 class="form-status form-status-list form__message" tabindex="-1" autofocus>
+              {% render 'icon-success' %}
+              Your return request has been submitted. Please print the return slip below.
+            </h2>
+          {%- elsif form.errors -%}
+            <div class="form__message">
+              <h2 class="form-status caption-large text-body" role="alert" tabindex="-1" autofocus>
+                {% render 'icon-error' %}
+                {{ 'templates.contact.form.error_heading' | t }}
+              </h2>
+            </div>
+          {%- endif -%}
+
+          <input type="hidden" name="contact[subject]" value="Return Request">
+          <input type="hidden" name="contact[tags]" value="return-request">
+
+          <div class="field">
+            <input
+              class="field__input"
+              type="text"
+              id="ReturnsForm-order"
+              name="contact[Order Number]"
+              required
+              placeholder="Order Number (e.g. #1001)"
+            >
+            <label class="field__label" for="ReturnsForm-order">Order Number</label>
+          </div>
+
+          <div class="field">
+            <input
+              class="field__input"
+              type="email"
+              id="ReturnsForm-email"
+              name="contact[email]"
+              required
+              autocomplete="email"
+              spellcheck="false"
+              autocapitalize="off"
+              value="{% if customer %}{{ customer.email }}{% endif %}"
+              placeholder="Email Address"
+            >
+            <label class="field__label" for="ReturnsForm-email">Email Address</label>
+          </div>
+
+          <div class="field">
+            <textarea
+              rows="5"
+              id="ReturnsForm-reason"
+              class="text-area field__input"
+              name="contact[Return Reason]"
+              placeholder="Which item(s) are you returning and why?"
+            >{{- form.body -}}</textarea>
+            <label class="form__label field__label" for="ReturnsForm-reason">Items &amp; Reason for Return</label>
+          </div>
+
+          <div class="returns-form__buttons">
+            <button type="submit" class="button">Submit Return Request</button>
+            <button type="button" class="button button--secondary" id="GenerateReturnSlip">Generate Return Slip</button>
+          </div>
+        {%- endform -%}
       </div>
 
-      <div class="returns-slip__items">
-        <p><strong>Item(s) Being Returned:</strong></p>
-        <p id="SlipItems" style="white-space: pre-line;">—</p>
-      </div>
+      <div class="returns-slip" id="ReturnSlip">
+        <div class="returns-slip__header">
+          <h2>Return Slip</h2>
+          <p>
+            <strong>{{ shop.name }}</strong>
+          </p>
+        </div>
 
-      <div class="returns-slip__policy">
-        <p>Items must be returned within <strong>{{ section.settings.return_window_days }} days</strong> of delivery in original condition with tags attached. Please include this slip in your return package.</p>
-      </div>
+        <div class="returns-slip__order">
+          <p><strong>Order Number:</strong> <span id="SlipOrderNumber">—</span></p>
+          <p><strong>Email:</strong> <span id="SlipEmail">—</span></p>
+          <p><strong>Date Generated:</strong> <span id="SlipDate">—</span></p>
+        </div>
 
-      <div class="returns-slip__cut-line">
-        ✂ Cut along this line and include in your package
-      </div>
+        <div class="returns-slip__address">
+          <p><strong>Return to:</strong></p>
+          <p>
+            {{ shop.name -}}
+            <br>
+            {{ section.settings.return_address_line_1 -}}
+            <br>
+            {%- if section.settings.return_address_line_2 != blank -%}
+              {{ section.settings.return_address_line_2 -}}
+              <br>
+            {%- endif -%}
+            {{ section.settings.return_address_city_state_zip }}
+          </p>
+        </div>
 
-      <div class="returns-slip__no-print" style="margin-top: 24px; text-align: center;">
-        <button type="button" class="button" onclick="window.print()">Print Return Slip</button>
+        <div class="returns-slip__items">
+          <p><strong>Item(s) Being Returned:</strong></p>
+          <p id="SlipItems">—</p>
+        </div>
+
+        <div class="returns-slip__policy">
+          <p>
+            Items must be returned within <strong>{{ section.settings.return_window_days }} days</strong> of delivery in
+            original condition with tags attached. Please include this slip in your return package.
+          </p>
+        </div>
+
+        <div class="returns-slip__cut-line">✂ Cut along this line and include in your package</div>
+
+        <div class="returns-slip__print">
+          <button type="button" class="button" onclick="window.print()">Print Return Slip</button>
+        </div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -184,7 +195,9 @@
         document.getElementById('SlipOrderNumber').textContent = orderInput.value.trim();
         document.getElementById('SlipEmail').textContent = emailInput.value.trim();
         document.getElementById('SlipDate').textContent = new Date().toLocaleDateString('en-US', {
-          year: 'numeric', month: 'long', day: 'numeric'
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
         });
         document.getElementById('SlipItems').textContent = reasonInput.value.trim() || 'See order details';
 

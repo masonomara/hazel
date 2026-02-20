@@ -24,7 +24,6 @@
       .then(({ products }) => {
         if (products.length > 0) {
           const firstRecommendedProduct = products[0];
-          console.log(`The title of the first recommended product is: ${firstRecommendedProduct.title}`);
           const recommendedProductHtml = `
 <div class="cartUpsell__container">
   <div class="cartUpsell__arrow">
@@ -59,9 +58,6 @@
           const cartItemElement = document.querySelector('#CartDrawer-Item-1');
           if (cartItemElement) {
             cartItemElement.insertAdjacentHTML('beforeend', recommendedProductHtml);
-            console.log('insertAdjacent Success!');
-          } else {
-            console.error('#CartDrawer-Item-1 not found in DOM');
           }
         } else {
           const alternativeRecommendationsUrl = `${window.Shopify.routes.root}recommendations/products.json?product_id={{ cart.items[0].product_id }}&limit=4&intent=related`;
@@ -75,7 +71,6 @@
             .then(({ products }) => {
               if (products.length > 0) {
                 const firstRecommendedProduct = products[0];
-                console.log(`The title of the first recommended product is: ${firstRecommendedProduct.title}`);
                 const recommendedProductHtml = `
 <div class="cartUpsell__container">
   <div class="cartUpsell__arrow">
@@ -111,20 +106,14 @@
                 const cartItemElement = document.querySelector('#CartDrawer-Item-1');
                 if (cartItemElement) {
                   cartItemElement.insertAdjacentHTML('beforeend', recommendedProductHtml);
-                  console.log('insertAdjacent Success!');
-                } else {
-                  console.error('#CartDrawer-Item-1 not found in DOM');
                 }
-                console.log('insertAdjacent backup Success!');
               } else {
-                console.log('No related products found.');
               }
             });
         }
       })
       .catch((error) => {
         console.error('Error fetching recommendations:', error);
-        console.log('There was an error fetching recommended products. Please try again later.');
       });
   });
 </script>
@@ -223,7 +212,7 @@
                   <thead role="rowgroup">
                     <tr role="row">
                       <th id="CartDrawer-ColumnProductImage" role="columnheader">
-                        <span class="visually-hidden" aria-hidden="true">{{ 'sections.cart.headings.image' | t }}</span>
+                        <span class="visually-hidden">{{ 'sections.cart.headings.image' | t }}</span>
                       </th>
                       <th
                         id="CartDrawer-ColumnProduct"
@@ -242,7 +231,7 @@
                         {{ 'sections.cart.headings.total' | t }}
                       </th>
                       <th id="CartDrawer-ColumnQuantity" role="columnheader">
-                        <span class="visually-hidden" aria-hidden="true">
+                        <span class="visually-hidden">
                           {{- 'sections.cart.headings.quantity' | t -}}
                         </span>
                       </th>
@@ -278,13 +267,13 @@
 
                           {%- if item.original_price != item.final_price -%}
                             <div class="cart-item__discounted-prices">
-                              <span class="visually-hidden" aria-hidden="true">
+                              <span class="visually-hidden">
                                 {{ 'products.product.price.regular_price' | t }}
                               </span>
                               <s class="cart-item__old-price product-option">
                                 {{- item.original_price | money -}}
                               </s>
-                              <span class="visually-hidden" aria-hidden="true">
+                              <span class="visually-hidden">
                                 {{ 'products.product.price.sale_price' | t }}
                               </span>
                               <strong class="cart-item__final-price product-option">
@@ -360,13 +349,13 @@
                           <div class="cart-item__price-wrapper">
                             {%- if item.original_line_price != item.final_line_price -%}
                               <div class="cart-item__discounted-prices">
-                                <span class="visually-hidden" aria-hidden="true">
+                                <span class="visually-hidden">
                                   {{ 'products.product.price.regular_price' | t }}
                                 </span>
                                 <s class="cart-item__old-price price price--end">
                                   {{ item.original_line_price | money }}
                                 </s>
-                                <span class="visually-hidden" aria-hidden="true">
+                                <span class="visually-hidden">
                                   {{ 'products.product.price.sale_price' | t }}
                                 </span>
                                 <span class="price price--end">
@@ -381,12 +370,12 @@
 
                             {%- if item.variant.available and item.unit_price_measurement -%}
                               <div class="unit-price caption">
-                                <span class="visually-hidden" aria-hidden="true">
+                                <span class="visually-hidden">
                                   {{- 'products.product.price.unit_price' | t -}}
                                 </span>
                                 {{ item.unit_price | money }}
                                 <span aria-hidden="true">/</span>
-                                <span class="visually-hidden" aria-hidden="true"
+                                <span class="visually-hidden"
                                   >&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span
                                 >
                                 {%- if item.unit_price_measurement.reference_value != 1 -%}
@@ -418,7 +407,7 @@
                               <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
                                 <quantity-input class="quantity cart-quantity">
                                   <button class="quantity__button no-js-hidden" name="minus" type="button">
-                                    <span class="visually-hidden" aria-hidden="true">
+                                    <span class="visually-hidden">
                                       {{-
                                         'products.product.quantity.decrease'
                                         | t: product: item.product.title
@@ -446,7 +435,7 @@
                                     data-index="{{ item.index | plus: 1 }}"
                                   >
                                   <button class="quantity__button no-js-hidden" name="plus" type="button">
-                                    <span class="visually-hidden" aria-hidden="true">
+                                    <span class="visually-hidden">
                                       {{-
                                         'products.product.quantity.increase'
                                         | t: product: item.product.title
@@ -583,8 +572,8 @@
                 </table>
               </div>
             {%- endif -%}
-            <p id="CartDrawer-LiveRegionText" class="visually-hidden" aria-hidden="true" role="status"></p>
-            <p id="CartDrawer-LineItemStatus" class="visually-hidden" aria-hidden="true" role="status">
+            <p id="CartDrawer-LiveRegionText" class="visually-hidden" role="status"></p>
+            <p id="CartDrawer-LineItemStatus" class="visually-hidden" role="status">
               {{ 'accessibility.loading' | t }}
             </p>
           </div>
@@ -601,7 +590,7 @@
               </span>
             </summary>
             <cart-note class="cart__note field">
-              <label class="visually-hidden" aria-hidden="true" for="CartDrawer-Note">
+              <label class="visually-hidden" for="CartDrawer-Note">
                 {{- 'sections.cart.note' | t -}}
               </label>
               <textarea

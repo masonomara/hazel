@@ -147,7 +147,7 @@
                     <noscript>
                       {%- form 'localization', id: 'HeaderCountryMobileFormNoScriptDrawer', class: 'localization-form' -%}
                         <div class="localization-form__select">
-                          <h2 class="visually-hidden" aria-hidden="true" id="HeaderCountryMobileLabelNoScriptDrawer">
+                          <h2 class="visually-hidden" id="HeaderCountryMobileLabelNoScriptDrawer">
                             {{ 'localization.country_label' | t }}
                           </h2>
                           <select
@@ -176,7 +176,7 @@
                     <localization-form class="no-js-hidden">
                       {%- form 'localization', id: 'HeaderCountryMobileForm', class: 'localization-form' -%}
                         <div>
-                          <h2 class="visually-hidden" aria-hidden="true" id="HeaderCountryMobileLabel">
+                          <h2 class="visually-hidden" id="HeaderCountryMobileLabel">
                             {{ 'localization.country_label' | t }}
                           </h2>
                           {%- render 'country-localization', localPosition: 'HeaderCountryMobile' -%}
@@ -192,7 +192,7 @@
                         class: 'localization-form'
                       -%}
                         <div class="localization-form__select">
-                          <h2 class="visually-hidden" aria-hidden="true" id="HeaderLanguageMobileLabelNoScriptDrawer">
+                          <h2 class="visually-hidden" id="HeaderLanguageMobileLabelNoScriptDrawer">
                             {{ 'localization.language_label' | t }}
                           </h2>
                           <select
@@ -221,7 +221,7 @@
                     <localization-form class="no-js-hidden">
                       {%- form 'localization', id: 'HeaderLanguageMobileForm', class: 'localization-form' -%}
                         <div>
-                          <h2 class="visually-hidden" aria-hidden="true" id="HeaderLanguageMobileLabel">
+                          <h2 class="visually-hidden" id="HeaderLanguageMobileLabel">
                             {{ 'localization.language_label' | t }}
                           </h2>
                           {%- render 'language-localization', localPosition: 'HeaderLanguageMobile' -%}
@@ -236,7 +236,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_twitter_link }}" class="list-social__link link">
                       {%- render 'icon-twitter' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.twitter' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.twitter' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -244,7 +244,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_facebook_link }}" class="list-social__link link">
                       {%- render 'icon-facebook' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.facebook' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.facebook' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -252,7 +252,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_pinterest_link }}" class="list-social__link link">
                       {%- render 'icon-pinterest' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.pinterest' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.pinterest' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -260,7 +260,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_instagram_link }}" class="list-social__link link">
                       {%- render 'icon-instagram' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.instagram' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.instagram' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -268,7 +268,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_tiktok_link }}" class="list-social__link link">
                       {%- render 'icon-tiktok' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.tiktok' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.tiktok' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -276,7 +276,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_tumblr_link }}" class="list-social__link link">
                       {%- render 'icon-tumblr' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.tumblr' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.tumblr' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -284,7 +284,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_snapchat_link }}" class="list-social__link link">
                       {%- render 'icon-snapchat' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.snapchat' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.snapchat' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -292,7 +292,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_youtube_link }}" class="list-social__link link">
                       {%- render 'icon-youtube' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.youtube' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.youtube' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}
@@ -300,7 +300,7 @@
                   <li class="list-social__item">
                     <a href="{{ settings.social_vimeo_link }}" class="list-social__link link">
                       {%- render 'icon-vimeo' -%}
-                      <span class="visually-hidden" aria-hidden="true">{{ 'general.social.links.vimeo' | t }}</span>
+                      <span class="visually-hidden">{{ 'general.social.links.vimeo' | t }}</span>
                     </a>
                   </li>
                 {%- endif -%}

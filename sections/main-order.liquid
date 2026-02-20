@@ -37,7 +37,7 @@
       {%- endif -%}
 
       <table role="table" class="order-details">
-        <caption class="visually-hidden" aria-hidden="true">
+        <caption class="visually-hidden">
           {{ 'customer.order.title' | t: name: order.name }}
         </caption>
         <thead role="rowgroup">
@@ -147,7 +147,7 @@
                   <dl>
                     {%- if line_item.original_price != line_item.final_price -%}
                       <dt>
-                        <span class="visually-hidden" aria-hidden="true">
+                        <span class="visually-hidden">
                           {{- 'products.product.price.regular_price' | t -}}
                         </span>
                       </dt>
@@ -155,7 +155,7 @@
                         <s>{{ line_item.original_price | money }}</s>
                       </dd>
                       <dt>
-                        <span class="visually-hidden" aria-hidden="true">
+                        <span class="visually-hidden">
                           {{- 'products.product.price.sale_price' | t -}}
                         </span>
                       </dt>
@@ -164,7 +164,7 @@
                       </dd>
                     {%- else -%}
                       <dt>
-                        <span class="visually-hidden" aria-hidden="true">
+                        <span class="visually-hidden">
                           {{- 'products.product.price.regular_price' | t -}}
                         </span>
                       </dt>
@@ -174,7 +174,7 @@
                     {%- endif -%}
                     {%- if line_item.unit_price_measurement -%}
                       <dt>
-                        <span class="visually-hidden" aria-hidden="true">
+                        <span class="visually-hidden">
                           {{- 'products.product.price.unit_price' | t -}}
                         </span>
                       </dt>
@@ -182,7 +182,7 @@
                         <span>
                           {%- capture unit_price_separator -%}
                             <span aria-hidden="true">/</span
-                            ><span class="visually-hidden" aria-hidden="true">{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+                            ><span class="visually-hidden">{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
                           {%- endcapture -%}
                           {%- capture unit_price_base_unit -%}
                             {%- if line_item.unit_price_measurement.reference_value != 1 -%}
@@ -216,7 +216,7 @@
                 {%- if line_item.original_line_price != line_item.final_line_price -%}
                   <dl>
                     <dt>
-                      <span class="visually-hidden" aria-hidden="true">
+                      <span class="visually-hidden">
                         {{- 'products.product.price.regular_price' | t -}}
                       </span>
                     </dt>
@@ -224,7 +224,7 @@
                       <s>{{ line_item.original_line_price | money }}</s>
                     </dd>
                     <dt>
-                      <span class="visually-hidden" aria-hidden="true">
+                      <span class="visually-hidden">
                         {{- 'products.product.price.sale_price' | t -}}
                       </span>
                     </dt>

@@ -1054,14 +1054,14 @@ These are all done in the Shopify Admin dashboard at `hazelboutique.myshopify.co
 
 Code changes — simple edits, safe to do first.
 
-- [ ] **1.1** Enable default page template — remove `"disabled": true` from `templates/page.json` (Task 1A)
-- [ ] **1.2** Enable contact form — remove `"disabled": true` from `templates/page.contact.json`, set heading to "Send Us a Message" (Task 2B)
-- [ ] **1.3** Fix CSS typo — change `900spx` to `900px` in `sections/header.liquid` line 41 (Task 7A)
-- [ ] **1.4** Remove `aria-hidden="true"` from all `visually-hidden` elements — bulk find-and-replace `class="visually-hidden" aria-hidden="true"` with `class="visually-hidden"` across all `.liquid` files (Task 6A)
-- [ ] **1.5** Fix nested `<h3>` — change inner `<h3>` to `<span>` in `snippets/card-product.liquid` around line 124 (Task 6B)
-- [ ] **1.6** Remove `console.log` statements from `sections/footer.liquid` recently-viewed JS (Task 7C)
-- [ ] **1.7** Remove `console.log` statements from `snippets/cart-drawer.liquid` upsell JS (Task 7C)
-- [ ] **1.8** Rename `nutTestTest` class to `header-dropdown-menu-helper` in `snippets/header-dropdown-menu-helper.liquid` (Task 7D)
+- [x] **1.1** Enable default page template — remove `"disabled": true` from `templates/page.json` (Task 1A)
+- [x] **1.2** Enable contact form — remove `"disabled": true` from `templates/page.contact.json`, set heading to "Send Us a Message" (Task 2B)
+- [x] **1.3** Fix CSS typo — change `900spx` to `900px` in `sections/header.liquid` line 41 (Task 7A)
+- [x] **1.4** Remove `aria-hidden="true"` from all `visually-hidden` elements — bulk find-and-replace `class="visually-hidden" aria-hidden="true"` with `class="visually-hidden"` across all `.liquid` files (Task 6A)
+- [x] **1.5** Fix nested `<h3>` — change inner `<h3>` to `<span>` in `snippets/card-product.liquid` around line 124 (Task 6B)
+- [x] **1.6** Remove `console.log` statements from `sections/footer.liquid` recently-viewed JS (Task 7C)
+- [x] **1.7** Remove `console.log` statements from `snippets/cart-drawer.liquid` upsell JS (Task 7C)
+- [x] **1.8** Rename `nutTestTest` class to `header-dropdown-menu-helper` in `snippets/header-dropdown-menu-helper.liquid` (Task 7D)
 
 ### Phase 2 — Medium complexity
 
@@ -1090,9 +1090,10 @@ All done at `hazelboutique.myshopify.com/admin`. No code editor needed.
 
 **Pages:**
 
-- [ ] **4.1** Go to **Online Store > Pages**, open "Our Story" — confirm handle is `our-story`, template is `page.about`. Save
-- [ ] **4.2** Open "Store Locations" — confirm handle is `store-locations`, template is `page`. Update body with new address (1709 Rt 34, Suite 3, Farmingdale, NJ 07719). Save
-- [ ] **4.3** Open "Contact Us" — confirm handle is `contact-us`, template is `page.contact`. Replace body with consolidated contact info: new address, email, phone, hours. Save
+- [x] **4.1** Go to **Online Store > Pages**, open "Our Story" — confirm handle is `our-story`, template is `page.about`. Save **Confirmed `https://hazelboutique.com/pages/our-story`**
+- [x] **4.2** Open "Store Locations" — confirm handle is `store-locations`, template is `page`. Update body with new address (1709 Rt 34, Suite 3, Farmingdale, NJ 07719). Save
+**Confirmed `https://hazelboutique.com/pages/store-locations`, actual store locations havent changed, jsut the shipping warehouse**
+- [x] **4.3** Open "Contact Us" — confirm handle is `contact-us`, template is `page.contact`. Replace body with consolidated contact info: new address, email, phone, hours. Save **Confirmed `https://hazelboutique.com/pages/contact-us`** Can you walk me through more what Jenna/Hazel girls want to see on this page
 - [ ] **4.4** Open "Sizing Guide" (or "Sizing") — confirm handle is `sizing`, template is `page.contact`. Save
 - [ ] **4.5** Create any of the above pages if they don't exist yet (Add Page, set title, handle, template, body content)
 - [ ] **4.6** Create new "Returns" page — title: "Returns", handle: `returns`, template: `page.returns`, paste returns policy text into body. Save and publish

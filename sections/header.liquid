@@ -38,7 +38,7 @@
   {%- endif -%}
 
   {%- if section.settings.menu_type_desktop != "drawer" -%}
-    @media screen and (min-width: 900spx) {
+    @media screen and (min-width: 900px) {
       header-drawer {
         display: none;
       }
@@ -244,7 +244,7 @@
           <noscript class="small-hide medium-hide">
             {%- form 'localization', id: 'HeaderCountryMobileFormNoScript', class: 'localization-form' -%}
               <div class="localization-form__select">
-                <h2 class="visually-hidden" aria-hidden="true" id="HeaderCountryMobileLabelNoScript">{{ 'localization.country_label' | t }}</h2>
+                <h2 class="visually-hidden" id="HeaderCountryMobileLabelNoScript">{{ 'localization.country_label' | t }}</h2>
                 <select class="localization-selector link" name="country_code" aria-labelledby="HeaderCountryMobileLabelNoScript">
                   {%- for country in localization.available_countries -%}
                     <option value="{{ country.iso_code }}" {%- if country.iso_code == localization.country.iso_code %} selected{% endif %}>
@@ -261,7 +261,7 @@
           <localization-form class="small-hide medium-hide no-js-hidden" data-prevent-hide>
             {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
               <div>
-                <h2 class="visually-hidden" aria-hidden="true" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
+                <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
                 {%- render 'country-localization', localPosition: 'HeaderCountry' -%}
               </div>
             {%- endform -%}
@@ -289,7 +289,7 @@
           <localization-form class="small-hide medium-hide no-js-hidden" data-prevent-hide>
             {%- form 'localization', id: 'HeaderLanguageForm', class: 'localization-form' -%}
               <div>
-                <h2 class="visually-hidden" aria-hidden="true" id="HeaderLanguageLabel">{{ 'localization.language_label' | t }}</h2>
+                <h2 class="visually-hidden" id="HeaderLanguageLabel">{{ 'localization.language_label' | t }}</h2>
                 {%- render 'language-localization', localPosition: 'HeaderLanguage' -%}
               </div>
             {%- endform -%}
@@ -301,7 +301,7 @@
       {% comment %} {%- if shop.customer_accounts_enabled -%}
         <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}">
           {% render 'icon-account' %}
-          <span class="visually-hidden" aria-hidden="true">
+          <span class="visually-hidden">
             {%- liquid
               if customer
                 echo 'customer.account_fallback' | t
@@ -328,7 +328,7 @@
             render 'icon-cart'
           endif
         -%}
-        <span class="visually-hidden" aria-hidden="true">{{ 'templates.cart.cart' | t }}</span>
+        <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
         {%- if cart != empty -%}
           <span class="cart-count-bubble--parenthesis">&#40;</span>
           <div class="cart-count-bubble">
@@ -345,7 +345,7 @@
             {%- if cart.item_count < 100 -%}
               <span aria-hidden="true">0</span>
             {%- endif -%}
-            <span class="visually-hidden" aria-hidden="true">0</span>
+            <span class="visually-hidden">0</span>
           </div>
           <span class="cart-count-bubble--parenthesis">&#41;</span>
         {%- endif -%}
@@ -422,7 +422,7 @@
             render 'icon-cart'
           endif
         -%}
-        <span class="visually-hidden" aria-hidden="true">{{ 'templates.cart.cart' | t }}</span>
+        <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
         {%- if cart != empty -%}
           <span class="cart-count-bubble--parenthesis">&#40;</span>
           <div class="cart-count-bubble">
@@ -439,7 +439,7 @@
             {%- if cart.item_count < 100 -%}
               <span aria-hidden="true">0</span>
             {%- endif -%}
-            <span class="visually-hidden" aria-hidden="true">0</span>
+            <span class="visually-hidden">0</span>
           </div>
           <span class="cart-count-bubble--parenthesis">&#41;</span>
         {%- endif -%}

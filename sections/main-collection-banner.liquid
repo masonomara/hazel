@@ -13,7 +13,7 @@
   <div class="collection-hero__inner page-width {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
     <div class="collection-hero__text-wrapper">
       <h1 class="collection-hero__title">
-        <span class="visually-hidden" aria-hidden="true">{{ 'sections.collection_template.title' | t }}: </span>
+        <span class="visually-hidden">{{ 'sections.collection_template.title' | t }}: </span>
         {% if collection.metafields.collection.custom_title != blank %}
           <img
             src="{{ collection.metafields.collection.custom_title | image_url  }}"
@@ -23,7 +23,7 @@
             loading="lazy"
           >
         {% else %}
-          <span class="visually-hidden" aria-hidden="true">{{ 'sections.collection_template.title' | t }}: </span>
+          <span class="visually-hidden">{{ 'sections.collection_template.title' | t }}: </span>
           {{- collection.title | escape -}}
         {% endif %}
       </h1>

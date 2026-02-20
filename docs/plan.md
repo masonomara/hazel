@@ -1067,14 +1067,14 @@ Code changes — simple edits, safe to do first.
 
 Code changes — require more care, affect visible UI.
 
-- [ ] **2.1** Fix Instagram heading and link in `templates/index.json` rich text section `rich_text_niFCNN` — or fix via theme editor (Task 5)
-- [ ] **2.2** Fix `aria-labelledby` on product card — change from text value to element ID in `snippets/card-product.liquid` line 43 (Task 6C)
-- [ ] **2.3** Fix `<span href>` — change to `<a href>` in `snippets/card-product.liquid` around line 193 (Task 7B)
-- [ ] **2.4** Add `alt` attribute to recently-viewed product images in `sections/footer.liquid` JS template literals (Task 6D)
-- [ ] **2.5** Fix duplicate IDs in second header — suffix all IDs in `masonHeaderModifierTwo` block of `sections/header.liquid` (Task 6E)
-- [ ] **2.6** Add `role="img"` and `aria-label` to color swatch dots in `snippets/card-product.liquid` around line 263 (Task 6H)
-- [ ] **2.7** Add `aria-label="Primary navigation"` to first `<header>` and `aria-label="Secondary navigation"` to second `<header>` in `sections/header.liquid` (Task 6I)
-- [ ] **2.8** Add `aria-hidden="true"` to `#follower` div in `layout/theme.liquid` line 421 (Task 6J)
+- [x] **2.1** Fix Instagram heading and link in `templates/index.json` rich text section `rich_text_niFCNN` — or fix via theme editor (Task 5)
+- [x] **2.2** Fix `aria-labelledby` on product card — change from text value to element ID in `snippets/card-product.liquid` line 43 (Task 6C)
+- [x] **2.3** Fix `<span href>` — change to `<a href>` in `snippets/card-product.liquid` around line 193 (Task 7B)
+- [x] **2.4** Add `alt` attribute to recently-viewed product images in `sections/footer.liquid` JS template literals (Task 6D)
+- [x] **2.5** Fix duplicate IDs in second header — suffix all IDs in `masonHeaderModifierTwo` block of `sections/header.liquid` (Task 6E)
+- [x] **2.6** Add `role="img"` and `aria-label` to color swatch dots in `snippets/card-product.liquid` around line 263 (Task 6H)
+- [x] **2.7** Add `aria-label="Primary navigation"` to first `<header>` and `aria-label="Secondary navigation"` to second `<header>` in `sections/header.liquid` (Task 6I)
+- [x] **2.8** Add `aria-hidden="true"` to `#follower` div in `layout/theme.liquid` line 421 (Task 6J)
 
 ### Phase 3 — New features
 

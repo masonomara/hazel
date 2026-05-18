@@ -93,6 +93,7 @@
   setRecentlyViewedPdp();
   // Set Variable for Local Storage Data
   const localViewed = localStorage.recently_viewed;
+  // console.log to verify the data
 </script>
 
 <div class="color-{{ section.settings.color_scheme }} gradient no-js-hidden noShowChecker">
@@ -115,6 +116,7 @@
   function getRecentPdp() {
     // First let's convert localStorage data into object again
     const pdpData = JSON.parse(localStorage.getItem('recently_viewed'));
+    {% comment %} console.log("pdpData:", product); {% endcomment %}
     // Create a empty Array
     const recentViewHtml = [];
     // Reverse the order of pdpData array
@@ -136,8 +138,8 @@
                 <div class="card__inner color-scheme-2 gradient ratio" style="--ratio-percent: 133%;">
                   <div class="card__media">
                     <div class="media media--transparent media--hover-effect">
-                      <img src='${item.productImg}' alt='${item.productTitle}' loading="lazy" width="1200"/>
-                      <img src='${item.productImgTwo}' alt='${item.productTitle}' loading="lazy" width="1200"/>
+                      <img src='${item.productImg}' loading="lazy" width="1200"/>
+                      <img src='${item.productImgTwo}' loading="lazy" width="1200"/>
                     </div>
                     <div class="recentlyViewedPopup">
                       <span>View Item</span>
@@ -166,6 +168,8 @@
     });
     // Now consolidate the data
     const recentBlock = `${recentViewHtml.join('')}`;
+    // console.log() to check data is correct
+    {% comment %} console.log(recentBlock); {% endcomment %}
     // Inject into PDP page
     const contentBlock = document.querySelectorAll('.product-grid-recently-viewed');
     // Push the data
@@ -430,7 +434,7 @@
           <noscript>
             {%- form 'localization', id: 'FooterCountryFormNoScript', class: 'localization-form' -%}
               <div class="localization-form__select">
-                <h2 class="visually-hidden" id="FooterCountryLabelNoScript">
+                <h2 class="visually-hidden" aria-hidden="true" id="FooterCountryLabelNoScript">
                   {{ 'localization.country_label' | t }}
                 </h2>
                 <select
@@ -469,7 +473,7 @@
           <noscript>
             {%- form 'localization', id: 'FooterLanguageFormNoScript', class: 'localization-form' -%}
               <div class="localization-form__select">
-                <h2 class="visually-hidden" id="FooterLanguageLabelNoScript">
+                <h2 class="visually-hidden" aria-hidden="true" id="FooterLanguageLabelNoScript">
                   {{ 'localization.language_label' | t }}
                 </h2>
                 <select
@@ -510,7 +514,7 @@
       <div class="footer__column footer__column--info">
         {%- if section.settings.payment_enable -%}
           <div class="footer__payment">
-            <span class="visually-hidden">{{ 'sections.footer.payment' | t }}</span>
+            <span class="visually-hidden" aria-hidden="true">{{ 'sections.footer.payment' | t }}</span>
             <ul class="list list-payment" role="list">
               {%- for type in shop.enabled_payment_types -%}
                 <li class="list-payment__item">

@@ -70,7 +70,7 @@
         href="{% if media.media_type == 'video' %}{{ media.sources[1].url }}{% else %}{{ media | external_video_url }}{% endif %}"
         class="product__media-toggle"
       >
-        <span class="visually-hidden">
+        <span class="visually-hidden" aria-hidden="true">
           {{- 'products.product.video_exit_message' | t: title: product.title | escape -}}
         </span>
       </a>
@@ -125,7 +125,7 @@
       aria-haspopup="dialog"
       data-media-id="{{ media.id }}"
     >
-      <span class="visually-hidden">
+      <span class="visually-hidden" aria-hidden="true">
         {{ 'products.product.media.open_media' | t: index: position }}
       </span>
     </button>
@@ -140,10 +140,10 @@
     <button id="Deferred-Poster-Modal-{{ media.id }}" class="deferred-media__poster" type="button">
       <span class="deferred-media__poster-button motion-reduce">
         {%- if media.media_type == 'model' -%}
-          <span class="visually-hidden">{{ 'products.product.media.play_model' | t }}</span>
+          <span class="visually-hidden" aria-hidden="true">{{ 'products.product.media.play_model' | t }}</span>
           {%- render 'icon-3d-model' -%}
         {%- else -%}
-          <span class="visually-hidden">{{ 'products.product.media.play_video' | t }}</span>
+          <span class="visually-hidden" aria-hidden="true">{{ 'products.product.media.play_video' | t }}</span>
           {%- render 'icon-play' -%}
         {%- endif -%}
       </span>

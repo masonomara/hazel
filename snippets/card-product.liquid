@@ -40,7 +40,7 @@
     class="card-wrapper product-card-wrapper underline-links-hover"
     href="{{ card_product.url }}"
     id="CardLink-{{ section_id }}-{{ card_product.id }}"
-    aria-labelledby="CardLink-{{ section_id }}-{{ card_product.id }}"
+    aria-labelledby="{{ card_product.title | escape }}"
   >
     <div
       class="
@@ -127,11 +127,11 @@
                 id="title-{{ section_id }}-{{ card_product.id }}"
               {% endif %}
             >
-              <span
+              <h3
                 class="full-unstyled-link"
               >
                 {{ card_product.title | escape }}
-              </span>
+              </h3>
             </h3>
           </div>
 
@@ -190,18 +190,18 @@
               id="title-{{ section_id }}-{{ card_product.id }}"
             {% endif %}
           >
-            <a
+            <span
               href="{{ card_product.url }}"
               id="CardLink-{{ section_id }}-{{ card_product.id }}"
               class="full-unstyled-link"
               aria-labelledby="CardLink-{{ section_id }}-{{ card_product.id }} Badge-{{ section_id }}-{{ card_product.id }}"
             >
               {{ card_product.title | escape }}
-            </a>
+            </span>
           </h3>
           <div class="card-information">
             {%- if show_vendor -%}
-              <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
+              <span class="visually-hidden" aria-hidden="true">{{ 'accessibility.vendor' | t }}</span>
               <div class="caption-with-letter-spacing light">{{ card_product.vendor }}</div>
             {%- endif -%}
 
@@ -236,7 +236,7 @@
               </p>
               <p class="rating-count caption">
                 <span aria-hidden="true">({{ card_product.metafields.reviews.rating_count }})</span>
-                <span class="visually-hidden">
+                <span class="visually-hidden" aria-hidden="true">
                   {{- card_product.metafields.reviews.rating_count }}
                   {{ 'accessibility.total_reviews' | t -}}
                 </span>
@@ -260,9 +260,13 @@
                   {% break %}
                 {% endif %}
                 {% if value.variant.metafields.custom.hex_color != blank %}
-                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5); background-color:{{ value.variant.metafields.custom.hex_color }}" role="img" aria-label="{{ value }} color swatch"></div>
+                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5); background-color:{{ value.variant.metafields.custom.hex_color }}">
+                    &nbsp;
+                  </div>
                 {% elsif value %}
-                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5); background-color:{{ value | split: ' ' | last | handle }}" role="img" aria-label="{{ value }} color swatch"></div>
+                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5);  background-color:{{ value | split: ' ' | last | handle }}">
+                    &nbsp;
+                  </div>
                 {% endif %}
               {%- endfor %}
               {% if option.values.size > 3 %}
@@ -438,7 +442,7 @@
           </h3>
           <div class="card-information">
             {%- if show_vendor -%}
-              <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
+              <span class="visually-hidden" aria-hidden="true">{{ 'accessibility.vendor' | t }}</span>
               <div class="caption-with-letter-spacing light">{{ 'products.product.vendor' | t }}</div>
             {%- endif -%}
             {% render 'price', show_compare_at_price: true %}

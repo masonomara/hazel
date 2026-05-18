@@ -211,7 +211,7 @@
                   role="status"
                   {{ block.shopify_attributes }}
                 >
-                  <span class="visually-hidden">{{ 'products.product.sku' | t }}:</span>
+                  <span class="visually-hidden" aria-hidden="true">{{ 'products.product.sku' | t }}:</span>
                   {{- product.selected_or_first_available_variant.sku -}}
                 </p>
               {%- when 'quantity_selector' -%}
@@ -240,7 +240,7 @@
                   <div class="price-per-item__container">
                     <quantity-input class="quantity">
                       <button class="quantity__button no-js-hidden" name="minus" type="button">
-                        <span class="visually-hidden">
+                        <span class="visually-hidden" aria-hidden="true">
                           {{- 'products.product.quantity.decrease' | t: product: product.title | escape -}}
                         </span>
                         {% render 'icon-minus' %}
@@ -262,7 +262,7 @@
                         form="{{ product_form_id }}"
                       >
                       <button class="quantity__button no-js-hidden" name="plus" type="button">
-                        <span class="visually-hidden">
+                        <span class="visually-hidden" aria-hidden="true">
                           {{- 'products.product.quantity.increase' | t: product: product.title | escape -}}
                         </span>
                         {% render 'icon-plus' %}
@@ -287,7 +287,7 @@
                           <div class="price-per-item">
                             {%- if variant_price_compare -%}
                               <dl class="price-per-item--current">
-                                <dt class="visually-hidden">
+                                <dt class="visually-hidden" aria-hidden="true">
                                   {{ 'products.product.price.regular_price' | t }}
                                 </dt>
                                 <dd>
@@ -327,7 +327,7 @@
                           <div class="price-per-item">
                             {%- if variant_price_compare -%}
                               <dl class="price-per-item--current">
-                                <dt class="visually-hidden">
+                                <dt class="visually-hidden" aria-hidden="true">
                                   {{ 'products.product.price.regular_price' | t }}
                                 </dt>
                                 <dd>
@@ -335,7 +335,7 @@
                                     {{ variant_price_compare | money_with_currency }}
                                   </s>
                                 </dd>
-                                <dt class="visually-hidden">
+                                <dt class="visually-hidden" aria-hidden="true">
                                   {{ 'products.product.price.sale_price' | t }}
                                 </dt>
                                 <dd>
@@ -496,7 +496,7 @@
                     </p>
                     <p class="rating-count caption">
                       <span aria-hidden="true">({{ product.metafields.reviews.rating_count }})</span>
-                      <span class="visually-hidden">
+                      <span class="visually-hidden" aria-hidden="true">
                         {{- product.metafields.reviews.rating_count }}
                         {{ 'accessibility.total_reviews' | t -}}
                       </span>

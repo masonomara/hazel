@@ -139,7 +139,7 @@
         <noscript class="small-hide medium-hide">
           {%- form 'localization', id: 'AnnouncementCountryMobileFormNoScript', class: 'localization-form' -%}
             <div class="localization-form__select">
-              <h2 class="visually-hidden" id="AnnouncementCountryMobileLabelNoScript">
+              <h2 class="visually-hidden" aria-hidden="true" id="AnnouncementCountryMobileLabelNoScript">
                 {{ 'localization.country_label' | t }}
               </h2>
               <select
@@ -168,7 +168,7 @@
         <localization-form class="small-hide medium-hide no-js-hidden">
           {%- form 'localization', id: 'AnnouncementCountryForm', class: 'localization-form' -%}
             <div>
-              <h2 class="visually-hidden" id="AnnouncementCountryLabel">
+              <h2 class="visually-hidden" aria-hidden="true" id="AnnouncementCountryLabel">
                 {{ 'localization.country_label' | t }}
               </h2>
               {%- render 'country-localization', localPosition: 'AnnouncementCountry' -%}
@@ -181,7 +181,7 @@
         <noscript class="small-hide medium-hide">
           {%- form 'localization', id: 'AnnouncementLanguageMobileFormNoScript', class: 'localization-form' -%}
             <div class="localization-form__select">
-              <h2 class="visually-hidden" id="AnnouncementLanguageMobileLabelNoScript">
+              <h2 class="visually-hidden" aria-hidden="true" id="AnnouncementLanguageMobileLabelNoScript">
                 {{ 'localization.language_label' | t }}
               </h2>
               <select
@@ -210,7 +210,7 @@
         <localization-form class="small-hide medium-hide no-js-hidden">
           {%- form 'localization', id: 'AnnouncementLanguageForm', class: 'localization-form' -%}
             <div>
-              <h2 class="visually-hidden" id="AnnouncementLanguageLabel">
+              <h2 class="visually-hidden" aria-hidden="true" id="AnnouncementLanguageLabel">
                 {{ 'localization.language_label' | t }}
               </h2>
               {%- render 'language-localization', localPosition: 'AnnouncementLanguage' -%}

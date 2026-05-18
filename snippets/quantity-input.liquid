@@ -11,7 +11,7 @@
 
 <quantity-input class="quantity cart-quantity">
   <button class="quantity__button no-js-hidden" name="minus" type="button">
-    <span class="visually-hidden">
+    <span class="visually-hidden" aria-hidden="true">
       {{- 'products.product.quantity.decrease' | t: product: variant.title | escape -}}
     </span>
     {% render 'icon-minus' %}
@@ -35,7 +35,7 @@
     data-index="{{ variant.id }}"
   >
   <button class="quantity__button no-js-hidden" name="plus" type="button">
-    <span class="visually-hidden">
+    <span class="visually-hidden" aria-hidden="true">
       {{- 'products.product.quantity.increase' | t: product: variant.title | escape -}}
     </span>
     {% render 'icon-plus' %}

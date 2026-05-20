@@ -63,14 +63,14 @@
 
 @media screen and (min-width: 990px) {
   .product--large:not(.product--no-media) .product__media-wrapper {
-    max-width: 70%;
-    width: calc(70% - var(--grid-desktop-horizontal-spacing) / 2);
+    max-width: 60%;
+    width: calc(60% - var(--grid-desktop-horizontal-spacing) / 2);
   }
 
   .product--large:not(.product--no-media) .product__info-wrapper {
     padding: 0 0 0 3.2rem;
-    max-width: 30%;
-    width: calc(35% - var(--grid-desktop-horizontal-spacing) / 2);
+    max-width: 40%;
+    width: calc(45% - var(--grid-desktop-horizontal-spacing) / 2);
   }
 
   .product--large:not(.product--no-media).product--right
@@ -1656,7 +1656,6 @@ a.product__text {
   line-height: 100%;
   background-color: black;
 
-  max-width: 320px;
 }
 @media screen and (max-width: 749px) {
   .product-form__submit {

@@ -92,9 +92,9 @@ product-recommendations.is-accordion + .accordion {
 }
 
 .complementary-products__container .card--horizontal .card__inner {
-  max-width: 30% !important;
-  width: 30% !important;
-  min-width: 30% !important;
+  max-width: 40% !important;
+  width: 40% !important;
+  min-width: 40% !important;
   height: 139px;
   min-height: 100%;
   border-radius: 0px !important;
@@ -105,7 +105,7 @@ product-recommendations.is-accordion + .accordion {
 }
 @media screen and (min-width: 750px) and (max-width: 1200px) {
   .complementary-products__container .card--horizontal .card__inner {
-    max-width: 30%;
+    max-width: 40%;
   }
 }
 

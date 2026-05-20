@@ -6682,9 +6682,7 @@ cart-remove-button .swym-button-bar {
   letter-spacing: 0.05rem !important;
   font-size: calc(var(--font-heading-scale) * 3rem) !important;
 }
-.price__regular .price-item--regular {
-  font-weight: 300 !important;
-}
+
 .banner__heading.inline-richtext.h1 {
   font-size: calc(var(--font-heading-scale) * 3.33rem) !important;
 }

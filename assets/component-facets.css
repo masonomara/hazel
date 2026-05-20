@@ -1042,6 +1042,7 @@ input.mobile-facets__checkbox {
   align-self: center;
   position: relative;
   text-align: right;
+  display: none;
 }
 
 .product-count__text {

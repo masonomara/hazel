@@ -70,9 +70,9 @@
   text-transform: uppercase;
   background-color: rgba(var(--color-foreground));
   border-radius: 14px;
-  height: 44px;
+  height: 40px;
   padding: 0px 16px;
-  line-height: 44px;
+  line-height: 40px;
   align-items: center;
   justify-content: center;
   width: fit-content;

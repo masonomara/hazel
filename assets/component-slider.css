@@ -399,8 +399,8 @@ slider-component.slider-component-full-width {
   background: transparent;
   border: none;
   cursor: pointer;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -452,8 +452,8 @@ slider-component.slider-component-full-width {
   .slider-buttons
   .slider-button {
   border-radius: 100px;
-  height: 44px;
-  width: 44px;
+  height: 40px;
+  width: 40px;
   background-color: rgba(0, 0, 0, 0);
   opacity: 0.87;
   transition: opacity 100ms ease-in-out;
@@ -463,8 +463,8 @@ slider-component.slider-component-full-width {
   .slider-buttons
   .slider-button[disabled] {
   border-radius: 100px;
-  height: 44px;
-  width: 44px;
+  height: 40px;
+  width: 40px;
   background-color: rgba(0, 0, 0, 0);
   opacity: 0 !important;
   transition: opacity 100ms ease-in-out;
@@ -474,8 +474,8 @@ slider-component.slider-component-full-width {
   .slider-buttons
   .slider-button:hover {
   border-radius: 100px;
-  height: 44px;
-  width: 44px;
+  height: 40px;
+  width: 40px;
 }
 
 .product__media-wrapper

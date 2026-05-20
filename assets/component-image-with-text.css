@@ -494,7 +494,7 @@
 .image-with-text .button.button--primary {
   padding: 0px;
   text-decoration: underline !important;
-  min-width: 44px !important;
+  min-width: 40px !important;
   text-underline-offset: 0.3em !important;
   margin-top: 8px !important;
 }
@@ -531,7 +531,7 @@
   .image-with-text .button.button--primary {
     padding: 0px;
     text-decoration: underline !important;
-    min-width: 44px !important;
+    min-width: 40px !important;
     text-underline-offset: 0.3em !important;
     margin-top: 0px !important;
   }

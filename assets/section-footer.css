@@ -359,7 +359,7 @@
   .copyright__content a:hover {
     color: rgb(var(--color-foreground));
     text-decoration: underline;
-    text-underline-offset: 0.3rem;
+    text-underline-offset: 0.5rem;
   }
 
   .footer-block__details-content .list-menu__item--active:hover {
@@ -612,9 +612,9 @@
   margin: 0px !important;
 }
 .newsletter-form__button.field__button {
-  height: 44px;
-  min-height: 44px;
-  max-height: 44px;
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
 }
 .newsletter-form__button.field__button {
   white-space: nowrap;
@@ -642,9 +642,9 @@
 .field__input {
   padding: 0px 8px 0px 0px !important;
   margin: 0px !important;
-  height: 44px;
-  max-height: 44px;
-  min-height: 44px;
+  height: 40px;
+  max-height: 40px;
+  min-height: 40px;
 }
 .field__label {
   display: relative !important;

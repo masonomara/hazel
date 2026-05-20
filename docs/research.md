@@ -205,7 +205,7 @@ The footer section (`sections/footer.liquid`) also contains a duplicate copy of 
 - All custom Hazel overrides appended after the base (lines ~3,600–7,044)
 
 ### Key custom CSS additions:
-- **Global typography overrides** (line ~84): `letter-spacing: 0px`, `text-underline-offset: 0.3rem`, `text-decoration-thickness: 1px` on all elements
+- **Global typography overrides** (line ~84): `letter-spacing: 0px`, `text-underline-offset: 0.5rem`, `text-decoration-thickness: 1px` on all elements
 - **Cursor easter eggs** (line ~89): Commented-out strawberry cursor URLs (`strawberryHazel.png`, `strawberryHazelHover.png`)
 - **Sparkle animation** (line ~3617): CSS variable `--sparkle: url("./sparkle.gif")` available for hover animations
 - **Header system** (line ~3892+): All custom `masonHeaderModifierOne/Two`, `headerLeftMenu`, `storeLocations` CSS

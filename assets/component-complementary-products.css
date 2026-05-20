@@ -206,7 +206,7 @@ product-recommendations.is-accordion + .accordion {
   text-align: left;
 }
 .complementary-products__container .accordion__title {
-  font-size: 17px;
+  font-size: 16px;
   font-family: "PragmaticaCondensed" !important;
   text-transform: uppercase;
   line-height: 20px !important;
@@ -281,7 +281,7 @@ product-recommendations.is-accordion + .accordion {
   margin-top: 4px !important;
   min-height: 40px !important;
   max-width: 100% !important;
-  min-width: 44px !important;
+  min-width: 40px !important;
   height: 40px !important;
   padding: 0px 12px !important;
 

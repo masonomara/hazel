@@ -246,7 +246,7 @@
 
 .facets__summary:hover .facets__summary-label {
   text-decoration: underline;
-  text-underline-offset: 0.3rem;
+  text-underline-offset: 0.5rem;
 }
 
 .facets__and-helptext {
@@ -781,7 +781,7 @@ a.active-facets__button.focused .active-facets__button-inner,
 
 .mobile-facets__open:hover .mobile-facets__open-label {
   text-decoration: underline;
-  text-underline-offset: 0.3rem;
+  text-underline-offset: 0.5rem;
 }
 
 .mobile-facets__open > * + * {

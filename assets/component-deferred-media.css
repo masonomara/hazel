@@ -102,3 +102,12 @@
 .deferred-media__poster-button .icon-play {
   margin-left: 0.2rem;
 }
+
+@media screen and (max-width: 749px) {
+  .product__media-item .deferred-media__poster-button {
+    display: none;
+  }
+  .product__media-item .deferred-media__poster {
+    pointer-events: auto;
+  }
+}

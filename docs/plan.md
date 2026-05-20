@@ -113,7 +113,7 @@ These are 1–20 line changes with immediate visible impact.
 
 ---
 
-### 6. Fix DA Restock Moment.js URL
+### 6. Fix DA Restock Moment.js URL **COMPLETE**
 
 **What:** The Moment.js script URL has a leading space that causes a 404 on every product page with the DA Restock widget.
 
@@ -133,7 +133,7 @@ These are 1–20 line changes with immediate visible impact.
 
 ---
 
-### 7. Hide "Press Play" Video Overlay Button on Mobile
+### 7. Hide "Press Play" Video Overlay Button on Mobile **COMPLETE**
 
 **What:** The play button overlay on product videos (`deferred-media__poster-button`) is broken on mobile. The fix is to hide it on mobile so videos load without requiring the tap interaction.
 
@@ -159,7 +159,7 @@ These are 1–20 line changes with immediate visible impact.
 
 ---
 
-### 8. Remove Product Count from Collection Pages
+### 8. Remove Product Count from Collection Pages **COMPLETE**
 
 **What:** Goals note says "Remove product count display from the product page." In the codebase this is the **"X products"** text shown in the vertical sort bar on collection pages.
 
@@ -197,7 +197,7 @@ There is also a product count in the horizontal filter bar inside `snippets/face
 
 ---
 
-### 9. Update Contact Page Email
+### 9. Update Contact Page Email **COMPLETE**
 
 **What:** The contact email on the contact page needs to change from the old Gmail address to shop@hazelboutique.com.
 

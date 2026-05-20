@@ -70,8 +70,8 @@ variant-selects {
   display: inline-block;
   margin: 0.7rem 0.5rem 0.2rem 0;
   padding: 1rem 2rem;
-  font-size: 1.4rem;
-  letter-spacing: 0.1rem;
+  font-size: 14px;
+  letter-spacing: 0rem;
   line-height: 1;
   text-align: center;
   transition: border var(--duration-short) ease;
@@ -90,6 +90,7 @@ variant-selects {
   justify-content: center;
   width: fit-content;
   min-width: 40px;
+  text-align: center;
 }
 .product-form__input--pill input[type="radio"]:hover + label {
   background-color: rgba(var(--color-foreground), 0.13);

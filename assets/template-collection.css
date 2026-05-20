@@ -79,7 +79,7 @@
 }
 .collection__title h2 {
   font-family: "PragmaticaCondensed";
-  font-weight: 300 !important;
+  font-weight: 400 !important;
   font-size: 32px !important;
   line-height: 32px !important;
   padding: 0px !important;
@@ -137,7 +137,7 @@
   }
   .collection__title h2 {
     font-family: "PragmaticaCondensed";
-    font-weight: 300 !important;
+    font-weight: 400 !important;
     font-size: 28px !important;
     line-height: 28px !important;
     padding: 0px !important;

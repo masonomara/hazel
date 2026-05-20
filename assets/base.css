@@ -171,7 +171,7 @@ body {
   }
 
   .page-width--narrow {
-    max-width: 72.6rem;
+    max-width: 600px;
     padding: 0;
   }
 
@@ -353,7 +353,11 @@ h2,
 
 h3,
 .h3 {
-  font-size: calc(var(--font-heading-scale) * 1.7rem);
+  font-size: 21px!important;
+  font-family: "PragmaticaCondensed";
+  text-transform: uppercase;
+  margin-top: 6.4rem;
+  font-weight: 400;
 }
 
 @media only screen and (min-width: 750px) {
@@ -457,8 +461,8 @@ table:not([class]) {
 
 table:not([class]) td,
 table:not([class]) th {
-  padding: 1em;
-  border: 0.1rem solid rgba(var(--color-foreground), 0.2);
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--color-background), 1);
 }
 
 @media screen and (max-width: 749px) {
@@ -734,7 +738,8 @@ summary::-webkit-details-marker {
 *:focus-visible {
   outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
   outline-offset: 0.3rem;
-  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 0.3rem rgb(var(--color-background)),
     0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
 }
 
@@ -743,7 +748,8 @@ summary::-webkit-details-marker {
 .no-js *:focus {
   outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
   outline-offset: 0.3rem;
-  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 0.3rem rgb(var(--color-background)),
     0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
 }
 
@@ -788,7 +794,8 @@ summary::-webkit-details-marker {
 .focus-offset:focus-visible {
   outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
   outline-offset: 1rem;
-  box-shadow: 0 0 0 1rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 1rem rgb(var(--color-background)),
     0 0 0.2rem 1.2rem rgba(var(--color-foreground), 0.3);
 }
 
@@ -796,7 +803,8 @@ summary::-webkit-details-marker {
 .no-js .focus-offset:focus {
   outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
   outline-offset: 1rem;
-  box-shadow: 0 0 0 1rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 1rem rgb(var(--color-background)),
     0 0 0.2rem 1.2rem rgba(var(--color-foreground), 0.3);
 }
 
@@ -1326,7 +1334,8 @@ button.shopify-payment-button__button--unbranded {
 .customer button:hover::after,
 .shopify-payment-button__button--unbranded:hover::after {
   --border-offset: 1.3px;
-  box-shadow: 0 0 0 calc(var(--buttons-border-width) + var(--border-offset))
+  box-shadow:
+    0 0 0 calc(var(--buttons-border-width) + var(--border-offset))
       rgba(var(--color-button-text), var(--border-opacity)),
     0 0 0 calc(var(--buttons-border-width) + 1px)
       rgba(var(--color-button), var(--alpha-button-background));
@@ -1344,7 +1353,8 @@ button.shopify-payment-button__button--unbranded {
 .shopify-payment-button__button--unbranded:focus,
 .shopify-payment-button [role="button"]:focus {
   outline: 0;
-  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 0.3rem rgb(var(--color-background)),
     0 0 0 0.5rem rgba(var(--color-foreground), 0.5),
     0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
 }
@@ -1584,7 +1594,8 @@ details[open] > .share-button__fallback {
 .share-button__fallback .field__input:-webkit-autofill {
   outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
   outline-offset: 0.1rem;
-  box-shadow: 0 0 0 0.1rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 0.1rem rgb(var(--color-background)),
     0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
 }
 
@@ -1792,7 +1803,8 @@ details[open] > .share-button__fallback {
   margin-bottom: 0;
   pointer-events: none;
   position: absolute;
-  transition: top var(--duration-short) ease,
+  transition:
+    top var(--duration-short) ease,
     font-size var(--duration-short) ease;
   color: rgba(var(--color-foreground), 0.6);
   /* letter-spacing: 0.1rem; */
@@ -2810,7 +2822,9 @@ details[open] .modal-overlay::after {
   position: absolute;
   opacity: 1;
   transform: scale(1);
-  transition: transform 150ms ease, opacity 150ms ease;
+  transition:
+    transform 150ms ease,
+    opacity 150ms ease;
 }
 
 details:not([open]) > .header__icon--menu .icon-close,
@@ -2890,7 +2904,6 @@ details > .header__menu-item {
   }
 }
 @media screen and (min-width: 990px) {
-
   .header--top-center .header__inline-menu > .list-menu--inline {
     justify-content: center;
     gap: 20px;
@@ -2958,7 +2971,8 @@ details[open] > .header__menu-item .icon-caret {
 }
 
 .header__submenu {
-  transition: opacity var(--duration-default) ease,
+  transition:
+    opacity var(--duration-default) ease,
     transform var(--duration-default) ease;
 }
 
@@ -3283,6 +3297,8 @@ details-disclosure > details {
 
 .rte table {
   table-layout: fixed;
+  width: 100%;
+  border: 1px solid rgba(var(--color-foreground), 1);
 }
 
 @media screen and (min-width: 750px) {
@@ -3480,7 +3496,8 @@ details-disclosure > details {
   .animate--hover-3d-lift .customer button,
   .animate--hover-3d-lift .shopify-payment-button__button,
   .animate--hover-3d-lift .deferred-media .deferred-media__poster-button {
-    transition: transform var(--duration-long) ease,
+    transition:
+      transform var(--duration-long) ease,
       box-shadow var(--duration-long) ease;
     transform-origin: center;
   }
@@ -3492,10 +3509,12 @@ details-disclosure > details {
   .animate--hover-3d-lift .customer button:not([disabled]):hover,
   .animate--hover-3d-lift .shopify-payment-button__button:hover,
   .animate--hover-3d-lift .deferred-media:hover .deferred-media__poster-button {
-    transition: transform var(--duration-extended) ease,
+    transition:
+      transform var(--duration-extended) ease,
       box-shadow var(--duration-long) ease; /* Slow the card transition speed while hover is active. */
     transform: rotate(1deg);
-    box-shadow: -1rem -1rem 1rem -1rem rgba(0, 0, 0, 0.05),
+    box-shadow:
+      -1rem -1rem 1rem -1rem rgba(0, 0, 0, 0.05),
       1rem 1rem 1rem -1rem rgba(0, 0, 0, 0.05),
       0 0 0.5rem 0 rgba(255, 255, 255, 0),
       0 2rem 3.5rem -2rem rgba(0, 0, 0, 0.5);
@@ -3531,7 +3550,8 @@ details-disclosure > details {
     .card--shape.card--standard:not(.card--text)
     .card__inner {
     box-shadow: none;
-    transition: transform var(--duration-long) ease,
+    transition:
+      transform var(--duration-long) ease,
       filter var(--duration-long) ease;
   }
 
@@ -3539,7 +3559,8 @@ details-disclosure > details {
     .card-wrapper:hover
     .card--shape.card--standard:not(.card--text)
     .card__inner {
-    transition: transform calc(2 * var(--duration-extended)) ease,
+    transition:
+      transform calc(2 * var(--duration-extended)) ease,
       filter var(--duration-long) ease; /* Slow the card transition speed while hover is active. */
     filter: drop-shadow(0rem 2rem 2rem rgba(0, 0, 0, 0.15))
       drop-shadow(0rem 1rem 1rem rgba(0, 0, 0, 0.15));
@@ -3585,7 +3606,8 @@ details-disclosure > details {
     left: 0;
     opacity: 0;
     pointer-events: none;
-    transition: background-position calc(2 * var(--duration-extended)) ease,
+    transition:
+      background-position calc(2 * var(--duration-extended)) ease,
       opacity var(--duration-default) ease;
     mix-blend-mode: overlay;
     background-size: 400% 100%;
@@ -3605,7 +3627,9 @@ details-disclosure > details {
     .card--standard
     .card__media:after {
     opacity: 0.2;
-    transition: background-position 6s ease, opacity var(--duration-long) ease;
+    transition:
+      background-position 6s ease,
+      opacity var(--duration-long) ease;
     background-position: left;
     z-index: 2;
   }
@@ -3666,7 +3690,8 @@ details-disclosure > details {
   .animate--hover-vertical-lift
     .shopify-payment-button__button:not([disabled]):hover:after {
     --border-offset: 0.3px; /* Default is 1.3px as defined above in this file. This removes 1px to prevent the border from growing on buttons when this effect is on.  */
-    box-shadow: 0 0 0 calc(var(--buttons-border-width) + var(--border-offset))
+    box-shadow:
+      0 0 0 calc(var(--buttons-border-width) + var(--border-offset))
         rgba(var(--color-button-text), var(--border-opacity)),
       0 0 0 var(--buttons-border-width)
         rgba(var(--color-button), var(--alpha-button-background));
@@ -3891,9 +3916,9 @@ details-disclosure > details {
   display: flex;
   gap: 24px;
 }
-  .icon-cart {
-    display: none !important;
-  }
+.icon-cart {
+  display: none !important;
+}
 @media screen and (max-width: 749px) {
   .menuButtonText {
     display: none !important;
@@ -4685,7 +4710,8 @@ quick-add-modal .product-media-container.constrain-height {
     (
         var(--modal-height-offset) + var(--modal-padding) +
           var(--popup-border-width)
-      ) * 2
+      ) *
+      2
   );
 }
 
@@ -4909,10 +4935,12 @@ product-form:has(.product-form__buttons) form {
 }
 .main--contact--container {
   font-size: 32px !important;
+  padding-top: 0px !important;
 }
 @media screen and (max-width: 749px) {
   .main--contact--container {
     font-size: 16px !important;
+    padding-top: 0px !important;
   }
 }
 
@@ -4942,15 +4970,13 @@ product-form:has(.product-form__buttons) form {
 .main-page-title {
   text-align: center;
   font-family: "PragmaticaCondensed";
-  font-weight: 300 !important;
-  font-size: 32px !important;
-  line-height: 28px !important;
+  font-weight: 400 !important;
+  font-size: 27px !important;
+  line-height: 27px !important;
   letter-spacing: 0px !important;
   text-transform: uppercase;
   color: rgb(var(--color-foreground)) !important;
   text-decoration-thickness: 1px !important;
-  margin: 36px 0px 0px;
-  margin-bottom: 24px !important;
 }
 .rte strong.rteDidge {
   font-weight: 400 !important;
@@ -5305,8 +5331,10 @@ cart-remove-button {
 }
 .fera-socialProofPopup-container .fera-notification.fera-popout {
   background: rgb(238, 236, 230) !important;
-  box-shadow: 0px 9px -3px 0px rgba(0, 0, 0, 0.05),
-    0px 15px -5px 0px rgba(0, 0, 0, 0.1), 0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
+  box-shadow:
+    0px 9px -3px 0px rgba(0, 0, 0, 0.05),
+    0px 15px -5px 0px rgba(0, 0, 0, 0.1),
+    0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
 }
 .fera-socialProofPopup-container
   .fera-notification.fera-popout
@@ -5419,8 +5447,10 @@ cart-remove-button {
   text-transform: uppercase;
   letter-spacing: 0px;
   font-size: calc(var(--font-heading-scale) * 3.2rem) !important;
-  text-shadow: 0px 4px 3px rgba(0, 0, 0, 0.05),
-    0px 8px 13px rgba(0, 0, 0, 0.175), 0px 18px 23px rgba(0, 0, 0, 0.175) !important;
+  text-shadow:
+    0px 4px 3px rgba(0, 0, 0, 0.05),
+    0px 8px 13px rgba(0, 0, 0, 0.175),
+    0px 18px 23px rgba(0, 0, 0, 0.175) !important;
 }
 @media screen and (max-width: 749px) {
   .collection-list-wrapper .card__content h3 div {
@@ -6181,8 +6211,10 @@ span.jdgm-star::before {
 
 .swym-ui-component .swym-atw-notification-container {
   background: rgb(238, 236, 230) !important;
-  box-shadow: 0px 9px -3px 0px rgba(0, 0, 0, 0.05),
-    0px 15px -5px 0px rgba(0, 0, 0, 0.1), 0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
+  box-shadow:
+    0px 9px -3px 0px rgba(0, 0, 0, 0.05),
+    0px 15px -5px 0px rgba(0, 0, 0, 0.1),
+    0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
   padding: 0px !important;
   border-radius: 18px !important;
 }
@@ -6412,8 +6444,10 @@ span.jdgm-star::before {
 }
 .swym-sfl-popup-dialog {
   background: rgb(238, 236, 230) !important;
-  box-shadow: 0px 9px -3px 0px rgba(0, 0, 0, 0.05),
-    0px 15px -5px 0px rgba(0, 0, 0, 0.1), 0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
+  box-shadow:
+    0px 9px -3px 0px rgba(0, 0, 0, 0.05),
+    0px 15px -5px 0px rgba(0, 0, 0, 0.1),
+    0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
 
   padding: 0px !important;
   border-radius: 18px !important;
@@ -6426,8 +6460,10 @@ span.jdgm-star::before {
 
 .swym-notifications-container.swymTopLeft {
   background: rgb(238, 236, 230) !important;
-  box-shadow: 0px 9px -3px 0px rgba(0, 0, 0, 0.05),
-    0px 15px -5px 0px rgba(0, 0, 0, 0.1), 0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
+  box-shadow:
+    0px 9px -3px 0px rgba(0, 0, 0, 0.05),
+    0px 15px -5px 0px rgba(0, 0, 0, 0.1),
+    0px 0px 1px 0px rgba(0, 0, 0, 0.1) !important;
 
   padding: 0px !important;
   border-radius: 18px !important;
@@ -7038,12 +7074,12 @@ cart-remove-button .swym-button-bar {
   opacity: 0;
 }
 .grid__item:has(.button:hover) .media.media--hover-effect > img + img {
-  opacity: 1
+  opacity: 1;
 }
 
 .inline-page-text {
   font-family: "PragmaticaCondensed";
-  font-weight: 300;
+  font-weight: 400;
   font-size: 16px;
-  line-height: 1.66;
+  line-height: 1.5;
 }

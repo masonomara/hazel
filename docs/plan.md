@@ -362,7 +362,7 @@ If nothing returns, it's page content only.
   font-display: swap;
   font-family: "Pragmatica";
   font-style: normal;
-  font-weight: 300;
+  font-weight: 400;
   src: url('https://cdn.shopify.com/s/files/1/0051/3264/8566/files/PragmaticaLight.woff2?v=1713569839') format('woff2'),
        url('https://cdn.shopify.com/s/files/1/0051/3264/8566/files/PragmaticaLight.woff?v=1713569839') format('woff'),
        url('https://cdn.shopify.com/s/files/1/0051/3264/8566/files/PragmaticaLight.ttf?v=1713569839') format('truetype');
@@ -382,7 +382,7 @@ If nothing returns, it's page content only.
   font-display: swap;
   font-family: "PragmaticaCondensed";
   font-style: normal;
-  font-weight: 300;
+  font-weight: 400;
   src: url('https://cdn.shopify.com/s/files/1/0051/3264/8566/files/PragmaticaCond-Light.woff2?v=1713569839') format('woff2'),
        url('https://cdn.shopify.com/s/files/1/0051/3264/8566/files/PragmaticaCond-Light.woff?v=1713569839') format('woff'),
        url('https://cdn.shopify.com/s/files/1/0051/3264/8566/files/PragmaticaCond-Light.ttf?v=1713569839') format('truetype');

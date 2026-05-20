@@ -10,7 +10,7 @@ These require zero theme changes. Do them first.
 
 ---
 
-### 1. Shop Navigation Categories
+### 1. Shop Navigation Categories **COMPLETE**
 
 **What:** Add Mock Necks under Clothing, add Perfume under Accessories, move Hazel Mini (Mini Cherub) under Bottoms within Clothing.
 
@@ -35,8 +35,10 @@ These require zero theme changes. Do them first.
 
 **Steps:**
 1. Go to **Products** → search "Route" or "Package Protection"
-2. Open the product → change **Status** from Active to **Draft** (hides from storefront entirely while keeping it active for the Route app)
-3. If Draft breaks Route's cart injection, instead use **Sales Channels** and deselect "Online Store" while keeping it active for Point of Sale / other channels
+2. Open the product → change **Status** to **Unlisted** (not Draft — Draft prevents cart injection and breaks the widget entirely)
+3. Save
+
+**Note:** Unlisted is Route's officially documented approach. The product is hidden from storefront search and collections but remains purchasable via cart/checkout so the widget functions normally. If using third-party search/recommendations apps (Rebuy, Klaviyo, Boost, etc.) that ignore Unlisted status, add a vendor filter: `Product vendor is not equal to "Route"` in that app's settings.
 
 **The `.route-div` placeholder in `snippets/cart-drawer.liquid:654` and `sections/main-cart-footer.liquid:80` is already empty** — Route injects its widget into that div via its app embed. The div itself is harmless but can be removed once Route is fully disabled if needed.
 

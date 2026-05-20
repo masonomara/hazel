@@ -130,7 +130,7 @@
   }
   .slider-mobile-gutter .grid {
     column-gap: 4px;
-    row-gap: 32px;
+    row-gap: 20px;
   }
   .slider-mobile-gutter .grid .card__content {
     padding-left: 8px;

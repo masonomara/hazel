@@ -27,7 +27,7 @@ These require zero theme changes. Do them first.
 
 ---
 
-### 2. Hide Route Insurance Product from Store
+### 2. Hide Route Insurance Product from Store **COMPLETE**
 
 **What:** Route's Package Protection product appears in product listings and possibly recommendations. It should not be customer-facing.
 
@@ -50,7 +50,7 @@ These require zero theme changes. Do them first.
 
 ---
 
-### 3. Returns Email Verification
+### 3. Returns Email Verification **COMPLETE**
 
 **What:** Confirm that return requests route to shop@hazelboutique.com.
 
@@ -65,7 +65,7 @@ These require zero theme changes. Do them first.
 
 ---
 
-### 4. Enable Express Checkout Payment Methods
+### 4. Enable Express Checkout Payment Methods **COMPLETE**
 
 **What:** Enable Apple Pay, Google Pay, and Shop Pay buttons in Shopify admin — these are the "dynamic checkout" buttons currently commented out in the theme.
 

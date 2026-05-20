@@ -30,15 +30,10 @@
 <script>
   // First Block
   function setRecentlyViewedPdp() {
-    let productImgTwo = "{{ product.images[1] | image_url }}";
-
-    if (!productImgTwo) {
-      productImgTwo = "{{ product.featured_image | image_url }}";
-    }
     const pdpData = {
       productTitle: '{{ product.title }}',
       productImg: "{{ product.featured_image | image_url }}",
-      productImgTwo: productImgTwo,
+      productImgTwo: {% if product.images.size > 1 %}"{{ product.images[1] | image_url }}"{% else %}null{% endif %},
       productPrice: "{{ product.price | money | remove_first: '' }}",
       productUrl: '{{ product.url }}',
     };
@@ -90,7 +85,9 @@
   }
 
   // Now we write all our function and it's time to execute it
+  {% unless product.vendor == 'Route' %}
   setRecentlyViewedPdp();
+  {% endunless %}
   // Set Variable for Local Storage Data
   const localViewed = localStorage.recently_viewed;
   // console.log to verify the data
@@ -123,6 +120,8 @@
     pdpData.reverse();
     // Loop through all the data and inject into HTML using ES6
     pdpData.forEach(function (item) {
+      // Skip Route package protection product
+      if (item.productTitle && (item.productTitle.toLowerCase().includes('route') || item.productTitle.toLowerCase().includes('package protection'))) return;
       // Check if productTitle is empty
       if (item.productTitle === '' | item.productImg === null ) {
         recentViewHtml.push(`
@@ -139,7 +138,7 @@
                   <div class="card__media">
                     <div class="media media--transparent media--hover-effect">
                       <img src='${item.productImg}' loading="lazy" width="1200"/>
-                      <img src='${item.productImgTwo}' loading="lazy" width="1200"/>
+                      ${item.productImgTwo && item.productImgTwo !== item.productImg ? `<img src='${item.productImgTwo}' loading="lazy" width="1200"/>` : ''}
                     </div>
                     <div class="recentlyViewedPopup">
                       <span>View Item</span>

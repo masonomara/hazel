@@ -85,7 +85,7 @@ These are 1–20 line changes with immediate visible impact.
 
 ---
 
-### 5. Fix Header Breakpoint Typo
+### 5. Fix Header Breakpoint Typo **COMPLETE**
 
 **What:** A typo `900spx` in the header CSS prevents the correct desktop/mobile breakpoint from applying, which may cause the hamburger drawer to show at desktop widths when it shouldn't.
 

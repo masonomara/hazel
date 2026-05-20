@@ -114,21 +114,6 @@
                     <span>{{ 'products.product.volume_pricing.note' | t }}</span>
                   </div>
                 {%- endif -%}
-                <div class="product__tax caption rte">
-                  {%- if cart.taxes_included -%}
-                    {{ 'products.product.include_taxes' | t }}
-                  {%- endif -%}
-                  {%- if shop.shipping_policy.body != blank -%}
-                    {{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
-                  {%- endif -%}
-                </div>
-                <div {{ block.shopify_attributes }}>
-                  {%- assign product_form_installment_id = 'product-form-installment-' | append: section.id -%}
-                  {%- form 'product', product, id: product_form_installment_id, class: 'installment caption-large' -%}
-                    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-                    {{ form | payment_terms }}
-                  {%- endform -%}
-                </div>
               {%- when 'inventory' -%}
                 <p
                   class="product__inventory no-js-hidden{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}{% if product.selected_or_first_available_variant.inventory_management != 'shopify' %} visibility-hidden{% endif %}"
@@ -462,6 +447,34 @@
                   section_id: section.id,
                   show_pickup_availability: true
                 -%}
+                <p class="product__installment caption">
+                  4 payments of
+                  <span id="installment-price-{{ section.id }}">
+                    {{- product.selected_or_first_available_variant.price | divided_by: 4 | money -}}
+                  </span>
+                  with
+                  {% render 'icon-shop-pay' %}
+                </p>
+                <div class="product__tax caption rte">
+                  {%- if cart.taxes_included -%}
+                    {{ 'products.product.include_taxes' | t }}
+                  {%- endif -%}
+                  {%- if shop.shipping_policy.body != blank -%}
+                    {{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
+                  {%- endif -%}
+                </div>
+
+                <script>
+                  (function () {
+                    subscribe(PUB_SUB_EVENTS.variantChange, function (event) {
+                      if (event.data.sectionId !== '{{ section.id }}') return;
+                      var el = document.getElementById('installment-price-{{ section.id }}');
+                      if (!el || !event.data.variant) return;
+                      var installment = Math.round(event.data.variant.price / 4);
+                      el.textContent = '$' + (installment / 100).toFixed(2);
+                    });
+                  })();
+                </script>
               {%- when 'rating' -%}
                 {%- if product.metafields.reviews.rating.value != blank -%}
                   <div class="rating-wrapper">
@@ -556,12 +569,12 @@
                                 {% endif %}
                               >
                                 <ul class="list-unstyled" role="list">
-                                  {%- comment %}theme-check-disable UndefinedObject{% endcomment -%}
+                                  {%- comment %}theme-check-disable UndefinedObject{%- endcomment %}
                                   {%- for product in recommendations.products
                                     limit: block.settings.products_per_page
                                     offset: continue
                                   -%}
-                                  {%- comment %}theme-check-enable UndefinedObject{% endcomment -%}
+                                    {%- comment %}theme-check-enable UndefinedObject{%- endcomment %}
                                     <li>
                                       {% render 'card-product',
                                         card_product: product,

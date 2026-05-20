@@ -143,6 +143,7 @@
   letter-spacing: 0.05rem;
   text-decoration: underline;
   text-underline-offset: 0.5rem;
+  display: none;
 }
 
 .shopify-payment-button__button + .shopify-payment-button__button--hidden {
@@ -225,6 +226,7 @@
 /* Overrides */
 .shopify-payment-button__more-options {
   color: rgb(var(--color-foreground));
+  display: none;
 }
 
 .shopify-payment-button__button {

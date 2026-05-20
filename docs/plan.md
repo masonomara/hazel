@@ -318,7 +318,7 @@ If nothing returns, it's page content only.
 
 ---
 
-### 12. Font Audit and Pragmatica Fix
+### 12. Font Audit and Pragmatica Fix **COMPLETE**
 
 **What:** Pragmatica and PragmaticaCondensed are currently falling back to system sans-serif because Shopify disabled those CDN files on 2026-03-30. The goals.md notes "all premium licensed fonts are confirmed in place" — this conflicts with what's in the code. Needs resolution before any font work.
 

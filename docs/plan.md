@@ -259,7 +259,7 @@ If nothing returns, it's page content only.
 
 ---
 
-### 11. Sizing Guide Page
+### 11. Sizing Guide Page **COMPLETE**
 
 **What:** Update the sizing guide to:
 - Add an "All Hazel styles are an oversized fit — models wear sizes L–2XL" note at the top

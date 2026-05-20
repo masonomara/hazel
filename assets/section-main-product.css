@@ -197,7 +197,7 @@
 }
 
 .product-form__submit {
-  margin-bottom: 1rem;
+  margin-bottom: 8px;
 }
 
 .no-js .product-form__submit.button--secondary {
@@ -414,11 +414,11 @@ a.product__text {
 }
 @media screen and (min-width: 750px) {
   .product-form__buttons {
-    transition: 150ms ease-in all;
+    /* transition: 150ms ease-in all; */
   }
   .product-form__buttons button:hover {
-    opacity: 0.8;
-    transition: 150ms ease-out all;
+    /* opacity: 0.8;
+    transition: 150ms ease-out all; */
   }
 }
 
@@ -1648,33 +1648,44 @@ a.product__text {
 }
 .product-form__submit {
   font-size: 56px;
-  height: 54px !important;
+  height: 46px !important;
   font-family: "PragmaticaCondensed";
   text-transform: uppercase;
   line-height: 100%;
   background-color: black;
-  border-radius: 19px;
+
   max-width: 320px;
 }
 @media screen and (max-width: 749px) {
   .product-form__submit {
     font-size: 56px;
-    height: 54px !important;
+    height: 46px !important;
     font-family: "PragmaticaCondensed";
     text-transform: uppercase;
     line-height: 100%;
     background-color: black;
-    border-radius: 19px;
+
     max-width: var(--page-width);
   }
 }
+
+
 .product-form__submit span {
-  font-size: 19px;
+  font-size: 16px;
   font-family: "PragmaticaCondensed";
   text-transform: uppercase;
   line-height: 100%;
   color: rgb(var(--color-background));
   letter-spacing: 0px;
+}
+
+.product-form__submit:hover {
+    background-color: rgba(var(--color-background), 1);
+    border: 1px solid black;
+}
+
+.product-form__submit:hover span {
+    color: black;
 }
 
 @media screen and (max-width: 749px) {
@@ -1865,6 +1876,6 @@ variant-selects {
   .swym-add-to-wishlist.swym-icontext:after {
   color: rgb(0, 0, 0) !important;
 }
-.button:hover {
-  opacity: 0.75;
-}
+
+
+

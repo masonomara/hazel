@@ -477,7 +477,7 @@ table:not([class]) th {
   text-transform: uppercase;
   text-align: left;
 }
-tbody {
+.rte tbody {
   border: 1px solid rgba(var(--color-foreground), 1);
 }
 
@@ -7092,3 +7092,5 @@ cart-remove-button .swym-button-bar {
   font-size: 16px;
   line-height: 1.5;
 }
+
+

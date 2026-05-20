@@ -30,14 +30,14 @@
 <script>
   // First Block
   function setRecentlyViewedPdp() {
-    let productImgTwo = "{{ product.images[1] | img_url: '' }}";
+    let productImgTwo = "{{ product.images[1] | image_url }}";
 
     if (!productImgTwo) {
-      productImgTwo = "{{ product.featured_image | img_url: '' }}";
+      productImgTwo = "{{ product.featured_image | image_url }}";
     }
     const pdpData = {
       productTitle: '{{ product.title }}',
-      productImg: "{{ product.featured_image | img_url: '' }}",
+      productImg: "{{ product.featured_image | image_url }}",
       productImgTwo: productImgTwo,
       productPrice: "{{ product.price | money | remove_first: '' }}",
       productUrl: '{{ product.url }}',

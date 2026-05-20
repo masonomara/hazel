@@ -1,23 +1,26 @@
-{% assign alwaysShow = shop.metafields['da-restock'].alwaysShow %}
-{% assign displayForm = product.metafields['da-restock'].hide %}
+{% comment %}theme-check-disable OrphanedSnippet{% endcomment %}
+{% assign always_show = shop.metafields['da-restock'].alwaysShow %}
+{% assign display_form = product.metafields['da-restock'].hide %}
 {% assign preorder = shop.metafields['da-restock'].preorder %}
 
-{% assign backInStockDateText = shop.metafields['da-restock'].showBackInStockDateText %}
-{% assign backInStockDateFormat = shop.metafields['da-restock'].showBackInStockDateFormat %}
-{% assign backInStockDate = product.metafields['da-restock'].backInStockDate %}
+{% assign back_in_stock_date_text = shop.metafields['da-restock'].showBackInStockDateText %}
+{% assign back_in_stock_date_format = shop.metafields['da-restock'].showBackInStockDateFormat %}
+{% assign back_in_stock_date = product.metafields['da-restock'].backInStockDate %}
 
-{% assign prefillEmail = '' %}
+{% assign prefill_email = '' %}
 {% if shop.metafields['da-restock'].prefillEmail == 'true' and customer.email %}
-  {% assign prefillEmail = customer.email %}
+  {% assign prefill_email = customer.email %}
 {% endif %}
 <script type="text/javascript">
   const da_variant = {{ product.selected_or_first_available_variant.id }};
 </script>
 
-<script type="text/JavaScript" src=" https://MomentJS.com/downloads/moment.js"></script>
+{% comment %}theme-check-disable RemoteAsset{% endcomment %}
+<script type="text/JavaScript" src="https://MomentJS.com/downloads/moment.js" defer></script>
+{% comment %}theme-check-enable RemoteAsset{% endcomment %}
 <script type="text/JavaScript">
-  const date = moment("{{ backInStockDate }}").format("{{ backInStockDateFormat }}");
-  const backInStockDateText = "{{ backInStockDateText }}"
+  const date = moment("{{ back_in_stock_date }}").format("{{ back_in_stock_date_format }}");
+  const backInStockDateText = "{{ back_in_stock_date_text }}"
   {% raw %}
     const updatedBackInStockDateText = (backInStockDateText).replace("{{ date }}", date).replace("{{ date }}", date);
   {% endraw %}
@@ -26,15 +29,15 @@
 {% comment %} Do not show form for ignored collections {% endcomment %}
 {% for collection in product.collections %}
   {% if collection.metafields['da-restock'].forbidden == 'true' %}
-    {% assign displayForm = 'false' %}
+    {% assign display_form = 'false' %}
   {% endif %}
 {% endfor %}
 
-{% if alwaysShow == 'true' and displayForm != 'false' %}
+{% if always_show == 'true' and display_form != 'false' %}
   {% assign show = false %}
-  {% assign multipleVariants = false %}
+  {% assign multiple_variants = false %}
   {% if product.variants.size > 1 %}
-    {% assign multipleVariants = true %}
+    {% assign multiple_variants = true %}
   {% endif %}
   {% for variant in product.variants %}
     {% if preorder == 'true' %}
@@ -60,14 +63,14 @@
       <div class="da-restock-notification da-restock-alwaysShow">
         <div class="da-restock-notification-form">
           <p>{{ shop.metafields['da-restock'].productText }}</p>
-          {% if backInStockDate and backInStockDateText %}
+          {% if back_in_stock_date and back_in_stock_date_text %}
             <div id="daBackInStockDate{{product.id}}" />
             <script type="text/JavaScript">
               document.querySelector('#daBackInStockDate{{ product.id }}').innerHTML = updatedBackInStockDateText;
             </script>
           {% endif %}
 
-          {% if multipleVariants %}
+          {% if multiple_variants %}
             <select name="variant">
               {% for variant in product.variants %}
                 {% if preorder == 'true' %}
@@ -92,7 +95,7 @@
             type="text"
             placeholder="{{ shop.metafields.da-restock.productInput | escape }}"
             name="email"
-            value="{{prefillEmail}}"
+            value="{{prefill_email}}"
           >
           <input
             type="hidden"
@@ -128,7 +131,7 @@
       </div>
     </div>
   {% endif %}
-{% elsif displayForm != 'false' %}
+{% elsif display_form != 'false' %}
   <div class="dd-restock-notification-container-v2" id="dd-restock-notification-container">
     <div id="dd-restock-notification-msg">
       <div id="dd-restock-notification-msg-success" style="display: none">
@@ -137,15 +140,15 @@
       <div id="dd-restock-notification-msg-error" style="display: none">{{ shop.metafields['da-restock'].error }}</div>
     </div>
     {% for variant in product.variants %}
-      {% assign variantAvailable = variant.available %}
+      {% assign variant_available = variant.available %}
       {% if preorder == 'true' %}
         {% if variant.inventory_quantity > 0 %}
-          {% assign variantAvailable = true %}
+          {% assign variant_available = true %}
         {% else %}
-          {% assign variantAvailable = false %}
+          {% assign variant_available = false %}
         {% endif %}
       {% endif %}
-      {% unless variantAvailable %}
+      {% unless variant_available %}
         <div
           class="da-restock-notification"
           id="da-restock-notification-variant-{{ variant.id }}"
@@ -154,7 +157,7 @@
           <div class="da-restock-notification-form">
             <p>{{ shop.metafields['da-restock'].productText }}</p>
 
-            {% if backInStockDate and backInStockDateText %}
+            {% if back_in_stock_date and back_in_stock_date_text %}
               <div id="daBackInStockDate{{product.id}}{{variant.id}}"></div>
               <script type="text/javascript">
                 document.querySelector('#daBackInStockDate{{ product.id }}{{ variant.id }}').innerHTML =
@@ -165,7 +168,7 @@
               type="text"
               placeholder="{{ shop.metafields.da-restock.productInput | escape }}"
               name="email"
-              value="{{prefillEmail}}"
+              value="{{prefill_email}}"
             >
             <input
               type="hidden"

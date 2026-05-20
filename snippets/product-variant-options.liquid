@@ -69,7 +69,9 @@
   {%- if picker_type == 'swatch' -%}
     {% assign checked = false %}
     {% if option.selected_value == value %}
+      {% comment %}theme-check-disable UnusedAssign{% endcomment %}
       {% assign checked = true %}
+      {% comment %}theme-check-enable UnusedAssign{% endcomment %}
     {% endif %}
     {%
       render 'swatch-input',

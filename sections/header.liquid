@@ -141,7 +141,11 @@
   endfor
 -%}
 
-<{% if section.settings.sticky_header_type != 'none' %}sticky-header data-sticky-type="{{ section.settings.sticky_header_type }}"{% else %}div{% endif %} class="header-wrapper masonHeaderModifierOne {% if template != 'index'%}headerOneMobileAdjustment{%  endif %} color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %} {% if template == 'index'%}header--homepage{%  endif %}">
+{%- if section.settings.sticky_header_type != 'none' -%}
+  <sticky-header data-sticky-type="{{ section.settings.sticky_header_type }}" class="header-wrapper masonHeaderModifierOne {% if template != 'index'%}headerOneMobileAdjustment{%  endif %} color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %} {% if template == 'index'%}header--homepage{%  endif %}">
+{%- else -%}
+  <div class="header-wrapper masonHeaderModifierOne {% if template != 'index'%}headerOneMobileAdjustment{%  endif %} color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %} {% if template == 'index'%}header--homepage{%  endif %}">
+{%- endif -%}
   {%- liquid
     assign social_links = false
     assign localization_forms = false
@@ -352,7 +356,11 @@
       </a>
     </div>
   </header>
-</{% if section.settings.sticky_header_type != 'none' %}sticky-header{% else %}div{% endif %}>
+{%- if section.settings.sticky_header_type != 'none' -%}
+  </sticky-header>
+{%- else -%}
+  </div>
+{%- endif -%}
 
 <div class="masonHeaderModifierTwo header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %} {% if template == 'index'%}header--homepage{%  endif %}">
 

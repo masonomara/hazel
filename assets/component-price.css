@@ -33,6 +33,19 @@
   font-size: 21px;
 }
 
+@media screen and (max-width: 749px) {
+.product__info-container .price__container * {
+  font-size: 19px;
+  line-height: 19px;
+font-family: PragmaticaCondensed;
+    text-transform: uppercase;
+  }
+.product__info-container .price__container {
+  margin-top: 19px;
+}
+}
+
+
 .price:not(.price--show-badge) .price-item--last:last-of-type {
   margin: 0;
 }

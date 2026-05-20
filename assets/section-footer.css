@@ -576,7 +576,7 @@
   font-weight: 400 !important;
   font-size: 16px !important;
   line-height: 16px !important;
-  padding: 1.5px 0px !important;
+  padding: 4px 0px !important;
   letter-spacing: 0px !important;
   text-transform: uppercase;
   color: rgb(var(--color-foreground)) !important;
@@ -713,8 +713,8 @@
   row-gap: 8px;
 }
 .policies.list-unstyled .copyright__content {
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
 }
 .policies.list-unstyled .copyright__content a {
   padding-top: 0px !important;

@@ -263,13 +263,15 @@
 }
 
 .card__heading a:focus:after {
-  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 0.3rem rgb(var(--color-background)),
     0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
   outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
 }
 
 .card__heading a:focus-visible:after {
-  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)),
+  box-shadow:
+    0 0 0 0.3rem rgb(var(--color-background)),
     0 0 0.5rem 0.4rem rgba(var(--color-foreground), 0.3);
   outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
 }
@@ -510,26 +512,19 @@
 
 .card__information .card__heading,
 .card__information .price {
-  font-size: 13px !important;
-  line-height: 16px !important;
   margin: 0px !important;
   text-decoration: none !important;
   text-transform: uppercase !important;
   font-family: "PragmaticaCondensed";
+  font-size: 14px !important;
+  line-height: 19px !important;
 }
-@media screen and (min-width: 750px) {
-  .card__information .card__heading,
-  .card__information .price {
-    font-size: 14px !important;
-    line-height: 17px !important;
-  }
-}
+
 .card__information {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   text-decoration: none !important;
-  margin: 8px 0px 0px;
+  margin: 6px 0px 0px;
 }
 .underline-links-hover:hover a {
   text-decoration: none !important;

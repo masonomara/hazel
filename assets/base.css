@@ -353,10 +353,10 @@ h2,
 
 h3,
 .h3 {
-  font-size: 21px!important;
+  font-size: 21px !important;
   font-family: "PragmaticaCondensed";
   text-transform: uppercase;
-  margin-top: 6.4rem;
+  margin-top: 2em;
   font-weight: 400;
 }
 
@@ -454,15 +454,31 @@ table:not([class]) {
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 1.4rem;
-  border-style: hidden;
   box-shadow: 0 0 0 0.1rem rgba(var(--color-foreground), 0.2);
   /* draws the table border  */
 }
 
-table:not([class]) td,
+table:not([class]) td {
+  border: 1px solid rgba(var(--color-foreground), 1);
+  font-family: "PragmaticaCondensed";
+  font-weight: 400;
+  padding: 0.5em;
+  font-size: 14px;
+  line-height: 1;
+  text-transform: uppercase;
+}
 table:not([class]) th {
-  padding: 0.8rem;
-  border: 1px solid rgba(var(--color-background), 1);
+  border: none;
+  font-family: "PragmaticaCondensed";
+  font-weight: 400;
+  padding: 0.5em;
+  font-size: 14px;
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: left;
+}
+tbody {
+  border: 1px solid rgba(var(--color-foreground), 1);
 }
 
 @media screen and (max-width: 749px) {
@@ -3077,7 +3093,8 @@ details-disclosure > details {
   border-color: rgba(var(--color-badge-border), var(--alpha-badge-border));
   color: rgb(var(--color-badge-foreground));
   word-break: break-word;
-  font-family: "Millionare";
+  text-transform: uppercase;
+  font-family: "Lustria" !important;
   gap: 6px;
 }
 
@@ -3298,7 +3315,6 @@ details-disclosure > details {
 .rte table {
   table-layout: fixed;
   width: 100%;
-  border: 1px solid rgba(var(--color-foreground), 1);
 }
 
 @media screen and (min-width: 750px) {
@@ -4768,16 +4784,12 @@ product-form:has(.product-form__buttons) form {
 
 .main--about--container td,
 .main--contact--container td {
-  padding: 36px 12px 0px 12px !important;
-  border: 0px !important;
   vertical-align: top;
   font-family: "PragmaticaCondensed";
-  font-weight: 300;
-  font-size: 16px;
-  line-height: 1.66;
+  font-weight: 400;
+  font-size: 14px;
 }
 .main--contact--container td {
-  padding: 0px 12px 0px 12px !important;
 }
 .main--about--container td:first-child {
   padding-right: 12px !important;
@@ -4888,13 +4900,10 @@ product-form:has(.product-form__buttons) form {
     padding: 0px 16px;
   }
   .main--about--container td {
-    padding: 36px 12px 0px 12px !important;
-    border: 0px !important;
     vertical-align: top;
     font-family: "PragmaticaCondensed";
-    font-weight: 300;
+    font-weight: 400;
     font-size: 16px;
-    line-height: 1.66;
   }
   .main--about--container td:nth-child(2) {
     padding-bottom: 64px !important;
@@ -4936,11 +4945,13 @@ product-form:has(.product-form__buttons) form {
 .main--contact--container {
   font-size: 32px !important;
   padding-top: 0px !important;
+  padding-bottom: 64px !important;
 }
 @media screen and (max-width: 749px) {
   .main--contact--container {
     font-size: 16px !important;
     padding-top: 0px !important;
+    padding-bottom: 64px !important;
   }
 }
 

@@ -85,7 +85,7 @@
                   {{ card_product.featured_media | image_url }} {{ card_product.featured_media.width }}w
                 "
                 src="{{ card_product.featured_media | image_url: width: 533 }}"
-                sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 5 }}px, (min-width: 1200px) calc((100vw - 130px) / 5), (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
                 alt="{{ card_product.featured_media.alt | escape }}"
                 class="motion-reduce"
                 {% unless lazy_load == false %}
@@ -108,7 +108,7 @@
                     {{ card_product.media[1] | image_url }} {{ card_product.media[1].width }}w
                   "
                   src="{{ card_product.media[1] | image_url: width: 533 }}"
-                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 5 }}px, (min-width: 1200px) calc((100vw - 130px) / 5), (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
                   alt=""
                   class="motion-reduce"
                   loading="lazy"
@@ -135,6 +135,7 @@
             </h3>
           </div>
 
+          {% comment %}
           <div class="card__badge {{ settings.badge_position }}">
             {%- if card_product.tags contains 'hazel brand' or card_product.tags contains 'Hazel Brand' -%}
               <span
@@ -180,6 +181,7 @@
               </span>
             {%- endif -%}
           </div>
+          {% endcomment %}
         </div>
       </div>
       <div class="card__content">
@@ -282,6 +284,7 @@
             {% endif %}
           {% endfor %}
         </div>
+        {% comment %}
         <div class="card__badge {{ settings.badge_position }}">
           {%- if card_product.available == false -%}
             <span
@@ -299,6 +302,7 @@
             </span>
           {%- endif -%}
         </div>
+        {% endcomment %}
         <div class="quick-add no-js-hidden complementary_quick_add">
           {%- liquid
             assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id
@@ -312,6 +316,7 @@
     </div>
   </a>
 
+ 
   {%- if card_product.variants.size > 1 or qty_rules -%}
     <modal-opener data-modal="#QuickAdd-{{ card_product.id }}" data-card-quickadd>
       <button
@@ -398,6 +403,7 @@
       {%- endform -%}
     </product-form>
   {%- endif -%}
+
 
 {%- else -%}
   {%- liquid

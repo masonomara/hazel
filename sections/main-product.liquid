@@ -440,6 +440,9 @@
               {%- when 'variant_picker' -%}
                 {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
               {%- when 'buy_buttons' -%}
+                 {%- if product.tags contains 'embroidery' or product.metafields.custom.embroidery_enabled -%}
+                  {% render 'embroidery', product: product, section_id: section.id %}
+                {%- endif -%}
                 {%- render 'buy-buttons',
                   block: block,
                   product: product,
@@ -447,6 +450,7 @@
                   section_id: section.id,
                   show_pickup_availability: true
                 -%}
+
                 <p class="product__installment caption">
                   4 payments of
                   <span id="installment-price-{{ section.id }}">

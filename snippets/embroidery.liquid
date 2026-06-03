@@ -1,0 +1,72 @@
+{%- comment -%}
+  Renders the Custom Embroidery button, modal, and the bound line item property input.
+  Accepts:
+  - product: {Object} product object.
+  - section_id: {String} id of the product section, used to bind to the add-to-cart form.
+{%- endcomment -%}
+{%- liquid
+  assign product_form_id = 'product-form-' | append: section_id
+  assign max_len = settings.embroidery_max_length | default: 50
+  assign fee = settings.embroidery_price | default: 20
+  assign option_name = settings.embroidery_option_name | default: 'Embroidery'
+  assign yes_value = settings.embroidery_yes_value | default: 'Yes'
+  assign no_value = settings.embroidery_no_value | default: 'No'
+  assign fee_money = fee | times: 100 | money
+-%}
+{{ 'embroidery.css' | asset_url | stylesheet_tag }}
+<div
+  class="embroidery"
+  data-embroidery
+  data-max="{{ max_len }}"
+  data-section-id="{{ section_id }}"
+  data-option-name="{{ option_name | escape }}"
+  data-yes-value="{{ yes_value | escape }}"
+  data-no-value="{{ no_value | escape }}"
+>
+  <input
+    type="hidden"
+    name="properties[Embroidery]"
+    id="embroidery-value-{{ section_id }}"
+    form="{{ product_form_id }}"
+    value=""
+    disabled
+    data-embroidery-field
+  >
+  <p class="embroidery__summary" data-embroidery-summary hidden>
+    Embroidery: “<span class="data-embroidery-text" data-embroidery-text></span>”
+  </p>
+  <button
+    type="button"
+    class="button button--secondary button--full-width embroidery__open"
+    data-embroidery-open
+    data-label-edit="Edit embroidery"
+  >
+    Add Custom Embroidery
+  </button>
+
+
+
+  <dialog class="embroidery__modal" data-embroidery-modal aria-label="Add custom embroidery">
+    <div class="embroidery__modal-inner">
+      <h2 class="embroidery__title">Add Custom embroidery <span class="embroidery__fee">(+{{ fee_money }})</span></h2>
+      <label for="embroidery-input-{{ section_id }}" class="embroidery__label">Your text</label>
+      <div class="field">
+        <input
+          id="embroidery-input-{{ section_id }}"
+          class="field__input embroidery__input"
+          type="text"
+          placeholder="Your text"
+          maxlength="{{ max_len }}"
+          data-embroidery-input
+        >
+      </div>
+      <p class="embroidery__count"><span data-embroidery-count>0</span>/{{ max_len }}</p>
+      <div class="embroidery__actions">
+        <button type="button" class="button button--secondary embroidery__action" data-embroidery-remove>Remove</button>
+        <button type="button" class="button embroidery__action embroidery__save" data-embroidery-save>Save</button>
+      </div>
+    </div>
+  </dialog>
+</div>
+
+<script src="{{ 'embroidery.js' | asset_url }}" defer="defer"></script>

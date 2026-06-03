@@ -43,7 +43,7 @@
     // Create a couple of variables
     let jsonResp, jsonRespArr, jsonRespArrStr;
     // Set the number how many products you want to capture
-    const numberOfProduct = 4;
+    const numberOfProduct = 5;
     // Now push the pdpData into Array so that we can use it
     productArr.push(pdpData);
     // Get the product title from pdpData
@@ -85,7 +85,7 @@
   }
 
   // Now we write all our function and it's time to execute it
-  {% unless product.vendor == 'Route' %}
+  {% unless product.vendor == 'Route' or product.collections.size == 0 %}
   setRecentlyViewedPdp();
   {% endunless %}
   // Set Variable for Local Storage Data
@@ -99,7 +99,7 @@
   >
     <h2 class="related-products__heading inline-richtext h2">Recently viewed</h2>
     <ul
-      class="grid product-grid product-grid-recently-viewed grid--4-col-desktop grid--2-col-tablet-down"
+      class="grid product-grid product-grid-recently-viewed grid--5-col-desktop grid--2-col-tablet-down"
       role="list"
     ></ul>
   </div>

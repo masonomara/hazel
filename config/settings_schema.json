@@ -1485,5 +1485,44 @@
         "default": "scheme-1"
       }
     ]
+  },
+  {
+    "name": "Custom Embroidery",
+    "settings": [
+      {
+        "type": "text",
+        "id": "embroidery_option_name",
+        "label": "Embroidery option name",
+        "default": "Embroidery",
+        "info": "Name of the product option that holds the price (must match the option added to the product, e.g. \"Embroidery\")."
+      },
+      {
+        "type": "text",
+        "id": "embroidery_yes_value",
+        "label": "Embroidery option — on value",
+        "default": "Embroidered",
+        "info": "The option value selected when embroidery is added (the higher-priced variant). Must exactly match the value in the product's Embroidery option."
+      },
+      {
+        "type": "text",
+        "id": "embroidery_no_value",
+        "label": "Embroidery option — off value",
+        "default": "Standard",
+        "info": "The option value selected when embroidery is removed (the standard-priced variant). Must exactly match the value in the product's Embroidery option."
+      },
+      {
+        "type": "number",
+        "id": "embroidery_price",
+        "label": "Embroidery fee for display",
+        "default": 20,
+        "info": "Drives the on-page \"(+$20)\" label only. The actual charge is the variant price difference."
+      },
+      {
+        "type": "number",
+        "id": "embroidery_max_length",
+        "label": "Embroidery max characters",
+        "default": 50
+      }
+    ]
   }
 ]

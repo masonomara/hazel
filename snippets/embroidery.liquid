@@ -11,6 +11,7 @@
   assign option_name = settings.embroidery_option_name | default: 'Embroidery'
   assign yes_value = settings.embroidery_yes_value | default: 'Yes'
   assign no_value = settings.embroidery_no_value | default: 'No'
+  assign thread_option_name = settings.embroidery_thread_option_name | default: 'Embroidery Thread color'
   assign fee_money = fee | times: 100 | money
 -%}
 {{ 'embroidery.css' | asset_url | stylesheet_tag }}
@@ -22,6 +23,7 @@
   data-option-name="{{ option_name | escape }}"
   data-yes-value="{{ yes_value | escape }}"
   data-no-value="{{ no_value | escape }}"
+  data-thread-option-name="{{ thread_option_name | escape }}"
 >
   <input
     type="hidden"
@@ -61,6 +63,17 @@
         >
       </div>
       <p class="embroidery__count"><span data-embroidery-count>0</span>/{{ max_len }}</p>
+      <div class="embroidery__thread-field" data-embroidery-thread-field hidden>
+        <label for="embroidery-thread-{{ section_id }}" class="embroidery__label">Thread color</label>
+        <div class="select">
+          <select
+            id="embroidery-thread-{{ section_id }}"
+            class="select__select embroidery__thread"
+            data-embroidery-thread
+          ></select>
+          {% render 'icon-caret' %}
+        </div>
+      </div>
       <div class="embroidery__actions">
         <button type="button" class="button button--secondary embroidery__action" data-embroidery-remove>Remove</button>
         <button type="button" class="button embroidery__action embroidery__save" data-embroidery-save>Save</button>

@@ -42,6 +42,39 @@
     }
   }
 
+  function optionValues(control) {
+    var values = [];
+    if (!control) return values;
+    if (control.type === "select") {
+      for (var i = 0; i < control.select.options.length; i++) {
+        values.push(control.select.options[i].value);
+      }
+    } else {
+      for (var j = 0; j < control.radios.length; j++) {
+        values.push(control.radios[j].value);
+      }
+    }
+    return values;
+  }
+
+  function currentOptionValue(control) {
+    if (!control) return "";
+    if (control.type === "select") return control.select.value;
+    for (var i = 0; i < control.radios.length; i++) {
+      if (control.radios[i].checked) return control.radios[i].value;
+    }
+    return "";
+  }
+
+  function populateSelect(select, values) {
+    for (var i = 0; i < values.length; i++) {
+      var option = document.createElement("option");
+      option.value = values[i];
+      option.textContent = values[i];
+      select.appendChild(option);
+    }
+  }
+
   function initRoot(root) {
     if (root.dataset.embroideryInit === "true") return;
     root.dataset.embroideryInit = "true";
@@ -68,6 +101,16 @@
     var optionControl = findOptionControl(variantSelects, optionName);
     if (optionControl) hideOptionControl(optionControl);
 
+    var threadOptionName = root.getAttribute("data-thread-option-name");
+    var threadControl = findOptionControl(variantSelects, threadOptionName);
+    var threadField = root.querySelector("[data-embroidery-thread-field]");
+    var threadSelect = root.querySelector("[data-embroidery-thread]");
+    if (threadControl && threadField && threadSelect) {
+      populateSelect(threadSelect, optionValues(threadControl));
+      threadSelect.value = currentOptionValue(threadControl);
+      threadField.hidden = false;
+    }
+
     var addLabel = openBtn.textContent.trim();
     var editLabel = openBtn.getAttribute("data-label-edit") || addLabel;
     var lastFocus = null;
@@ -79,6 +122,7 @@
     function openModal(trigger) {
       lastFocus = trigger || null;
       input.value = field.value || "";
+      if (threadControl && threadSelect) threadSelect.value = currentOptionValue(threadControl);
       updateCount();
       if (typeof modal.showModal === "function") {
         modal.showModal();
@@ -109,6 +153,7 @@
         summary.hidden = false;
         openBtn.textContent = editLabel;
         selectOptionValue(optionControl, yesValue);
+        if (threadControl && threadSelect) selectOptionValue(threadControl, threadSelect.value);
       } else {
         field.value = "";
         field.disabled = true;

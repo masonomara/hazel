@@ -1511,6 +1511,13 @@
         "info": "The option value selected when embroidery is removed (the standard-priced variant). Must exactly match the value in the product's Embroidery option."
       },
       {
+        "type": "text",
+        "id": "embroidery_thread_option_name",
+        "label": "Thread color option name",
+        "default": "Embroidery Thread Color",
+        "info": "Name of the product option for thread color. It's hidden in the variant picker and shown inside the embroidery modal instead. Must match the product option name exactly."
+      },
+      {
         "type": "number",
         "id": "embroidery_price",
         "label": "Embroidery fee for display",

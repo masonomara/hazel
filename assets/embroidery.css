@@ -125,15 +125,47 @@
 
 .embroidery__label {
     font-size: 1.4rem;
-    display: none;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 19px !important;
+    margin-bottom: 2px;
 }
 
 .embroidery__input.field__input {
     border-bottom: 1px solid black;
+    min-height: 40px;
+    height: 40px;
+    max-height: 40px;
 }
 
 .embroidery__input.field__input:hover,
 .embroidery__input.field__input:focus {
+    box-shadow: 0px 0.5px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.embroidery__input::placeholder {
+    opacity: 1;
+    color: rgba(var(--color-foreground), 0.5);
+}
+
+.embroidery__thread-field .select::before,
+.embroidery__thread-field .select::after {
+    display: none;
+}
+
+.embroidery__thread {
+    border-radius: 0;
+    border-bottom: 1px solid black;
+    font-size: 1.6rem;
+    color: black;
+    padding: 0px !important;
+    min-height: 40px;
+    height: 40px;
+    max-height: 40px;
+}
+
+.embroidery__thread:hover,
+.embroidery__thread:focus {
     box-shadow: 0px 0.5px 0px 0px rgba(0, 0, 0, 1) !important;
 }
 
@@ -144,13 +176,14 @@
     font-family: "PragmaticaCondensed";
 
     margin-top: -4px;
-    margin-bottom: 8px;
+    margin-bottom: -8px;
 }
 
 .embroidery__actions {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
+    margin-top: 16px;
 }
 
 .embroidery__open {

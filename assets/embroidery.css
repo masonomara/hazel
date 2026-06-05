@@ -38,32 +38,78 @@
 .embroidery__modal {
     width: 90vw;
     max-width: 46rem;
-    max-height: 90vh;
+    max-height: 100vh;
     padding: 0;
     overflow: auto;
     color: rgb(var(--color-foreground));
     background-color: rgb(var(--color-background));
     border: none;
-    border-radius: 24px;
+    border-radius: 0;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    height: 100vh;
+}
+
+/* Desktop: slide in from the right when the dialog opens */
+.embroidery__modal[open] {
+    animation: embroiderySlideInRight 300ms ease;
+}
+
+.embroidery__modal[open]::backdrop {
+    animation: embroideryBackdropFade 300ms ease;
+}
+
+@keyframes embroiderySlideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes embroiderySlideInUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes embroideryBackdropFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .embroidery__modal[open],
+    .embroidery__modal[open]::backdrop {
+        animation: none;
+    }
 }
 
 .embroidery__action {
     display: inline-block;
 
     padding: 1rem 2rem;
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 0rem;
     line-height: 1;
     text-align: center;
     transition: border var(--duration-short) ease;
     cursor: pointer;
     position: relative;
-    border: none !important;
     font-family: "PragmaticaCondensed";
     letter-spacing: 0px;
     text-transform: uppercase;
-    background-color: rgba(var(--color-foreground), 0.05);
-    border-radius: 14px;
+    background-color: rgba(var(--color-foreground), 0.1);
+    border-radius: 8px;
     height: 36px !important;
     min-height: 36px !important;
     max-height: 36px !important;
@@ -71,15 +117,18 @@
     line-height: 36px;
     align-items: center;
     justify-content: center;
+    min-width: 140px;
     width: fit-content;
-    min-width: 40px;
+    color: rgba(var(--color-foreground), 1);
     text-align: center;
     width: 72px;
     transition: 150ms ease-in-out;
 }
 .embroidery__action:hover {
-    background-color: rgba(var(--color-foreground), 0.13);
+    background-color: rgba(var(--color-foreground), 0.12);
     transition: 150ms ease-in-out;
+
+    color: black;
 }
 
 .embroidery__save {
@@ -88,8 +137,9 @@
     color: white;
 }
 .embroidery__save:hover {
-    background-color: rgba(var(--color-foreground), 0.87);
+    background-color: rgba(var(--color-foreground), 0.85);
     transition: 150ms ease-in-out;
+    color: white;
 }
 
 .embroidery__modal::backdrop {
@@ -99,8 +149,8 @@
 .embroidery__modal-inner {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 24px;
+
+    padding: 40px;
 }
 
 .embroidery__title {
@@ -109,22 +159,49 @@
     margin-bottom: 8px;
     text-align: left;
 
+    margin: 0;
+    font-size: 27px !important;
+    line-height: 33px !important;
     font-family: "PragmaticaCondensed";
-    font-weight: 400 !important;
-    font-size: 21px !important;
-    line-height: 26px !important;
-    letter-spacing: 0px !important;
     text-transform: uppercase;
-    color: rgb(var(--color-foreground)) !important;
-    text-decoration-thickness: 1px !important;
-    font-weight: 400 !important;
+    margin-top: 0px;
+    font-family: "Lustria" !important;
 }
 
 .embroidery__fee {
+    font-size: 20px;
+    line-height: 25px !important;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    margin-top: 12px;
+    font-weight: 300;
+}
+
+.embroidery__preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    padding: 8px 16px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: rgb(var(--color-background));
+    border: 1px solid rgba(var(--color-foreground), 0.1);
+}
+
+.embroidery__preview-text {
+    font-family: "Champignon";
+    font-size: clamp(64px, 12vw, 74px);
+    line-height: 1;
+    text-align: center;
+    word-break: break-word;
+    color: #1a1a1a;
 }
 
 .embroidery__label {
-    font-size: 1.4rem;
+    font-size: 12px;
     font-family: "PragmaticaCondensed";
     text-transform: uppercase;
     line-height: 19px !important;
@@ -132,20 +209,25 @@
 }
 
 .embroidery__input.field__input {
-    border-bottom: 1px solid black;
+    border: 1px solid rgba(0, 0, 0, 0.15);
     min-height: 40px;
     height: 40px;
     max-height: 40px;
+    padding: 0px 8px !important;
 }
 
 .embroidery__input.field__input:hover,
 .embroidery__input.field__input:focus {
-    box-shadow: 0px 0.5px 0px 0px rgba(0, 0, 0, 1) !important;
+    border: 1px solid rgba(0, 0, 0, 1);
 }
 
 .embroidery__input::placeholder {
     opacity: 1;
     color: rgba(var(--color-foreground), 0.5);
+}
+
+.embroidery__thread-field {
+    margin-top: 24px;
 }
 
 .embroidery__thread-field .select::before,
@@ -155,10 +237,10 @@
 
 .embroidery__thread {
     border-radius: 0;
-    border-bottom: 1px solid black;
+    border: 1px solid rgba(0, 0, 0, 0.15);
     font-size: 1.6rem;
     color: black;
-    padding: 0px !important;
+    padding: 0px 8px !important;
     min-height: 40px;
     height: 40px;
     max-height: 40px;
@@ -166,7 +248,8 @@
 
 .embroidery__thread:hover,
 .embroidery__thread:focus {
-    box-shadow: 0px 0.5px 0px 0px rgba(0, 0, 0, 1) !important;
+    border: 1px solid rgba(0, 0, 0, 1);
+    box-shadow: none !important;
 }
 
 .embroidery__count {
@@ -174,16 +257,19 @@
     font-size: 1.2rem;
     text-align: right;
     font-family: "PragmaticaCondensed";
+    height: 22px;
 
-    margin-top: -4px;
-    margin-bottom: -8px;
+    margin-top: 0px;
+    margin-bottom: -22px;
+    color: rgba(0, 0, 0, 0.5);
 }
 
 .embroidery__actions {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
-    margin-top: 16px;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-top: 40px;
 }
 
 .embroidery__open {
@@ -210,7 +296,23 @@
 
 @media screen and (max-width: 480px) {
     .embroidery__modal {
-        width: 94vw;
+        width: 100vw;
+        margin-top: auto;
+        margin-bottom: 0px;
+        border-radius: 16px;
+        border-bottom-right-radius: 0px;
+        border-bottom-left-radius: 0px;
+        height: fit-content;
+    }
+
+    .embroidery__modal[open] {
+        animation: embroiderySlideInUp 300ms ease;
+    }
+
+    .embroidery__modal-inner {
+        padding: 24px;
+        padding-top: 32px;
+        padding-bottom: 32px;
     }
 
     .embroidery__actions {
@@ -219,5 +321,10 @@
 
     .embroidery__actions .button {
         width: 100%;
+    }
+
+    .embroidery__title {
+        font-size: 21px !important;
+        line-height: 26px !important;
     }
 }

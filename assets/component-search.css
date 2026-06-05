@@ -1,11 +1,12 @@
 .search__input.field__input {
-  padding-right: 9.8rem;
-  border-bottom: 1px solid black;
+  padding: 0px 10px !important;
+  border: 1px solid rgba(0,0,0,.2);
 }
 .search__input.field__input:hover,
 .search__input.field__input:focus {
   padding-right: 9.8rem;
-  box-shadow: 0px 0.5px 0px 0px rgba(0, 0, 0, 1) !important;
+  border: 1px solid rgba(0,0,0,1);
+
 }
 
 .search__button {
@@ -66,6 +67,8 @@
   stroke: black;
   stroke-width: 0.5px;
 }
+
+
 
 .reset__button .icon.icon-close {
   height: 1.8rem;

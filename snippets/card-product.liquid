@@ -254,19 +254,21 @@
           </div>
         </div>
         <div class="card_swatch_wrapper">
+          {%- assign has_color_option = false -%}
           {% for option in card_product.options_with_values %}
             {% if option.name == 'Color' %}
+              {%- assign has_color_option = true -%}
               {%- for value in option.values limit: 3 -%}
                 {% if forloop.index == 4 %}
                   <span>+</span>
                   {% break %}
                 {% endif %}
                 {% if value.variant.metafields.custom.hex_color != blank %}
-                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5); background-color:{{ value.variant.metafields.custom.hex_color }}">
+            <div style="height: 21px; width: 16px; border-radius:7px;  background-color:{{ card_product.metafields.custom.display_color }}">
                     &nbsp;
                   </div>
                 {% elsif value %}
-                  <div style="height: 14px; width: 14px; border-radius:100px; box-shadow: 0px 0px 0.5px 0px rgba(0,0,0,.5);  background-color:{{ value | split: ' ' | last | handle }}">
+            <div style="height: 21px; width: 16px; border-radius:7px;  background-color:{{ card_product.metafields.custom.display_color }}">
                     &nbsp;
                   </div>
                 {% endif %}
@@ -283,6 +285,14 @@
               {% endif %}
             {% endif %}
           {% endfor %}
+          {%- comment -%} Fallback: no color variants, use product-level metafield {%- endcomment -%}
+          {%- comment -%}
+          {% if has_color_option == false and card_product.metafields.custom.display_color != blank %}
+            <div style="height: 21px; width: 16px; border-radius:7px;  background-color:{{ card_product.metafields.custom.display_color }}">
+              &nbsp;
+            </div>
+          {% endif %}
+          {%- endcomment -%}
         </div>
         {% comment %}
         <div class="card__badge {{ settings.badge_position }}">
@@ -316,7 +326,7 @@
     </div>
   </a>
 
- 
+
   {%- if card_product.variants.size > 1 or qty_rules -%}
     <modal-opener data-modal="#QuickAdd-{{ card_product.id }}" data-card-quickadd>
       <button

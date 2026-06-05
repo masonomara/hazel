@@ -13,6 +13,24 @@
   assign no_value = settings.embroidery_no_value | default: 'No'
   assign thread_option_name = settings.embroidery_thread_option_name | default: 'Embroidery Thread color'
   assign fee_money = fee | times: 100 | money
+  assign color_option_name = 'Color'
+  assign display_color = product.metafields.custom.display_color
+  assign color_pairs = ''
+  for option in product.options_with_values
+    if option.name == color_option_name
+      for value in option.values
+        assign hex = value.variant.metafields.custom.hex_color
+        if hex != blank
+          assign pair = '"' | append: value | append: '":"' | append: hex | append: '"'
+          if color_pairs == ''
+            assign color_pairs = pair
+          else
+            assign color_pairs = color_pairs | append: ',' | append: pair
+          endif
+        endif
+      endfor
+    endif
+  endfor
 -%}
 {{ 'embroidery.css' | asset_url | stylesheet_tag }}
 <div
@@ -24,7 +42,10 @@
   data-yes-value="{{ yes_value | escape }}"
   data-no-value="{{ no_value | escape }}"
   data-thread-option-name="{{ thread_option_name | escape }}"
+  data-color-option-name="{{ color_option_name | escape }}"
+  data-display-color="{{ display_color | escape }}"
 >
+  <script type="application/json" data-embroidery-colors>{ {{ color_pairs }} }</script>
   <input
     type="hidden"
     name="properties[Embroidery]"
@@ -50,7 +71,11 @@
 
   <dialog class="embroidery__modal" data-embroidery-modal aria-label="Add custom embroidery">
     <div class="embroidery__modal-inner">
-      <h2 class="embroidery__title">Add Custom embroidery <span class="embroidery__fee">(+{{ fee_money }})</span></h2>
+      <h2 class="embroidery__title">Custom embroidery</h2>
+       <span class="embroidery__fee">+{{ fee_money }}</span>
+      <div class="embroidery__preview" data-embroidery-preview>
+        <span class="embroidery__preview-text" data-embroidery-preview-text></span>
+      </div>
       <label for="embroidery-input-{{ section_id }}" class="embroidery__label">Your text</label>
       <div class="field">
         <input
@@ -75,8 +100,10 @@
         </div>
       </div>
       <div class="embroidery__actions">
+
         <button type="button" class="button button--secondary embroidery__action" data-embroidery-remove>Remove</button>
-        <button type="button" class="button embroidery__action embroidery__save" data-embroidery-save>Save</button>
+                      <button type="button" class="button embroidery__action embroidery__save" data-embroidery-save>Save</button>
+
       </div>
     </div>
   </dialog>

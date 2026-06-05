@@ -25,7 +25,6 @@
 
 .price__regular .price-item--regular {
     margin-right: 0;
-    font-weight: 300;
 }
 
 .product__info-container .price__container * {
@@ -36,6 +35,7 @@
     .product__info-container .price__container * {
         font-size: 19px;
         line-height: 19px;
+        font-weight: 300;
         font-family: PragmaticaCondensed;
         text-transform: uppercase;
     }

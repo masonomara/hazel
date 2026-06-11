@@ -32,7 +32,7 @@ Mark field-data rows "field". Lab INP is not real INP.
 
 ## C. Accessibility detail
 
-| Page / Device | axe critical | axe serious | Keyboard pass | Focus visible | Screen reader pass | Contrast fails | Alt coverage |
+| Page / Device | WAVE errors | WAVE contrast errors | Keyboard pass | Focus visible | Screen reader pass | Contrast fails | Alt coverage |
 |---|---|---|---|---|---|---|---|
 | Home — mobile |  |  |  |  |  |  |  |
 | Home — desktop |  |  |  |  |  |  |  |

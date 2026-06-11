@@ -12,7 +12,7 @@ The one thing this agent optimizes for:
 
 Each priority is written as **baseline → target** so "done" is not a matter of opinion. If there is no number, there is no priority — find the number first.
 
-1. **Accessibility:** baseline TBD → Lighthouse Accessibility 100 and 0 critical/serious axe issues on all three core pages.
+1. **Accessibility:** baseline TBD → Lighthouse Accessibility 100 and 0 WAVE errors/contrast errors on all three core pages.
 2. **SEO & discoverability:** baseline TBD → Lighthouse SEO ≥ 95 and the full SEO checklist passing on all three core pages.
 3. **Performance:** baseline TBD → Lighthouse Performance ≥ 90 and Core Web Vitals all "good" on all three core pages, mobile + desktop.
 

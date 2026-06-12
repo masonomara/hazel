@@ -451,14 +451,7 @@
                   show_pickup_availability: true
                 -%}
 
-                <p class="product__installment caption">
-                  4 payments of
-                  <span id="installment-price-{{ section.id }}">
-                    {{- product.selected_or_first_available_variant.price | divided_by: 4 | money -}}
-                  </span>
-                  with
-                  {% render 'icon-shop-pay' %}
-                </p>
+
                 <div class="product__tax caption rte">
                   {%- if cart.taxes_included -%}
                     {{ 'products.product.include_taxes' | t }}

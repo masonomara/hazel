@@ -1,1 +1,113 @@
-{"name":"t:sections.header.name","type":"header","sections":{"announcement-bar":{"type":"announcement-bar","blocks":{"announcement_frrEKz":{"type":"announcement","disabled":true,"settings":{"text":"","link":""}},"announcement-bar-0":{"type":"announcement","settings":{"text":"Hazel Policies","link":"shopify:\/\/policies\/refund-policy"}}},"block_order":["announcement_frrEKz","announcement-bar-0"],"custom_css":[".utility-bar--bottom-border {border-bottom-color: #000; font-family: \"PragmaticaCondensed\"; font-weight: 400;}",".utility-bar--bottom-border * {font-family: \"PragmaticaCondensed\"; font-weight: 400; text-transform: uppercase; font-size: 16px;}"],"settings":{"color_scheme":"scheme-1","show_line_separator":true,"show_social":false,"auto_rotate":false,"change_slides_speed":5,"enable_country_selector":false,"enable_language_selector":false}},"header":{"type":"header","settings":{"logo_position":"top-center","menu":"navbar-menu","menu_type_desktop":"dropdown","sticky_header_type":"always","show_line_separator":true,"color_scheme":"scheme-1","menu_color_scheme":"scheme-1","enable_country_selector":false,"enable_language_selector":false,"mobile_logo_position":"center","margin_bottom":0,"padding_top":12,"padding_bottom":12,"megamenu_title_one":"","link_one_a":"","text_one_a":"","link_one_b":"","text_one_b":"","megamenu_title_two":"Hazel Brand","link_two_a":"shopify:\/\/products\/the-hzl-mini-cherub-crewneck","image_two_a":"shopify:\/\/shop_images\/EEDF9D80-03CC-4EC3-80B8-CEEAA5B8EBB0.jpg","text_two_a":"The MINI Cherub Crew","link_two_b":"shopify:\/\/products\/the-tamis-garden-robe","image_two_b":"shopify:\/\/shop_images\/4C7237C1-615B-4510-AF6C-AA83F765A64E.jpg","text_two_b":"Tami’s Garden Robe","megamenu_title_three":"Clothing","link_three_a":"shopify:\/\/products\/the-bold-move-cardigan","image_three_a":"shopify:\/\/shop_images\/010DF558-C33E-4C73-BB0C-04B9D82AD298.jpg","text_three_a":"The Bold Move Sweater","link_three_b":"shopify:\/\/products\/the-lover-shorts","image_three_b":"shopify:\/\/shop_images\/83229ABC-9700-4031-9644-F96F7AA6B111.jpg","text_three_b":"The Lover Shorts","megamenu_title_four":"","link_four_a":"","text_four_a":"","link_four_b":"","text_four_b":"","megamenu_title_five":"","link_five_a":"","text_five_a":"","link_five_b":"","text_five_b":"","megamenu_title_six":"","link_six_a":"","text_six_a":"","link_six_b":"","text_six_b":"","megamenu_title_seven":"","link_seven_a":"","text_seven_a":"","link_seven_b":"","text_seven_b":""}}},"order":["announcement-bar","header"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "t:sections.header.name",
+  "type": "header",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "announcement_frrEKz": {
+          "type": "announcement",
+          "disabled": true,
+          "settings": {
+            "text": "",
+            "link": ""
+          }
+        },
+        "announcement-bar-0": {
+          "type": "announcement",
+          "settings": {
+            "text": "Hazel Policies",
+            "link": "shopify://policies/refund-policy"
+          }
+        }
+      },
+      "block_order": [
+        "announcement_frrEKz",
+        "announcement-bar-0"
+      ],
+      "custom_css": [
+        ".utility-bar--bottom-border {border-bottom-color: #000; font-family: \"PragmaticaCondensed\"; font-weight: 400;}",
+        ".utility-bar--bottom-border * {font-family: \"PragmaticaCondensed\"; font-weight: 400; text-transform: uppercase; font-size: 16px;}"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "show_line_separator": true,
+        "show_social": false,
+        "auto_rotate": false,
+        "change_slides_speed": 5,
+        "enable_country_selector": false,
+        "enable_language_selector": false
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "logo_position": "top-center",
+        "menu": "navbar-menu",
+        "menu_type_desktop": "dropdown",
+        "sticky_header_type": "always",
+        "show_line_separator": true,
+        "color_scheme": "scheme-1",
+        "menu_color_scheme": "scheme-1",
+        "enable_country_selector": false,
+        "enable_language_selector": false,
+        "mobile_logo_position": "center",
+        "margin_bottom": 0,
+        "padding_top": 12,
+        "padding_bottom": 12,
+        "megamenu_title_one": "",
+        "link_one_a": "",
+        "text_one_a": "",
+        "link_one_b": "",
+        "text_one_b": "",
+        "megamenu_title_two": "Hazel Brand",
+        "link_two_a": "shopify://products/the-hzl-polly-mockneck",
+        "image_two_a": "shopify://shop_images/E30CD770-43BC-4641-A2C6-C7814C095A9F.jpg",
+        "text_two_a": "The Polly Mock",
+        "link_two_b": "shopify://products/the-hzl-sally-mockneck",
+        "image_two_b": "shopify://shop_images/352970BB-1DB1-4496-87D4-64EB4A53F015.jpg",
+        "text_two_b": "The Sally Mock",
+        "megamenu_title_three": "Clothing",
+        "link_three_a": "shopify://products/the-sunday-brunch-mockneck-dusty-blue",
+        "image_three_a": "shopify://shop_images/CE14AA70-1751-4BDF-AE75-AA8FC29ED1CE.jpg",
+        "text_three_a": "The Dusty Blue Mock",
+        "link_three_b": "shopify://products/the-hzl-university-long-sleeve",
+        "image_three_b": "shopify://shop_images/B161B4B4-FACB-41EC-B8AD-91CF6375EACE.jpg",
+        "text_three_b": "The Locals Tee",
+        "megamenu_title_four": "",
+        "link_four_a": "",
+        "text_four_a": "",
+        "link_four_b": "",
+        "text_four_b": "",
+        "megamenu_title_five": "",
+        "link_five_a": "",
+        "text_five_a": "",
+        "link_five_b": "",
+        "text_five_b": "",
+        "megamenu_title_six": "",
+        "link_six_a": "",
+        "text_six_a": "",
+        "link_six_b": "",
+        "text_six_b": "",
+        "megamenu_title_seven": "",
+        "link_seven_a": "",
+        "text_seven_a": "",
+        "link_seven_b": "",
+        "text_seven_b": ""
+      }
+    }
+  },
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
+}

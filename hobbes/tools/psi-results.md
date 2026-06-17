@@ -1,4 +1,4 @@
-# PSI results — 2026-06-17 13:42
+# PSI results — 2026-06-17 13:54
 
 Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field
 are pulled and labelled SEPARATELY so they can't be mixed. Transcribe these
@@ -10,7 +10,7 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile ⚠ | 62 | 97 | 92 | 92 |
+| Home — mobile ⚠ | 62 ✗cut | 97 | 92 | 92 |
 | Home — desktop ⚠ | 69 | 97 | 92 | 92 |
 | Collection — mobile ⚠ | 65 | 93 | 96 | 92 |
 | Collection — desktop ⚠ | 96 | 94 | 96 | 92 |
@@ -21,7 +21,7 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile ⚠ | 13.21 | 0.087 | 2.11 | 0.01 | 272 | 5.26 |
+| Home — mobile ⚠ | 13.21 ✗cut | 0.087 | 2.11 | 0.01 | 272 | 5.26 |
 | Home — desktop ⚠ | 1.93 | 0.009 | 0.61 | 0.01 | 482 | 1.35 |
 | Collection — mobile ⚠ | 5.48 | 0.002 | 2.56 | 0.01 | 368 | 4.18 |
 | Collection — desktop ⚠ | 1.29 | 0.014 | 0.63 | 0.01 | 67 | 1.11 |
@@ -49,4 +49,6 @@ Failing axe audits straight from PSI's a11y category — `color-contrast` is the
 | Product — mobile ⚠ | 3 | button-name×5, image-alt×2, frame-title×1 |
 | Product — desktop ⚠ | 3 | button-name×5, image-alt×2, frame-title×1 |
 
-> ⚠ Incomplete lab runs — PSI hit its time limit, numbers unreliable, re-measure with `--fresh`: Home mobile, Home desktop, Collection mobile, Collection desktop, Product mobile, Product desktop
+> ⚠ **Never reached network-idle** — PSI cut these runs at its time limit. The early metrics still hold: FCP, CLS, TBT, Speed Index and the Accessibility / SEO / Best-Practices scores are trustworthy. Re-measuring won't help (local Lighthouse hits the same wall) — **investigate why the page never idles** (a background script keeping the network busy). Rows: Home mobile, Home desktop, Collection mobile, Collection desktop, Product mobile, Product desktop
+
+> ✗cut **LCP truncated** — on these rows the LCP, and its LCP-weighted Performance score, is the cutoff value rather than a real paint. Treat both as unknown, not as the page's number: Home mobile

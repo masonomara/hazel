@@ -40,6 +40,14 @@ CATEGORIES = ["performance", "accessibility", "best-practices", "seo"]
 # queue-wait + run-time and blows the timeout — that was the real stall. Cap
 # concurrency low so calls actually run when sent, not after a queue.
 MAX_CONCURRENCY = 3
+# A runWarning containing this = PSI cut the run at its time limit (the page never
+# reached network-idle). It does NOT void the run: metrics that resolved before
+# the cut (FCP, CLS, TBT, Speed Index, and the a11y/SEO/Best-Practices scores) are
+# trustworthy. Only a truncated LCP and the LCP-weighted Performance score are not.
+INCOMPLETE_SIG = "loaded too slowly"
+# An LCP this large on an incomplete run is the cutoff artifact, not a real paint
+# (real-but-slow LCPs sit well under this; our truncated ones were 13–21s).
+LCP_ARTIFACT_S = 8.0
 CACHE_DIR = Path(__file__).resolve().parent  # *.psi.json here is git-ignored
 
 
@@ -171,20 +179,31 @@ def main():
 
     rows_a, rows_lab, rows_field, rows_c = [], [], [], []
     failed = [j for j, d in results.items() if d is None]
-    warned = []  # lab runs PSI itself flagged as incomplete — numbers unreliable
+    idle_fail = []   # runs PSI cut at the time limit (page never reached idle)
+    lcp_cut = []     # runs where the LCP itself is a cutoff artifact, not a real paint
     for label, url in urls:
         for strat in ("mobile", "desktop"):
             lh = (results[(label, url, strat)] or {}).get("lighthouseResult", {})
-            warn = lh.get("runWarnings") or []
-            mark = " ⚠" if warn else ""  # e.g. "page loaded too slowly to finish"
-            if warn:
-                warned.append((label, strat))
+            warns = lh.get("runWarnings") or []
+            incomplete = any(INCOMPLETE_SIG in w.lower() for w in warns)  # classify, don't lump
+            mark = " ⚠" if incomplete else ""   # ⚠ = page never idled (kept, on purpose)
+            if incomplete:
+                idle_fail.append((label, strat))
+
+            lcp = audit_s(lh, "largest-contentful-paint")
+            # Trust an early LCP even on an incomplete run; flag ONLY a truncated one.
+            cut = incomplete and isinstance(lcp, (int, float)) and lcp > LCP_ARTIFACT_S
+            if cut:
+                lcp_cut.append((label, strat))
+            lcp_cell = f"{lcp} ✗cut" if cut else f"{lcp}"
+            perf_cell = f"{score(lh,'performance')} ✗cut" if cut else f"{score(lh,'performance')}"
+
             rows_a.append(
-                f"| {label} — {strat}{mark} | {score(lh,'performance')} | "
+                f"| {label} — {strat}{mark} | {perf_cell} | "
                 f"{score(lh,'accessibility')} | {score(lh,'best-practices')} | {score(lh,'seo')} |"
             )
             rows_lab.append(
-                f"| {label} — {strat}{mark} | {audit_s(lh,'largest-contentful-paint')} | "
+                f"| {label} — {strat}{mark} | {lcp_cell} | "
                 f"{audit_raw(lh,'cumulative-layout-shift')} | {audit_s(lh,'first-contentful-paint')} | "
                 f"{audit_s(lh,'server-response-time')} | {audit_ms(lh,'total-blocking-time')} | "
                 f"{audit_s(lh,'speed-index')} |"
@@ -249,9 +268,20 @@ def main():
         "|---|---|---|",
         *rows_c,
     ]
-    if warned:
-        L += ["", "> ⚠ Incomplete lab runs — PSI hit its time limit, numbers unreliable, "
-              "re-measure with `--fresh`: " + ", ".join(f"{l} {s}" for l, s in warned)]
+    if idle_fail:
+        L += ["",
+              "> ⚠ **Never reached network-idle** — PSI cut these runs at its time "
+              "limit. The early metrics still hold: FCP, CLS, TBT, Speed Index and the "
+              "Accessibility / SEO / Best-Practices scores are trustworthy. "
+              "Re-measuring won't help (local Lighthouse hits the same wall) — "
+              "**investigate why the page never idles** (a background script keeping "
+              "the network busy). Rows: " + ", ".join(f"{l} {s}" for l, s in idle_fail)]
+    if lcp_cut:
+        L += ["",
+              "> ✗cut **LCP truncated** — on these rows the LCP, and its LCP-weighted "
+              "Performance score, is the cutoff value rather than a real paint. Treat "
+              "both as unknown, not as the page's number: "
+              + ", ".join(f"{l} {s}" for l, s in lcp_cut)]
     if failed:
         L += ["", "> ✗ Failed calls (cells show — above): "
               + ", ".join(f"{lbl} {strat}" for lbl, _u, strat in failed)]

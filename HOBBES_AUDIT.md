@@ -34,16 +34,10 @@ The single biggest issue: **by the system's own rule ("a page is never green on 
 
 It exists in **no commit, ever** (checked full git history of `hobbes/scorecards/`). The findings got scattered into `MISSION.md` priorities instead — but without the fix and the S/M/L effort sizing the format requires. So the most actionable artifact in the method is missing, and three docs point at a file that isn't there.
 
-### 2.2 ~~Filename convention is broken three ways, and the live references dangle~~ ✅ RESOLVED 2026-06-17
-The scorecard filename had churned across commits — `2026-06-11.md`, then `baseline-2026-06-11.md`, then the current `2026-06-11-baseline.md` — against two more conventions in the spec (`BASELINE.md` said `baseline-YYYY-MM-DD.md`, `TEMPLATE.md` said `baseline-YYYY-MM.md`). Three shapes, none agreeing, and `MISSION.md`/`CHANGELOG.md` pointed at a dead `baseline-2026-06-11.md` path.
-
-**Decision (Mason, 2026-06-17): one convention — `[date]-[name].md`, date first (ISO 8601), so listings sort chronologically.** The current file already matches. Propagated: `BASELINE.md` (copy-to line + both deliverable paths → `YYYY-MM-DD-baseline.md` / `YYYY-MM-DD-findings.md`), `TEMPLATE.md` copy-to line, and the live refs in `MISSION.md` (×2) + `CHANGELOG.md` now point to `2026-06-11-baseline.md` / `2026-06-11-findings.md`.
-**Still open:** the `2026-06-11-findings.md` reference is now correctly *named* but the file still doesn't exist — creating it is tracked under **2.1**.
-
-### 2.3 The lab-vs-field rule the guide preaches was not honored in the scorecard
+### 2.2 The lab-vs-field rule the guide preaches was not honored in the scorecard
 `BASELINE.md` warns three times that lab INP is fake and field rows must be marked "field" (lines 10, 35, 66); `TEMPLATE.md:22` says "Mark field-data rows 'field'." In the filled scorecard (section B, lines 24–31) **not one row is marked "field."** The numbers are a silent mix of lab Lighthouse and CrUX field data with no way to tell which is which — the exact failure the methodology exists to prevent.
 
-### 2.4 The scorecard contradicts MISSION and CHANGELOG on the headline Home number
+### 2.3 The scorecard contradicts MISSION and CHANGELOG on the headline Home number
 This is the one that should bother you most, because it means a number is wrong and we don't know which:
 
 | Metric | Scorecard B | MISSION.md:17 | CHANGELOG.md:26 |
@@ -53,16 +47,16 @@ This is the one that should bother you most, because it means a number is wrong 
 
 The two narrative docs agree on 7.5s; the scorecard says 1.6s. A Home-mobile **Performance score of 64** (scorecard line 13) with **Speed Index 5.2s** is consistent with a ~7.5s LCP, **not** 1.6s. So the scorecard's 1.6s is almost certainly a field number dropped into a lab row — which is 2.3 biting us in practice. One of these artifacts is lying about the headline performance problem.
 
-### 2.5 Manual accessibility pass (Scorecard C) — entirely blank
+### 2.4 Manual accessibility pass (Scorecard C) — entirely blank
 Every cell for Keyboard / Focus visible / Screen reader / Contrast fails / Alt coverage is empty across all six rows (scorecard lines 37–42). Group C (`BASELINE.md` lines 46–54) was not done. This is partially **acknowledged** (`MISSION.md:15,40` say the manual pass is "not yet run"), so it's a known hole, not a hidden one. But the consequence is hard: per `BASELINE.md:68`, **no page can be marked "pass"** until those rows are signed. The baseline is, by its own definition, provisional.
 
-### 2.6 SEO checklist (Scorecard D) — entirely blank, yet the work was clearly done
+### 2.5 SEO checklist (Scorecard D) — entirely blank, yet the work was clearly done
 Section D is empty in every cell (scorecard lines 46–55). But `MISSION.md:16` lists **specific** SEO findings: missing meta descriptions on Home + Collection, brand-only Home title, no Home `og:image`, Product `image-alt`, Home double-`h1`. So Group D **was performed** — the results just never got transcribed into the scorecard. The data lives in the narrative and not in the structured artifact. Same disease as 2.1: findings gathered, deliverable not filled.
 
-### 2.7 Best Practices is measured but orphaned
+### 2.6 Best Practices is measured but orphaned
 Scorecard A records Best Practices for all six combos (97/92/96/96/92/**76**). The target is ≥95 (`BASELINE.md:78`). Three combos **fail**, and Product desktop at **76** is the **worst single score on the entire board** — yet there is **no MISSION priority** tracking Best Practices. The three priorities are a11y, SEO, performance; Best Practices fell through the floor. The worst number we have is the one nobody owns.
 
-### 2.8 CHANGELOG numbers don't match the scorecard
+### 2.7 CHANGELOG numbers don't match the scorecard
 The CHANGELOG entry (008) summarizes numbers that disagree with the file it cites:
 
 | Claim | CHANGELOG.md:26 | Scorecard A/B |
@@ -74,15 +68,7 @@ The CHANGELOG entry (008) summarizes numbers that disagree with the file it cite
 
 The Best Practices range is the egregious one: CHANGELOG says 69–73, scorecard says 76–97 — they don't even overlap. A changelog that misreports its own scorecard is worse than no summary.
 
-### 2.9 "Run by: Tigertail" — wrong field, not a ghost *(resolved 2026-06-17)*
-Original finding assumed "Tigertail" was a pre-rename ghost. **Correction:** Tigertail is Mason's agency, which owns Hobbes — a real entity, not a leftover. The actual issue was narrower: "Run by" is the **human operator** field (per `CONTEXT.md` and `BASELINE.md`, Mason drives the cycle), so an agency name alone undersold it. Fixed to "Run by: Mason (Tigertail)." The identity chain — Mason (creator/operator) · Hobbes (agent) · Tigertail (agency, owns Hobbes) — is now recorded in `CONTEXT.md`.
-
-### 2.10 ~~Shop Pay removal shipped but the process didn't follow it~~ ✅ RESOLVED 2026-06-17
-Git's most recent commit is "removed shop pay" (16f4e69) — the sunset decision was **executed** without a paper trail.
-- ~~There is **no CHANGELOG entry** for the removal.~~ → Logged as **CHANGELOG 009 cleanup/shop-pay-removal** (2026-06-12), with the RESULTS rationale tied to feature 006.
-- ~~`MISSION.md` still files Express pay under "**Sunset candidates**" as if pending.~~ → "Sunset candidates" now reads `*(none active)*`; the removal record lives in CHANGELOG 009. Docs match git.
-
-### 2.11 Minor drift
+### 2.8 Minor drift
 - **Template placeholder left in:** scorecard line 1 still reads "# Baseline scorecard — YYYY-MM" — the header was never filled.
 - **TTFB column added off-spec:** scorecard B carries a TTFB column (line 24); `TEMPLATE.md` has none, and `BASELINE.md:104` reserves TTFB for **non-Shopify** sites ("server response time that Shopify hides"). Hazel is Shopify. Harmless extra data, but it's drift — the template and the filled file have diverged.
 - **WAVE contradiction:** `MISSION.md:15,40` say the "WAVE scan … not yet run," but Scorecard C has WAVE error counts filled (59 / 134 / 13). Either WAVE ran and MISSION is stale, or those counts came from somewhere else (likely Lighthouse/axe, since the "axe failures" in MISSION are axe-core rule names that Lighthouse surfaces). Reconcile which tool actually produced those numbers.
@@ -136,22 +122,11 @@ These are my judgments, separated from the cited facts above:
 
 Concrete, in rough priority order. I have **not** made any of these yet — they're proposals.
 
-1. ~~**Pick one filename convention and propagate it.**~~ ✅ **DONE 2026-06-17** — chose `[date]-[name].md` (date first, ISO 8601). No rename needed (current file already matched); fixed `BASELINE.md`, `TEMPLATE.md`, and the dead paths in `MISSION.md` + `CHANGELOG.md`. See 2.2.
-2. **Create `findings-2026-06-11.md`** in the required *page → failing → fix → effort* format, back-filling from the findings already in MISSION — or, if findings-in-MISSION is the real workflow, **delete the findings-doc requirement** from `BASELINE.md` and the three references. Don't keep pointing at a file that isn't there.
-3. **Add a "Source" column (lab/field) to Scorecard B in `TEMPLATE.md`**, or split it into a lab table and a field table. Make the rule impossible to skip. Then fix the Home LCP row (2.4) once you know which number is real.
-4. **Add Best Practices to MISSION priorities** (or write one line in MISSION saying why it's deliberately excluded). Product desktop 76 needs an owner.
-5. **Make the scorecard the source of truth.** MISSION and CHANGELOG should quote numbers *from* the filled scorecard, never carry their own. Reconcile the 2.8 mismatches by deciding the scorecard wins.
-6. ~~**Fix identity:** scorecard "Run by: Tigertail" → "Mason."~~ ✅ **DONE 2026-06-17** — set to "Mason (Tigertail)"; identity chain (Mason creator/operator · Hobbes agent · Tigertail agency) recorded in `CONTEXT.md`. Tigertail confirmed as the agency, not a stale name.
-7. ~~**Log the Shop Pay removal as CHANGELOG 009** and resolve Express pay in MISSION.~~ ✅ **DONE 2026-06-17** — see 2.10.
-8. **Decide TTFB:** either add the column to `TEMPLATE.md` for everyone, or drop it from the Shopify scorecard per `BASELINE.md:104`. Template and filled file should not diverge.
-9. **Reconcile the WAVE contradiction** (2.11): state plainly whether WAVE ran and what produced the 59/134/13 counts.
-10. **Define a "minimum viable baseline"** in `BASELINE.md`: which cells are mandatory for a baseline to count vs. which can be marked "deferred — human pass pending," so a partial cycle is labeled honestly and a page is never silently treated as passing.
-11. **Resolve the PSI dependency:** get an API key, or rewrite `BASELINE.md` to make local Lighthouse the standard for this client and drop the "PSI is primary" framing that didn't survive contact.
-
----
-
-## 7. Evidence index
-
-- System files: `CLAUDE.md`; `hobbes/MISSION.md`; `hobbes/DEVELOPMENT.md`; `hobbes/CONTEXT.md`; `hobbes/CHANGELOG.md`; `hobbes/BASELINE.md`.
-- Baseline: `hobbes/scorecards/2026-06-11-baseline.md`; `hobbes/scorecards/TEMPLATE.md`.
-- Git: filename churn across commits 57cda40 → 65b6cab → 5e790ea; "name change" 65b6cab; "removed shop pay" 16f4e69; no `findings-*` file in any commit.
+1. **Create `findings-2026-06-11.md`** in the required *page → failing → fix → effort* format, back-filling from the findings already in MISSION — or, if findings-in-MISSION is the real workflow, **delete the findings-doc requirement** from `BASELINE.md` and the three references. Don't keep pointing at a file that isn't there.
+2. **Add a "Source" column (lab/field) to Scorecard B in `TEMPLATE.md`**, or split it into a lab table and a field table. Make the rule impossible to skip. Then fix the Home LCP row (2.4) once you know which number is real.
+3. **Add Best Practices to MISSION priorities** (or write one line in MISSION saying why it's deliberately excluded). Product desktop 76 needs an owner.
+4. **Make the scorecard the source of truth.** MISSION and CHANGELOG should quote numbers *from* the filled scorecard, never carry their own. Reconcile the 2.8 mismatches by deciding the scorecard wins.
+5. **Decide TTFB:** either add the column to `TEMPLATE.md` for everyone, or drop it from the Shopify scorecard per `BASELINE.md:104`. Template and filled file should not diverge.
+6. **Reconcile the WAVE contradiction** (2.11): state plainly whether WAVE ran and what produced the 59/134/13 counts.
+7. **Define a "minimum viable baseline"** in `BASELINE.md`: which cells are mandatory for a baseline to count vs. which can be marked "deferred — human pass pending," so a partial cycle is labeled honestly and a page is never silently treated as passing.
+8. **Resolve the PSI dependency:** get an API key, or rewrite `BASELINE.md` to make local Lighthouse the standard for this client and drop the "PSI is primary" framing that didn't survive contact.

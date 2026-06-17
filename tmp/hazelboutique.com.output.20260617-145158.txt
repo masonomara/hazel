@@ -1,0 +1,610 @@
+
+ ####                ####             #####        
+ ####                ####           #######        
+ ####      ###       ####         #########        
+ ####     ######     ####       ###### ####        
+  ######################       #####   ####        
+    #######    #######       #####     ####        
+    #######    #######         #       ####        
+  ######################               ####        
+ ####     ######     ####              ####        
+ ####       ##       ####              ####        
+ ####                ####       ################## 
+ ####                ####       ################## 
+
+==================================================
+# SiteOne Crawler, v2.3.0.20260330               #
+# Author: jan.reges@siteone.cz                   #
+==================================================
+
+
+Detected terminal width 138 < 140 chars - compact mode activated.
+
+URL                                                            | Status | Type     | Time   | Size   | Cache  | Access.  | Best pr.
+------------------------------------------------------------------------------------------------------------------------------------
+ /                                                              | 200    | HTML     | 831 ms | 400 kB | etag   | 1/3/2    | 2/1/6   
+ /cdn/shopifycloud/shop-js/modules/v2/loade…cart-sync.en.esm.js | 200    | JS       | 43 ms  | 884 B  | 30 min |          |         
+ /cdn/shop/files/email.png?v=1717448722&width=3200              | 200    | Image    | 274 ms | 621 B  | 12 mon |          |         
+ /cdn/shop/files/email.png?v=1717448722&width=150               | 200    | Image    | 406 ms | 621 B  | 12 mon |          |         
+ /cdn/shop/t/51/assets/component-list-menu.…6815722871779286625 | 200    | CSS      | 70 ms  | 518 B  | 12 mon |          |         
+ /cdn/shop/t/51/assets/details-modal.js?v=3…4613130181771610528 | 200    | JS       | 62 ms  | 2 kB   | 12 mon |          |         
+ /cdn/shop/files/A0241D12-845A-4198-812D-80…781225714&width=533 | 200    | Image    | 76 ms  | 31 kB  | 12 mon |          |         
+ /cdn/shop/files/tape.png?v=1717448725&width=2750               | 200    | Image    | 386 ms | 1 kB   | 12 mon |          |         
+ /cdn/shop/files/A0A8C32C-CEAC-4D84-B603-3C…781235184&width=165 | 200    | Image    | 804 ms | 16 kB  | 12 mon |          |         
+ /cdn/shop/files/E30CD770-43BC-4641-A2C6-C7…780627337&width=300 | 200    | Image    | 110 ms | 36 kB  | 12 mon |          |         
+ /cdn/shop/t/51/assets/cart-drawer.js?v=114…1083643431771610528 | 200    | JS       | 67 ms  | 3 kB   | 12 mon |          |         
+ /cdn/shop/t/51/compiled_assets/scripts.js?…6032179081771610579 | 200    | JS       | 58 ms  | 4 kB   | 12 mon |          |         
+ /cdn/shop/files/Frame_64.svg?v=1714054119&width=400            | 200    | Image    | 48 ms  | 24 kB  | 12 mon |          |         
+ /cdn/shop/files/book_7a4ecc6f-29c5-49f0-96…17448720&width=1750 | 200    | Image    | 408 ms | 725 B  | 12 mon |          |         
+ /cart                                                          | 200    | HTML     | 765 ms | 254 kB | etag   | 1/3/2    | 2/1/6   
+
+Skipped URLs Summary
+--------------------
+
+Reason             | Domain              | Unique URLs
+--------------------------------------------------------
+Not allowed host   | cdn.shopify.com     | 30         
+Not allowed host   | www.tiktok.com      | 1          
+Not allowed host   | www.instagram.com   | 1          
+Not allowed host   | shop.app            | 1          
+Not allowed host   | opnsrcsolutions.com | 1          
+
+
+Skipped URLs
+------------
+
+Reason             | Skipped URL                                                  | Source              | Found at URL                                                
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Not allowed host   | https://cdn.shopify.com/extensions/019ed…-251/assets/main.js | <script src>        | /                                                           
+Not allowed host   | https://cdn.shopify.com/extensions/019ed…51/assets/style.css | <link href>         | /                                                           
+Not allowed host   | https://cdn.shopify.com/extensions/019ed…-consent-manager.js | <script src>        | /                                                           
+Not allowed host   | https://cdn.shopify.com/extensions/019ed…76/assets/loader.js | <script src>        | /                                                           
+Not allowed host   | https://cdn.shopify.com/extensions/019ed…sets/shopify_v2.css | <link href>         | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…on.otf?v=1780691138 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…ar.ttf?v=1718904023 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1718904382 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…r.woff?v=1718904399 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…pt.ttf?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…t.woff?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…ok.ttf?v=1713569841 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…k.woff?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…ok.ttf?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…k.woff?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…ht.ttf?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569841 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…t.woff?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…ht.ttf?v=1713569841 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…t.woff?v=1713569841 | css url()           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….png?v=1713629.5093 | <img src>           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…go.png?v=1713641093 | <img src>           | /cart                                                       
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3….png?v=1713629.5093 | <img src>           | /                                                           
+Not allowed host   | https://cdn.shopify.com/s/files/1/0051/3…go.png?v=1713641093 | <img src>           | /cart                                                       
+Not allowed host   | https://cdn.shopify.com/shopifycloud/sto…_trials-c173577b.js | <script src>        | /                                                           
+Not allowed host   | https://cdn.shopify.com/storefront/standard-actions.js       | <script src>        | /                                                           
+Not allowed host   | https://opnsrcsolutions.com/                                 | <a href>            | /                                                           
+Not allowed host   | https://shop.app/checkouts/internal/prel…&shop_id=5132648566 | <script src>        | /                                                           
+Not allowed host   | https://www.instagram.com/hazel_boutique                     | <a href>            | /                                                           
+Not allowed host   | https://www.tiktok.com/@hazelboutique                        | <a href>            | /                                                           
+
+
+External URLs
+-------------
+
+External URL                                                 | Pages | Found on URL (max 5)                                        
+-------------------------------------------------------------------------------------------------------------------------------------
+https://cdn.shopify.com/extensions/019ed…-251/assets/main.js | 1     | /                                                           
+https://cdn.shopify.com/extensions/019ed…51/assets/style.css | 1     | /                                                           
+https://cdn.shopify.com/extensions/019ed…-consent-manager.js | 1     | /                                                           
+https://cdn.shopify.com/extensions/019ed…76/assets/loader.js | 1     | /                                                           
+https://cdn.shopify.com/extensions/019ed…sets/shopify_v2.css | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…on.otf?v=1780691138 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…ar.ttf?v=1718904023 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1718904382 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…r.woff?v=1718904399 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…pt.ttf?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…t.woff?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…ok.ttf?v=1713569841 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…k.woff?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…ok.ttf?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…k.woff?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…ht.ttf?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569841 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…t.woff?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…ht.ttf?v=1713569841 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3….woff2?v=1713569840 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…t.woff?v=1713569841 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3….png?v=1713629.5093 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…go.png?v=1713641093 | 1     | /cart                                                       
+https://cdn.shopify.com/s/files/1/0051/3….png?v=1713629.5093 | 1     | /                                                           
+https://cdn.shopify.com/s/files/1/0051/3…go.png?v=1713641093 | 1     | /cart                                                       
+https://cdn.shopify.com/shopifycloud/sto…_trials-c173577b.js | 1     | /                                                           
+https://cdn.shopify.com/storefront/standard-actions.js       | 1     | /                                                           
+https://opnsrcsolutions.com/                                 | 1     | /                                                           
+https://shop.app/checkouts/internal/prel…&shop_id=5132648566 | 1     | /                                                           
+https://www.instagram.com/hazel_boutique                     | 1     | /                                                           
+https://www.tiktok.com/@hazelboutique                        | 1     | /                                                           
+
+
+Redirected URLs
+---------------
+
+No redirects found.
+
+
+404 URLs
+--------
+
+No 404 URLs found.
+
+
+SSL/TLS info
+------------
+
+Info                   | Text                                                                                                        
+---------------------------------------------------------------------------------------------------------------------------------------
+Issuer                 | C = US, O = Let's Encrypt, CN = YE1                                                                         
+Subject                | CN = hazelboutique.com                                                                                      
+Valid from             | May 29 22:00:03 2026 GMT (VALID already 18.9 day(s))                                                        
+Valid to               | Aug 27 22:00:02 2026 GMT (VALID still for 71.1 day(s))                                                      
+Supported protocols    | TLSv1.3                                                                                                     
+RAW certificate output | sh: timeout: command not found
+                                                                             
+RAW protocols output   | === ssl2 ===
+sh: timeout: command not found
+
+=== ssl3 ===
+sh: timeout:…===
+sh: timeout: command not found   
+
+
+TOP fastest URLs
+----------------
+
+Time   | Status | Fast URL                                                                                                              
+------------------------------------------------------------------------------------------------------------------------------------------
+765 ms | 200    | /cart                                                                                                                 
+831 ms | 200    | /                                                                                                                     
+
+
+TOP slowest URLs
+----------------
+
+Time   | Status | Slow URL                                                                                                         
+-------------------------------------------------------------------------------------------------------------------------------------
+831 ms | 200    | /                                                                                                                
+765 ms | 200    | /cart                                                                                                            
+
+
+SEO metadata
+------------
+
+This table contains large data and shows max 10 rows. To see them all, use output to HTML using `--output-html-report=tmp/myreport.html`.
+
+URL                                                | Indexing             | Title        | H1           | Description  | Keywords    
+---------------------------------------------------------------------------------------------------------------------------------------
+/                                                  | Allowed              | Hazel Bo…que | Missing H1   |              |             
+/cart                                              | Allowed              | Your Sho…que | Your cart    |              |             
+
+
+OpenGraph metadata
+------------------
+
+This table contains large data and shows max 10 rows. To see them all, use output to HTML using `--output-html-report=tmp/myreport.html`.
+
+URL                                                | OG Title   | OG Description | OG Image           | Twitter Title | Twitter Description | Twitter Image     
+--------------------------------------------------------------------------------------------------------------------------------------------------
+/                                                  | Hazel B…ue | Hazel B…ue |                    | Hazel B…ue | Hazel B…ue |                   
+/cart                                              | Your Sh…rt | Hazel B…ue |                    | Your Sh…rt | Hazel B…ue |                   
+
+
+Heading structure
+-----------------
+
+This table contains large data and shows max 10 rows. To see them all, use output to HTML using `--output-html-report=tmp/myreport.html`.
+
+Heading structure                                                                    | Count | Errors | URL                           
+----------------------------------------------------------------------------------------------------------------------------------------
+<h2> Your cart is empty <h3> Fine Jewelry <h3> Fine Jewe…Guide <h2> Recently viewed  | 62    | 9      | /                             
+<h2> Your cart is empty <h3> Fine Jewelry <h3> Fine Jewe…total <h2> Recently viewed  | 12    | 9      | /cart                         
+
+
+HTTP headers
+------------
+
+Header                            | Occurs | Unique | Values preview                                   | Min value  | Max value 
+----------------------------------------------------------------------------------------------------------------------------------
+Accept-Ranges                     | 13     | 1      | bytes                                            |            |           
+Access-Control-Allow-Origin       | 13     | 1      | *                                                |            |           
+Access-Control-Expose-Headers     | 12     | 1      | *                                                |            |           
+Age                               | 8      | -      | [ignored generic values]                         | 14.6 min(s) | 49.8 day(s)
+Alt-Svc                           | 15     | 1      | h3=":443"; ma=86400                              |            |           
+Cache-Control                     | 13     | 2      | public, max-age=31557600 (12) /…-revalidate (1)  |            |           
+Cf-Cache-Status                   | 15     | 3      | HIT (9) / MISS (4) / DYNAMIC (2)                 |            |           
+Cf-Ray                            | 15     | -      | [ignored generic values]                         |            |           
+Content-Language                  | 2      | 1      | en-US                                            |            |           
+Content-Length                    | 7      | -      | [ignored generic values]                         | 621 B      | 36 kB     
+Content-Security-Policy           | 3      | 2      | block-all-mixed-content; frame-a…csp-reports (1) |            |           
+Content-Type                      | 15     | 7      | text/javascript (4) / image/png…age/svg+xml (1)  |            |           
+Date                              | 15     | -      | [ignored generic values]                         | 2026-06-17 | 2026-06-17
+Etag                              | 2      | -      | [ignored generic values]                         |            |           
+Last-Modified                     | 13     | -      | [ignored generic values]                         | 2026-06-17 | 2026-06-17
+Link                              | 7      | 6      | [see values below]                               |            |           
+Nel                               | 15     | 1      | {"report_to":"cf-nel","success_f…ax_age":604800} |            |           
+Powered-By                        | 2      | 1      | Shopify                                          |            |           
+Report-To                         | 15     | 15     | [see values below]                               |            |           
+Reporting-Endpoints               | 1      | 1      | csp-reports="https://security-re…b-f5a658701a14" |            |           
+Server                            | 15     | 1      | cloudflare                                       |            |           
+Server-Timing                     | 15     | 15     | [see values below]                               |            |           
+Set-Cookie                        | 2      | -      | [ignored generic values]                         |            |           
+Shopify-Complexity-Score          | 2      | 2      | 1950 (1) / 2340 (1)                              |            |           
+Shopify-Complexity-Score-V2       | 2      | 2      | 234 (1) / 195 (1)                                |            |           
+Source-Length                     | 8      | 7      | 573 (2) / 1017 (1) / 24105 (1) /…1) / 821345 (1) |            |           
+Source-Type                       | 8      | 3      | image/png (4) / image/jpeg (3) /…age/svg+xml (1) |            |           
+Strict-Transport-Security         | 15     | 2      | max-age=63072000; includeSubDoma…age=7889238 (2) |            |           
+Timing-Allow-Origin               | 13     | 1      | *                                                |            |           
+Vary                              | 15     | 3      | Accept (7) / Accept-Encoding (6)…pt-encoding (2) |            |           
+X-Content-Type-Options            | 15     | 1      | nosniff                                          |            |           
+X-Dc                              | 15     | 3      | gcp-us-east1,gcp-us-east1 (7) /…cp-us-east1 (2)  |            |           
+X-Download-Options                | 15     | 1      | noopen                                           |            |           
+X-Frame-Options                   | 2      | 1      | DENY                                             |            |           
+X-Permitted-Cross-Domain-Policies | 15     | 1      | none                                             |            |           
+X-Request-Id                      | 15     | 15     | [see values below]                               |            |           
+X-Shopify-Perf-Experiments        | 2      | 1      | f_liquid_vm_bytecode_optimizations_v2/v6         |            |           
+X-XSS-Protection                  | 15     | 1      | 1; mode=block                                    |            |           
+
+
+HTTP header values
+------------------
+
+Header                            | Occurs | Value                                                                             
+---------------------------------------------------------------------------------------------------------------------------------
+Accept-Ranges                     | 13     | bytes                                                                             
+Access-Control-Allow-Origin       | 13     | *                                                                                 
+Access-Control-Expose-Headers     | 12     | *                                                                                 
+Alt-Svc                           | 15     | h3=":443"; ma=86400                                                               
+Cache-Control                     | 12     | public, max-age=31557600                                                          
+Cache-Control                     | 1      | public, max-age=1800, must-revalidate                                             
+Cf-Cache-Status                   | 9      | HIT                                                                               
+Cf-Cache-Status                   | 4      | MISS                                                                              
+Cf-Cache-Status                   | 2      | DYNAMIC                                                                           
+Content-Language                  | 2      | en-US                                                                             
+Content-Security-Policy           | 2      | block-all-mixed-content; frame-ancestors 'none'; upgrade-insecure-requests;       
+Content-Security-Policy           | 1      | sandbox; report-to csp-reports                                                    
+Content-Type                      | 4      | text/javascript                                                                   
+Content-Type                      | 4      | image/png                                                                         
+Content-Type                      | 2      | image/webp                                                                        
+Content-Type                      | 2      | text/html; charset=utf-8                                                          
+Content-Type                      | 1      | text/css                                                                          
+Content-Type                      | 1      | image/avif                                                                        
+Content-Type                      | 1      | image/svg+xml                                                                     
+Link                              | 2      | <https://cdn.shopify.com>; rel="preconnect", <https://c…width: 400px) 50vw, 200px"
+Link                              | 1      | <https://cdn.shopify.com/s/files/1/0051/3264/8566/t/51/…modal.js>; rel="canonical"
+Link                              | 1      | <https://cdn.shopify.com/s/files/1/0051/3264/8566/t/51/…ripts.js>; rel="canonical"
+Link                              | 1      | <https://cdn.shopify.com/shopifycloud/shop-js/modules/v…n.esm.js>; rel="canonical"
+Link                              | 1      | <https://cdn.shopify.com/s/files/1/0051/3264/8566/t/51/…rawer.js>; rel="canonical"
+Link                              | 1      | <https://cdn.shopify.com/s/files/1/0051/3264/8566/t/51/…menu.css>; rel="canonical"
+Nel                               | 15     | {"report_to":"cf-nel","success_fraction":0.01,"max_age":604800}                   
+Powered-By                        | 2      | Shopify                                                                           
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…KmT5%2F0%2BClQnjg9zDlS"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…sIhc3voAPDj9u0CNAoNgZs"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…T2IuI3IsXbDQyt5YrUWHbN"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…80iJu8HB2WCBlqafxDr8bV"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…KarrDy%2Fu0%2BIOxgPB5Z"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…M%2BWsNXy%2Fsbj5xNu7E5"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…g3glaI27ay7UVa1sjGwWyR"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…0BTu8XCv6zDE%2FYOCIeQd"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…8feJaYBxSjbt%2BFIyxqyn"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…876x8mooBZU6Ln5wJDTZ68"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…HI%2Fltj%2BJExbD2tlsML"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…nawPDFN%2BH1c2qg%3D%3D"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…f5uob0ex3oAZcI9Ob2QqM7"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…ovmrAEadYa2OzNmF%2FczG"}]}
+Report-To                         | 1      | {"group":"cf-nel","max_age":604800,"endpoints":[{"url":…45NTcLxzuERhbftusrTpXR"}]}
+Reporting-Endpoints               | 1      | csp-reports="https://security-reports.shopifysvc.com/re…1a-4369-a32b-f5a658701a14"
+Server                            | 15     | cloudflare                                                                        
+Server-Timing                     | 1      | imagery;dur=515.829, imageryFetch;dur=71.010, imageryPr…s;dur=443.295;desc="image"
+Server-Timing                     | 1      | imagery;dur=86.809, imageryFetch;dur=84.829                                       
+Server-Timing                     | 1      | imagery;dur=97.474, imageryFetch;dur=79.351, imageryPro…ss;dur=16.892;desc="image"
+Server-Timing                     | 1      | processing;dur=238;desc="gc:16", db;dur=72, render;dur=…ime;dur=10.006, earlyhints
+Server-Timing                     | 1      | imagery;dur=92.872, imageryFetch;dur=88.828                                       
+Server-Timing                     | 1      | imagery;dur=165.262, imageryFetch;dur=129.306, imageryP…ess;dur=0.070;desc="image"
+Server-Timing                     | 1      | imagery;dur=99.522, imageryFetch;dur=95.356                                       
+Server-Timing                     | 1      | imagery;dur=166.649, imageryFetch;dur=72.694, imageryPr…ss;dur=92.852;desc="image"
+Server-Timing                     | 1      | processing;dur=203, db;dur=87, render;dur=71, asn;desc=…compressionTime;dur=7.788 
+Server-Timing                     | 1      | imagery;dur=33.246, imageryFetch;dur=31.617                                       
+Server-Timing                     | 1      | imagery;dur=178.052, imageryFetch;dur=124.805, imageryP…ss;dur=51.956;desc="image"
+Server-Timing                     | 1      | imagery;dur=246.109, imageryFetch;dur=108.396, imageryP…s;dur=135.540;desc="image"
+Server-Timing                     | 1      | imagery;dur=112.052, imageryFetch;dur=103.959                                     
+Server-Timing                     | 1      | imagery;dur=79.924, imageryFetch;dur=57.943, imageryPro…ss;dur=21.436;desc="image"
+Server-Timing                     | 1      | imagery;dur=116.079, imageryFetch;dur=84.697, imageryPr…ss;dur=30.555;desc="image"
+Shopify-Complexity-Score          | 1      | 1950                                                                              
+Shopify-Complexity-Score          | 1      | 2340                                                                              
+Shopify-Complexity-Score-V2       | 1      | 234                                                                               
+Shopify-Complexity-Score-V2       | 1      | 195                                                                               
+Source-Length                     | 2      | 573                                                                               
+Source-Length                     | 1      | 1017                                                                              
+Source-Length                     | 1      | 24105                                                                             
+Source-Length                     | 1      | 677                                                                               
+Source-Length                     | 1      | 1262629                                                                           
+Source-Length                     | 1      | 866350                                                                            
+Source-Length                     | 1      | 821345                                                                            
+Source-Type                       | 4      | image/png                                                                         
+Source-Type                       | 3      | image/jpeg                                                                        
+Source-Type                       | 1      | image/svg+xml                                                                     
+Strict-Transport-Security         | 13     | max-age=63072000; includeSubDomains; preload                                      
+Strict-Transport-Security         | 2      | max-age=7889238                                                                   
+Timing-Allow-Origin               | 13     | *                                                                                 
+Vary                              | 7      | Accept                                                                            
+Vary                              | 6      | Accept-Encoding                                                                   
+Vary                              | 2      | Accept, accept-encoding                                                           
+X-Content-Type-Options            | 15     | nosniff                                                                           
+X-Dc                              | 7      | gcp-us-east1,gcp-us-east1                                                         
+X-Dc                              | 6      | gcp-us-central1,gcp-us-central1                                                   
+X-Dc                              | 2      | gcp-us-east1,gcp-us-east1,gcp-us-east1                                            
+X-Download-Options                | 15     | noopen                                                                            
+X-Frame-Options                   | 2      | DENY                                                                              
+X-Permitted-Cross-Domain-Policies | 15     | none                                                                              
+X-Request-Id                      | 1      | 2954a8a8-e9f4-4594-bea7-7d83e62e9fc2-1781091412                                   
+X-Request-Id                      | 1      | 3a1ab814-6946-4684-8c90-6646aaa224b2-1781725922                                   
+X-Request-Id                      | 1      | fdf1f654-3b9e-43d6-b43d-8e1d2cd14deb-1781725923                                   
+X-Request-Id                      | 1      | b02ccaeb-0c56-4421-8119-d12c9c26fc41-1781725922                                   
+X-Request-Id                      | 1      | a6f3202d-a319-4890-a603-75886f891f48-1777422161                                   
+X-Request-Id                      | 1      | 97998d7e-2eb9-4ad7-89fc-3086c3280d4a-1781080237                                   
+X-Request-Id                      | 1      | 33b5c79f-6f70-4cb3-88a3-8a1056eda488-1779292226                                   
+X-Request-Id                      | 1      | ffbdb30a-4b31-429e-8bd4-0f3c6372ba3d-1780665682                                   
+X-Request-Id                      | 1      | a9e94710-2ab3-4dbe-afd7-774efaa18973-1779292226                                   
+X-Request-Id                      | 1      | fbbcf2b8-a88a-4c87-b6fb-7a6cef457162-1781725923                                   
+X-Request-Id                      | 1      | 6ce9aa8f-c72c-498a-9ade-36d10bee10b6-1781725044                                   
+X-Request-Id                      | 1      | b97fb865-bc23-44c0-a8d0-b762ead7e135-1781272981                                   
+X-Request-Id                      | 1      | 5ed1afec-4016-44aa-bd40-c99df61f4e40-1781725921                                   
+X-Request-Id                      | 1      | ff3a18dc-cf8b-4195-9a0b-ea5d1d301d38-1781725922                                   
+X-Request-Id                      | 1      | 88778652-53d6-4c2b-8892-b1dc2bd216bb-1781549254                                   
+X-Shopify-Perf-Experiments        | 2      | f_liquid_vm_bytecode_optimizations_v2/v6                                          
+X-XSS-Protection                  | 15     | 1; mode=block                                                                     
+
+
+HTTP Caching by content type (only from crawlable domains)
+----------------------------------------------------------
+
+Content type | Cache type   | URLs  | AVG lifetime | MIN lifetime | MAX lifetime
+----------------------------------------------------------------------------
+Image        | Cache-Control + Last-Modified | 8     | 12 mon     | 12 mon     | 12 mon    
+JS           | Cache-Control + Last-Modified | 4     | 9 mon      | 30 min     | 12 mon    
+HTML         | ETag         | 2     | -          | -          | -         
+CSS          | Cache-Control + Last-Modified | 1     | 12 mon     | 12 mon     | 12 mon    
+
+
+HTTP Caching by domain
+----------------------
+
+Domain               | Cache type   | URLs  | AVG lifetime | MIN lifetime | MAX lifetime
+------------------------------------------------------------------------------------
+hazelboutique.com    | Cache-Control + Last-Modified | 13    | 11 mon     | 30 min     | 12 mon    
+hazelboutique.com    | ETag         | 2     | -          | -          | -         
+
+
+HTTP Caching by domain and content type
+---------------------------------------
+
+Domain               | Content type | Cache type   | URLs  | AVG lifetime | MIN lifetime | MAX lifetime
+---------------------------------------------------------------------------------------------------
+hazelboutique.com    | Image        | Cache-Control + Last-Modified | 8     | 12 mon     | 12 mon     | 12 mon    
+hazelboutique.com    | JS           | Cache-Control + Last-Modified | 4     | 9 mon      | 30 min     | 12 mon    
+hazelboutique.com    | HTML         | ETag         | 2     | -          | -          | -         
+hazelboutique.com    | CSS          | Cache-Control + Last-Modified | 1     | 12 mon     | 12 mon     | 12 mon    
+
+
+TOP non-unique titles
+---------------------
+
+Nothing to report.
+
+
+TOP non-unique descriptions
+---------------------------
+
+Count | Description                                                                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------
+2     |                                                                                                                                 
+
+
+Best practices
+--------------
+
+Analysis name                            | OK    | Notice | Warning | Critical
+--------------------------------------------------------------------------------
+Invalid inline SVGs                      | 7     | 0      | 9       | 0       
+Large inline SVGs (> 5120 B)             | 16    | 0      | 0       | 0       
+Heading structure                        | 2     | 0      | 2       | 2       
+Non-clickable phone numbers              | 1     | 0      | 0       | 0       
+DOM depth (> 30)                         | 2     | 0      | 0       | 0       
+Duplicate inline SVGs (> 5 and > 1024 B) | 16    | 0      | 0       | 0       
+Title uniqueness (> 10%)                 | 2     | 0      | 0       | 0       
+Description uniqueness (> 10%)           | 0     | 0      | 1       | 0       
+Brotli support                           | 0     | 0      | 2       | 0       
+WebP support                             | 2     | 0      | 0       | 0       
+AVIF support                             | 1     | 0      | 0       | 0       
+
+
+Accessibility
+-------------
+
+Analysis name                | OK    | Notice | Warning | Critical
+--------------------------------------------------------------------
+Missing image alt attributes | 26    | 0      | 23      | 0       
+Missing html lang attribute  | 1     | 0      | 0       | 0       
+Missing roles                | 0     | 0      | 3       | 0       
+Missing aria labels          | 42    | 0      | 12      | 2       
+
+
+Source domains
+--------------
+
+Domain            | Totals        | HTML         | Image        | JS           | CSS        
+----------------------------------------------------------------------------------------------
+hazelboutique.com | 15/773kB/4.4s | 2/653kB/1.6s | 8/109kB/2.5s | 4/10kB/232ms | 1/518B/70ms
+
+
+Content types
+-------------
+
+Content type | URLs  | Total size | Total time | Avg time | Status 20x
+------------------------------------------------------------------------
+Image        | 8     | 109 kB     | 2.5 s      | 314 ms   | 8         
+JS           | 4     | 10 kB      | 232 ms     | 58 ms    | 4         
+HTML         | 2     | 653 kB     | 1.6 s      | 798 ms   | 2         
+CSS          | 1     | 518 B      | 70 ms      | 70 ms    | 1         
+
+
+Content types (MIME types)
+--------------------------
+
+Content type               | URLs  | Total size | Total time | Avg time | Status 20x
+--------------------------------------------------------------------------------------
+image/png                  | 4     | 3 kB       | 1.5 s      | 369 ms   | 4         
+text/javascript            | 4     | 10 kB      | 232 ms     | 58 ms    | 4         
+text/html; charset=utf-8   | 2     | 653 kB     | 1.6 s      | 798 ms   | 2         
+image/webp                 | 2     | 67 kB      | 186 ms     | 93 ms    | 2         
+text/css                   | 1     | 518 B      | 70 ms      | 70 ms    | 1         
+image/svg+xml              | 1     | 24 kB      | 48 ms      | 48 ms    | 1         
+image/avif                 | 1     | 16 kB      | 804 ms     | 804 ms   | 1         
+
+
+DNS info
+--------
+
+DNS resolving tree                                                    
+------------------------------------------------------------------------
+hazelboutique.com                                                     
+  IPv4: 23.227.38.70                                                  
+                                                                      
+DNS server: 192.168.1.1                                               
+
+
+Security
+--------
+
+Header                     | OK    | Notice | Warning | Critical | Recommendation                                                      
+-----------------------------------------------------------------------------------------------------------------------------------------
+Referrer-Policy            | 0     | 0      | 2       | 0        | Referrer-Policy header is not set. It controls…privacy and security.
+Feature-Policy             | 0     | 0      | 2       | 0        | Feature-Policy header is not set. It allows en…ssions-Policy is set.
+Permissions-Policy         | 0     | 0      | 2       | 0        | Permissions-Policy header is not set. It allow…eatures for security.
+X-XSS-Protection           | 0     | 2      | 0       | 0        | X-XSS-Protection header is set but deprecated.…urity-Policy instead.
+Server                     | 0     | 2      | 0       | 0        | Server header is set to 'cloudflare'. It is be…al used technologies.
+Strict-Transport-Security  | 2     | 0      | 0       | 0        |                                                                     
+X-Frame-Options            | 2     | 0      | 0       | 0        |                                                                     
+X-Content-Type-Options     | 2     | 0      | 0       | 0        |                                                                     
+Content-Security-Policy    | 2     | 0      | 0       | 0        |                                                                     
+Set-Cookie                 | 2     | 0      | 0       | 0        |                                                                     
+
+
+Analysis stats
+--------------
+
+Class::method                                        | Exec time | Exec count
+-------------------------------------------------------------------------------
+SslTlsAnalyzer::getTLSandSSLCertificateInfo          | 240 ms    | 1         
+BestPracticeAnalyzer::checkNonClickablePhoneNumbers  | 9 ms      | 2         
+BestPracticeAnalyzer::checkHeadingStructure          | 9 ms      | 2         
+AccessibilityAnalyzer::checkMissingLabels            | 8 ms      | 2         
+BestPracticeAnalyzer::checkMaxDOMDepth               | 7 ms      | 2         
+AccessibilityAnalyzer::checkMissingAriaLabels        | 7 ms      | 2         
+AccessibilityAnalyzer::checkMissingRoles             | 6 ms      | 2         
+AccessibilityAnalyzer::checkMissingLang              | 5 ms      | 2         
+BestPracticeAnalyzer::checkInlineSvg                 | 2 ms      | 2         
+BestPracticeAnalyzer::checkMissingQuotesOnAttributes | 0 ms      | 2         
+AccessibilityAnalyzer::checkImageAltAttributes       | 0 ms      | 2         
+SecurityAnalyzer::checkHeaders                       | 0 ms      | 2         
+SecurityAnalyzer::checkHtmlSecurity                  | 0 ms      | 2         
+SeoAndOpenGraphAnalyzer::analyzeHeadings             | 0 ms      | 1         
+SeoAndOpenGraphAnalyzer::analyzeSeo                  | 0 ms      | 1         
+SeoAndOpenGraphAnalyzer::analyzeOpenGraph            | 0 ms      | 1         
+BestPracticeAnalyzer::checkTitleUniqueness           | 0 ms      | 1         
+BestPracticeAnalyzer::checkMetaDescriptionUniqueness | 0 ms      | 1         
+BestPracticeAnalyzer::checkWebpSupport               | 0 ms      | 1         
+BestPracticeAnalyzer::checkBrotliSupport             | 0 ms      | 1         
+BestPracticeAnalyzer::checkAvifSupport               | 0 ms      | 1         
+
+
+Content processor stats
+-----------------------
+
+Class::method                                            | Exec time | Exec count
+-----------------------------------------------------------------------------------
+HtmlProcessor::findUrls                                  | 12 ms     | 2         
+NextJsProcessor::applyContentChangesBeforeUrlParsing     | 2 ms      | 7         
+JavaScriptProcessor::findUrls                            | 1 ms      | 6         
+CssProcessor::findUrls                                   | 1 ms      | 3         
+AstroProcessor::findUrls                                 | 0 ms      | 6         
+NextJsProcessor::findUrls                                | 0 ms      | 7         
+AstroProcessor::applyContentChangesBeforeUrlParsing      | 0 ms      | 6         
+SvelteProcessor::applyContentChangesBeforeUrlParsing     | 0 ms      | 2         
+JavaScriptProcessor::applyContentChangesBeforeUrlParsing | 0 ms      | 6         
+SvelteProcessor::findUrls                                | 0 ms      | 2         
+CssProcessor::applyContentChangesBeforeUrlParsing        | 0 ms      | 3         
+HtmlProcessor::applyContentChangesBeforeUrlParsing       | 0 ms      | 2         
+
+
+==========================================================================================================================================
+Total execution time 5.5 s using 3 workers and 2048M memory limit
+Total of 15 visited URLs with a total size of 773 kB and power of 2 reqs/s with download speed 141 kB/s
+Response times: AVG 294 ms MIN 44 ms MAX 831 ms TOTAL 4.4 s
+==========================================================================================================================================
+
+╔═════════════════════════════════════════════════════════════════╗
+║                      WEBSITE QUALITY SCORE                      ║
+╠═════════════════════════════════════════════════════════════════╣
+║  Overall         ███████████████████████░░   9.0/10  Excellent  ║
+╠═════════════════════════════════════════════════════════════════╣
+║  Performance     █████████████████████████  10.0/10  Excellent  ║
+║  SEO             ███████████████████████░░   9.3/10  Excellent  ║
+║  Security        ██████████████████████░░░   8.8/10  Good       ║
+║  Accessibility   ████████████████████░░░░░   7.9/10  Good       ║
+║  Best Practices  ███████████████████████░░   9.1/10  Excellent  ║
+╚═════════════════════════════════════════════════════════════════╝
+
+Summary
+-------
+
+⛔ Skipped URLs - 34 skipped URLs found.
+⛔ SSL/TLS protocol TLSv1.2 is not supported. Ask your admin/provider to add TLSv1.2 support.
+⛔ 2 page(s) with multiple <h1> headings.
+⚠️ The description '' exceeds the allowed 10% duplicity. 100% of pages have this same description.
+⚠️ 2 page(s) do not support Brotli compression.
+⚠️ 2 page(s) with invalid inline SVGs.
+⚠️ 2 page(s) with skipped heading levels.
+⚠️ 2 page(s) without image alt attributes.
+⚠️ 2 page(s) without aria labels.
+⚠️ 2 page(s) without role attributes.
+⚠️ Security - 6 pages(s) with warning(s).
+⏩ Loaded robots.txt for domain 'hazelboutique.com': status code 200, size 4 kB and took 772 ms.
+⏩ External URLs - 34 external URL(s) found.
+⏩ HTTP headers - found 38 unique headers.
+⏩ DNS IPv6: domain hazelboutique.com does not support IPv6 (DNS server: 192.168.1.1).
+✅ Redirects - no redirects found.
+✅ 404 OK - all pages exists, no non-existent pages found.
+✅ SSL/TLS certificate is valid until Aug 27 22:00:02 2026 GMT. Issued by C = US, O = Let's Encrypt, CN = YE1. Subject is CN = hazelboutique.com.
+✅ SSL/TLS certificate issued by 'C = US, O = Let's Encrypt, CN = YE1'.
+✅ Performance OK - all non-media URLs are faster than 3 seconds.
+✅ All 2 unique title(s) are within the allowed 10% duplicity. Highest duplicity title has 50%.
+✅ 2 WebP image(s) found on the website.
+✅ 1 AVIF image(s) found on the website.
+✅ All pages have quoted attributes.
+✅ All pages have inline SVGs smaller than 5120 bytes.
+✅ All pages have inline SVGs with less than 5 duplicates.
+✅ All pages have <h1> heading.
+✅ All pages have DOM depth less than 30.
+✅ All pages have clickable (interactive) phone numbers.
+✅ All pages have valid HTML.
+✅ All pages have form labels.
+✅ All pages have lang attribute.
+✅ DNS IPv4 OK: domain hazelboutique.com resolved to 23.227.38.70 (DNS server: 192.168.1.1).
+📌 HTML report saved to '/Users/masonomara/Documents/hazel/tmp/hazelboutique.com.report.20260617-145158.html' and took 0 ms.
+

@@ -1,4 +1,4 @@
-# PSI results — 2026-06-17 14:14
+# PSI results — 2026-06-17 15:02
 
 Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field
 are pulled and labelled SEPARATELY so they can't be mixed. Transcribe these
@@ -11,23 +11,23 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile ⚠ | 62 ✗cut | 97 | 92 | 92 |
-| Home — desktop ⚠ | 69 | 97 | 92 | 92 |
-| Collection — mobile ⚠ | 65 | 93 | 96 | 92 |
-| Collection — desktop ⚠ | 96 | 94 | 96 | 92 |
-| Product — mobile ⚠ | 69 | 88 | 92 | 92 |
-| Product — desktop ⚠ | 88 | 88 | 77 | 92 |
+| Home — mobile ⚠ | 57 ✗cut | 97 | 92 | 92 |
+| Home — desktop ⚠ | 85 | 97 | 92 | 92 |
+| Collection — mobile ⚠ | 77 | 93 | 96 | 92 |
+| Collection — desktop ⚠ | 94 | 94 | 92 | 92 |
+| Product — mobile ⚠ | 52 ✗cut | 88 | 96 | 92 |
+| Product — desktop ⚠ | 93 | 88 | 73 | 92 |
 
 ## B. Lab metrics (LAB — not real INP; TBT is the lab stand-in)
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile ⚠ | 13.21 ✗cut | 0.087 | 2.11 | 0.01 | 272 | 5.26 |
-| Home — desktop ⚠ | 1.93 | 0.009 | 0.61 | 0.01 | 482 | 1.35 |
-| Collection — mobile ⚠ | 5.48 | 0.002 | 2.56 | 0.01 | 368 | 4.18 |
-| Collection — desktop ⚠ | 1.29 | 0.014 | 0.63 | 0.01 | 67 | 1.11 |
-| Product — mobile ⚠ | 5.48 | 0.0 | 1.97 | 0.01 | 343 | 3.95 |
-| Product — desktop ⚠ | 2.13 | 0.01 | 0.53 | 0.01 | 88 | 1.24 |
+| Home — mobile ⚠ | 12.91 ✗cut | 0.065 | 2.56 | 0.01 | 398 | 5.55 |
+| Home — desktop ⚠ | 2.51 | 0.014 | 0.61 | 0.01 | 71 | 1.42 |
+| Collection — mobile ⚠ | 4.73 | 0.0 | 1.97 | 0.01 | 200 | 3.77 |
+| Collection — desktop ⚠ | 1.27 | 0.014 | 0.63 | 0.01 | 129 | 1.14 |
+| Product — mobile ⚠ | 13.01 ✗cut | 0.0 | 3.55 | 0.01 | 432 | 6.04 |
+| Product — desktop ⚠ | 1.65 | 0.013 | 0.5 | 0.01 | 72 | 1.16 |
 
 ## C. Field data (CrUX 28-day, per page — the only real INP)
 
@@ -52,4 +52,4 @@ Failing axe audits straight from PSI's a11y category — `color-contrast` is the
 
 > ⚠ **Never reached network-idle** — PSI cut these runs at its time limit. The early metrics still hold: FCP, CLS, TBT, Speed Index and the Accessibility / SEO / Best-Practices scores are trustworthy. Re-measuring won't help (local Lighthouse hits the same wall) — **investigate why the page never idles** (a background script keeping the network busy). Rows: Home mobile, Home desktop, Collection mobile, Collection desktop, Product mobile, Product desktop
 
-> ✗cut **LCP truncated** — on these rows the LCP, and its LCP-weighted Performance score, is the cutoff value rather than a real paint. Treat both as unknown, not as the page's number: Home mobile
+> ✗cut **LCP truncated** — on these rows the LCP, and its LCP-weighted Performance score, is the cutoff value rather than a real paint. Treat both as unknown, not as the page's number: Home mobile, Product mobile

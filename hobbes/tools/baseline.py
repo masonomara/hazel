@@ -2,9 +2,10 @@
 """
 baseline.py — one-command MVP baseline runner.
 
-Runs psi.py (fills A–D) and seo.py (fills E), then stamps a dated scorecard
-from TEMPLATE.md with the header populated and sections A–E pasted in. Section
-F (manual a11y) is left blank for the human — that's the above-and-beyond pass.
+Runs psi.py (A–D), seo.py (E), and crawl.py (site-wide counts into E), then
+stamps a dated scorecard from TEMPLATE.md with the header populated and sections
+A–E pasted in. Section F (manual a11y) is left blank for the human — that's the
+above-and-beyond pass.
 
 A baseline should reflect the CURRENT site, so this fetches fresh by default.
 If a fresh run stalls partway, every successful call is still cached, so
@@ -13,6 +14,7 @@ If a fresh run stalls partway, every successful call is still cached, so
 USAGE:
   python3 hobbes/tools/baseline.py            # fresh capture (correct baseline)
   python3 hobbes/tools/baseline.py --resume   # reuse cache (recover a stalled run)
+  python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick rerun)
 
 Writes hobbes/scorecards/YYYY-MM-DD-baseline.md.
 """
@@ -63,9 +65,12 @@ def between(text, start, end):
 
 
 def main():
+    no_crawl = "--no-crawl" in sys.argv[1:]
     passthrough = [] if "--resume" in sys.argv[1:] else ["--fresh"]
     run_tool("psi.py", passthrough)
     run_tool("seo.py", passthrough)
+    if not no_crawl:
+        run_tool("crawl.py", passthrough)
 
     psi = (TOOLS / "psi-results.md").read_text()
     seo = (TOOLS / "seo-results.md").read_text()
@@ -76,6 +81,13 @@ def main():
     f = after(tmpl, "## F.")                        # manual a11y, blank for the human
     if not (abcd and e and f):
         sys.exit("✗ couldn't extract sections — check psi-results.md / seo-results.md / TEMPLATE.md")
+
+    # Site-wide crawl counts fold into Section E (the per-URL detail stays in
+    # crawl-results.md for findings). Just the count table, no competing header.
+    crawl_counts = ""
+    if not no_crawl:
+        crawl = (TOOLS / "crawl-results.md").read_text()
+        crawl_counts = between(crawl, "| Site-wide (crawl) | Count |", "## Detail")
 
     date = datetime.now().strftime("%Y-%m-%d")
     golden = " · ".join(f"[{lbl}]({u})" for lbl, u in DEFAULT_URLS)
@@ -88,12 +100,15 @@ def main():
         f"Golden path: {golden}",
         "",
         "**MVP baseline** — sections A–E captured automatically (`psi.py` → A–D, "
-        "`seo.py` → E). Section F (manual a11y) is the above-and-beyond pass, "
-        "blank pending human sign-off; a page is not certified fully pass until F is signed.",
+        "`seo.py` → E per-page, `crawl.py` → E site-wide counts). Section F (manual "
+        "a11y) is the above-and-beyond pass, blank pending human sign-off; a page is "
+        "not certified fully pass until F is signed.",
         "",
         abcd,
         "",
         e,
+        "",
+        crawl_counts,
         "",
         f,
     ]) + "\n"

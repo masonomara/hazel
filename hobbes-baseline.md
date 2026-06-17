@@ -76,8 +76,8 @@ The CHANGELOG entry (008) summarizes numbers that disagree with the file it cite
 
 The Best Practices range is the egregious one: CHANGELOG says 69–73, scorecard says 76–97 — they don't even overlap. A changelog that misreports its own scorecard is worse than no summary.
 
-### 2.9 Stale identity: "Run by: Tigertail"
-Scorecard line 3: "Run by: **Tigertail**." The agent is **Hobbes** (`CLAUDE.md` is emphatic: "refers to itself as Hobbes and nothing else"). "Tigertail" is a pre-rename ghost (git shows commit 65b6cab "name change"). Also, "Run by" is a **human** field — per `CONTEXT.md:20` and `BASELINE.md`, Mason drives the cycle. It should read "Mason," not any agent name.
+### 2.9 "Run by: Tigertail" — wrong field, not a ghost *(resolved 2026-06-17)*
+Original finding assumed "Tigertail" was a pre-rename ghost. **Correction:** Tigertail is Mason's agency, which owns Hobbes — a real entity, not a leftover. The actual issue was narrower: "Run by" is the **human operator** field (per `CONTEXT.md` and `BASELINE.md`, Mason drives the cycle), so an agency name alone undersold it. Fixed to "Run by: Mason (Tigertail)." The identity chain — Mason (creator/operator) · Hobbes (agent) · Tigertail (agency, owns Hobbes) — is now recorded in `CONTEXT.md`.
 
 ### 2.10 Shop Pay removal shipped but the process didn't follow it
 Git's most recent commit is "removed shop pay" (16f4e69) — the sunset decision from `MISSION.md:36` was **executed**. But:

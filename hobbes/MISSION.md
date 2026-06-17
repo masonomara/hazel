@@ -33,7 +33,7 @@ Each priority is written as **baseline → target** so "done" is not a matter of
 
 ## Sunset candidates
 
-- **Express pay** - Enabled Shop Pay express checkout on every page for one-tap checkout. RESULTS: After about 80,000 sessions the share of orders completed with Shop Pay declined from 9.5% to 6.7% and the reached checkout rate went down 15%. Small sample size but nothing suggest sthe SHop Pay buttons helped with checkout. 
+- *(none active)*
 
 ## Debt
 

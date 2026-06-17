@@ -17,7 +17,7 @@ Women of all ages looking for stylish and unique and trendy products. Primarily 
 ## 3. People and roles
 
 - **Jenna Campfield** — runs Hazel Boutique; owns brand, product, merchandising, and final sign-off; supplies assets (e.g. the May 2026 size charts).
-- **Mason O'Mara** — developer / operator. Builds, ships, and drives the baseline cycle; the only one who publishes the live theme.
+- **Mason O'Mara** — developer / operator, and creator of Hobbes. Builds, ships, and drives the baseline cycle; the only one who publishes the live theme. Works under **Tigertail**, his agency, which owns Hobbes (the agent running this engagement).
 - **Britni Adamo** — Hazel's second in command. competant and more responsibile for the day-to-day on the site.
 - **Brenda McWynn** — Social media manager for help regarding thing TikTok, Instagram, Facebook
 

@@ -1,0 +1,39 @@
+# PSI results — 2026-06-17 13:15
+
+Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field
+are pulled and labelled SEPARATELY so they can't be mixed. Transcribe these
+into the scorecard; the manual a11y/SEO rows are signed by a human.
+
+Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelboutique.com/collections/all-hazel-brand) · [Product](https://hazelboutique.com/products/the-capri-collection-baby-pink)
+
+## A. Lighthouse scores (LAB — PSI server)
+
+| Page / Device | Performance | Accessibility | Best Practices | SEO |
+|---|---|---|---|---|
+| Home — mobile ⚠ | 62 | 97 | 92 | 92 |
+| Home — desktop ⚠ | 69 | 97 | 92 | 92 |
+| Collection — mobile ⚠ | 65 | 93 | 96 | 92 |
+| Collection — desktop ⚠ | 96 | 94 | 96 | 92 |
+| Product — mobile ⚠ | 69 | 88 | 92 | 92 |
+| Product — desktop ⚠ | 88 | 88 | 77 | 92 |
+
+## B1. Lab metrics (LAB — not real INP; TBT is the lab stand-in)
+
+| Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
+|---|---|---|---|---|---|---|
+| Home — mobile ⚠ | 13.21 | 0.087 | 2.11 | 0.01 | 272 | 5.26 |
+| Home — desktop ⚠ | 1.93 | 0.009 | 0.61 | 0.01 | 482 | 1.35 |
+| Collection — mobile ⚠ | 5.48 | 0.002 | 2.56 | 0.01 | 368 | 4.18 |
+| Collection — desktop ⚠ | 1.29 | 0.014 | 0.63 | 0.01 | 67 | 1.11 |
+| Product — mobile ⚠ | 5.48 | 0.0 | 1.97 | 0.01 | 343 | 3.95 |
+| Product — desktop ⚠ | 2.13 | 0.01 | 0.53 | 0.01 | 88 | 1.24 |
+
+## B2. Field data (CrUX 28-day, per page — the only real INP)
+
+| Page | LCP (s) | INP (ms) | CLS | Overall |
+|---|---|---|---|---|
+| Home | 1.581 | 104.0 | 0.08 | FAST |
+| Collection | 0.783 | 78.0 | 0.01 | FAST |
+| Product — origin agg. | 1.013 | 96.0 | 0.0 | FAST |
+
+> ⚠ Incomplete lab runs — PSI hit its time limit, numbers unreliable, re-measure with `--fresh`: Home mobile, Home desktop, Collection mobile, Collection desktop, Product mobile, Product desktop

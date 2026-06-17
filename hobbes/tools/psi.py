@@ -7,7 +7,7 @@ WHY THIS EXISTS: run-1 numbers were transcribed by hand and field data got
 mixed into lab rows (see hobbes-baseline.md 2.3/2.4/2.8). This pulls lab and
 field SEPARATELY from the PSI API and labels them, so the mix can't happen.
 
-KEY: read from $PSI_API_KEY, else from hobbes/.psi-key (git-ignored).
+KEY: read from $PSI_API_KEY, else from hobbes/tools/.psi-key (alongside this script).
 USAGE:
   python3 hobbes/tools/psi.py                 # default golden path
   python3 hobbes/tools/psi.py URL [URL ...]   # custom URLs
@@ -52,12 +52,12 @@ def load_key():
     key = os.environ.get("PSI_API_KEY", "").strip()
     if key:
         return key
-    key_file = Path(__file__).resolve().parent.parent / ".psi-key"
+    key_file = Path(__file__).resolve().parent / ".psi-key"  # alongside this script
     if key_file.exists():
         raw = key_file.read_text().strip()
         # tolerate either "KEY" or "PSI_API_KEY=KEY"
         return raw.split("=", 1)[1].strip() if "=" in raw else raw
-    sys.exit("No key: set $PSI_API_KEY or create hobbes/.psi-key")
+    sys.exit("No key: set $PSI_API_KEY or create hobbes/tools/.psi-key")
 
 
 def fetch(url, strategy, key, tries=8, timeout=75):

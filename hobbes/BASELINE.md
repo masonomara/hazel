@@ -69,7 +69,7 @@ PSI runs Lighthouse on Google's servers and returns the category scores, the lab
 
 ## The scorecard
 
-Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/baseline-YYYY-MM-DD.md` and fill it in. That filled file is the baseline.
+Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD-baseline.md` and fill it in. That filled file is the baseline. **Filename convention: `[date]-[name].md`** — date first (ISO 8601), so a directory listing sorts chronologically. Same shape for every deliverable below.
 
 ## Targets — the pass bar (same for every client)
 
@@ -86,8 +86,8 @@ Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/baseline-YYYY-MM-DD.m
 
 ## Deliverables
 
-- `hobbes/scorecards/baseline-YYYY-MM-DD.md` — the filled scorecard (the numbers).
-- `hobbes/scorecards/findings-YYYY-MM-DD.md` — each failure as: *page → what is failing → the fix → effort (S/M/L)*.
+- `hobbes/scorecards/YYYY-MM-DD-baseline.md` — the filled scorecard (the numbers).
+- `hobbes/scorecards/YYYY-MM-DD-findings.md` — each failure as: *page → what is failing → the fix → effort (S/M/L)*.
 - `hobbes/MISSION.md` — priorities updated with each gap, written `baseline → target` so it is testable.
 
 ## Site-type adaptations

@@ -34,13 +34,11 @@ The single biggest issue: **by the system's own rule ("a page is never green on 
 
 It exists in **no commit, ever** (checked full git history of `hobbes/scorecards/`). The findings got scattered into `MISSION.md` priorities instead — but without the fix and the S/M/L effort sizing the format requires. So the most actionable artifact in the method is missing, and three docs point at a file that isn't there.
 
-### 2.2 Filename convention is broken three ways, and the live references dangle
-The scorecard filename churned across commits:
-- `2026-06-11.md` (commit 57cda40)
-- `baseline-2026-06-11.md` (commit 65b6cab) ← this one **matched** `BASELINE.md`'s spec
-- `2026-06-11-baseline.md` (commit 5e790ea, current) ← **does not match** the spec
+### 2.2 ~~Filename convention is broken three ways, and the live references dangle~~ ✅ RESOLVED 2026-06-17
+The scorecard filename had churned across commits — `2026-06-11.md`, then `baseline-2026-06-11.md`, then the current `2026-06-11-baseline.md` — against two more conventions in the spec (`BASELINE.md` said `baseline-YYYY-MM-DD.md`, `TEMPLATE.md` said `baseline-YYYY-MM.md`). Three shapes, none agreeing, and `MISSION.md`/`CHANGELOG.md` pointed at a dead `baseline-2026-06-11.md` path.
 
-`BASELINE.md:72` says copy the template to `baseline-YYYY-MM-DD.md`. `TEMPLATE.md:7` says copy to `baseline-YYYY-MM.md` (no day). The actual file is `2026-06-11-baseline.md` (date first). **Three conventions, none agreeing.** Worse: `MISSION.md:21` and `CHANGELOG.md:26` both point to `hobbes/scorecards/baseline-2026-06-11.md` — a path that **no longer exists** because the file was renamed. The references are dead links.
+**Decision (Mason, 2026-06-17): one convention — `[date]-[name].md`, date first (ISO 8601), so listings sort chronologically.** The current file already matches. Propagated: `BASELINE.md` (copy-to line + both deliverable paths → `YYYY-MM-DD-baseline.md` / `YYYY-MM-DD-findings.md`), `TEMPLATE.md` copy-to line, and the live refs in `MISSION.md` (×2) + `CHANGELOG.md` now point to `2026-06-11-baseline.md` / `2026-06-11-findings.md`.
+**Still open:** the `2026-06-11-findings.md` reference is now correctly *named* but the file still doesn't exist — creating it is tracked under **2.1**.
 
 ### 2.3 The lab-vs-field rule the guide preaches was not honored in the scorecard
 `BASELINE.md` warns three times that lab INP is fake and field rows must be marked "field" (lines 10, 35, 66); `TEMPLATE.md:22` says "Mark field-data rows 'field'." In the filled scorecard (section B, lines 24–31) **not one row is marked "field."** The numbers are a silent mix of lab Lighthouse and CrUX field data with no way to tell which is which — the exact failure the methodology exists to prevent.
@@ -79,12 +77,10 @@ The Best Practices range is the egregious one: CHANGELOG says 69–73, scorecard
 ### 2.9 "Run by: Tigertail" — wrong field, not a ghost *(resolved 2026-06-17)*
 Original finding assumed "Tigertail" was a pre-rename ghost. **Correction:** Tigertail is Mason's agency, which owns Hobbes — a real entity, not a leftover. The actual issue was narrower: "Run by" is the **human operator** field (per `CONTEXT.md` and `BASELINE.md`, Mason drives the cycle), so an agency name alone undersold it. Fixed to "Run by: Mason (Tigertail)." The identity chain — Mason (creator/operator) · Hobbes (agent) · Tigertail (agency, owns Hobbes) — is now recorded in `CONTEXT.md`.
 
-### 2.10 Shop Pay removal shipped but the process didn't follow it
-Git's most recent commit is "removed shop pay" (16f4e69) — the sunset decision from `MISSION.md:36` was **executed**. But:
-- There is **no CHANGELOG entry** for the removal (the system requires one change per entry).
-- `MISSION.md:36` still files Express pay under "**Sunset candidates**" as if it's pending, not done.
-
-The most recent real change to the store skipped the changelog discipline the system is built on. The docs don't reflect git reality.
+### 2.10 ~~Shop Pay removal shipped but the process didn't follow it~~ ✅ RESOLVED 2026-06-17
+Git's most recent commit is "removed shop pay" (16f4e69) — the sunset decision was **executed** without a paper trail.
+- ~~There is **no CHANGELOG entry** for the removal.~~ → Logged as **CHANGELOG 009 cleanup/shop-pay-removal** (2026-06-12), with the RESULTS rationale tied to feature 006.
+- ~~`MISSION.md` still files Express pay under "**Sunset candidates**" as if pending.~~ → "Sunset candidates" now reads `*(none active)*`; the removal record lives in CHANGELOG 009. Docs match git.
 
 ### 2.11 Minor drift
 - **Template placeholder left in:** scorecard line 1 still reads "# Baseline scorecard — YYYY-MM" — the header was never filled.
@@ -140,13 +136,13 @@ These are my judgments, separated from the cited facts above:
 
 Concrete, in rough priority order. I have **not** made any of these yet — they're proposals.
 
-1. **Pick one filename convention and propagate it.** Recommend `baseline-YYYY-MM-DD.md` (matches `BASELINE.md:72`). Rename the current file, fix `TEMPLATE.md:7`, fix the dead paths in `MISSION.md:21` and `CHANGELOG.md:26`.
+1. ~~**Pick one filename convention and propagate it.**~~ ✅ **DONE 2026-06-17** — chose `[date]-[name].md` (date first, ISO 8601). No rename needed (current file already matched); fixed `BASELINE.md`, `TEMPLATE.md`, and the dead paths in `MISSION.md` + `CHANGELOG.md`. See 2.2.
 2. **Create `findings-2026-06-11.md`** in the required *page → failing → fix → effort* format, back-filling from the findings already in MISSION — or, if findings-in-MISSION is the real workflow, **delete the findings-doc requirement** from `BASELINE.md` and the three references. Don't keep pointing at a file that isn't there.
 3. **Add a "Source" column (lab/field) to Scorecard B in `TEMPLATE.md`**, or split it into a lab table and a field table. Make the rule impossible to skip. Then fix the Home LCP row (2.4) once you know which number is real.
 4. **Add Best Practices to MISSION priorities** (or write one line in MISSION saying why it's deliberately excluded). Product desktop 76 needs an owner.
 5. **Make the scorecard the source of truth.** MISSION and CHANGELOG should quote numbers *from* the filled scorecard, never carry their own. Reconcile the 2.8 mismatches by deciding the scorecard wins.
-6. **Fix identity:** scorecard "Run by: Tigertail" → "Mason." Grep the repo for any other "Tigertail" before closing.
-7. **Log the Shop Pay removal as CHANGELOG 009** and move Express pay from "Sunset candidates" to a resolved state in MISSION, so the docs match git.
+6. ~~**Fix identity:** scorecard "Run by: Tigertail" → "Mason."~~ ✅ **DONE 2026-06-17** — set to "Mason (Tigertail)"; identity chain (Mason creator/operator · Hobbes agent · Tigertail agency) recorded in `CONTEXT.md`. Tigertail confirmed as the agency, not a stale name.
+7. ~~**Log the Shop Pay removal as CHANGELOG 009** and resolve Express pay in MISSION.~~ ✅ **DONE 2026-06-17** — see 2.10.
 8. **Decide TTFB:** either add the column to `TEMPLATE.md` for everyone, or drop it from the Shopify scorecard per `BASELINE.md:104`. Template and filled file should not diverge.
 9. **Reconcile the WAVE contradiction** (2.11): state plainly whether WAVE ran and what produced the 59/134/13 counts.
 10. **Define a "minimum viable baseline"** in `BASELINE.md`: which cells are mandatory for a baseline to count vs. which can be marked "deferred — human pass pending," so a partial cycle is labeled honestly and a page is never silently treated as passing.

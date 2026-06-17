@@ -18,7 +18,7 @@ Each priority is written as **baseline → target** so "done" is not a matter of
 
 ## Active builds
 
-- **Hazel storefront** - cleaned up and running better (base theme fork stripped, fonts and tokens set, mobile fixed). Step 0 baseline captured 2026-06-11 (`hobbes/scorecards/baseline-2026-06-11.md` + `findings-2026-06-11.md`); the three priorities now carry real numbers. Next: work the findings shortlist — product alt/button-name, the missing meta descriptions, the dual-header double-H1, and Home mobile performance.
+- **Hazel storefront** - cleaned up and running better (base theme fork stripped, fonts and tokens set, mobile fixed). Step 0 baseline captured 2026-06-11 (`hobbes/scorecards/2026-06-11-baseline.md` + `2026-06-11-findings.md`); the three priorities now carry real numbers. Next: work the findings shortlist — product alt/button-name, the missing meta descriptions, the dual-header double-H1, and Home mobile performance.
 
 ## Needs work
 
@@ -37,7 +37,7 @@ Each priority is written as **baseline → target** so "done" is not a matter of
 
 ## Debt
 
-- **Accessibility issues** - now measured (baseline 2026-06-11): a11y 88–97, axe failures listed in priority 1 and `findings-2026-06-11.md`. Still owed: WAVE scan + the manual keyboard/screen-reader/contrast pass before any page is signed off.
+- **Accessibility issues** - now measured (baseline 2026-06-11): a11y 88–97, axe failures listed in priority 1 and `2026-06-11-findings.md`. Still owed: WAVE scan + the manual keyboard/screen-reader/contrast pass before any page is signed off.
 - **Baseline method** - captured via **local Lighthouse**, not PSI (anonymous PSI API quota is zero; permalinks gave field data only). Re-baseline next cycle with the same local method (or get a PSI API key) so numbers stay comparable. Home still needs a CrUX permalink to get a real-user verdict.
 - **Lingering nav/template cleanup** and unconfirmed sitewide asset loading.
 - **Ongoing theme-cleanup backlog** - chip away as hours allow.

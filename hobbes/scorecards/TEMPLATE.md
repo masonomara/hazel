@@ -4,7 +4,7 @@ Client: [name] · Site: [url] · Platform: [platform] · Run by: [name] · Date:
 
 Golden path: [page 1 url] · [page 2 url] · [page 3 url]
 
-Copy this file to `baseline-YYYY-MM.md` and fill every cell with a raw number or pass/fail. Compare to the Targets in `hobbes/BASELINE.md`. The filled file **is** the baseline.
+Copy this file to `YYYY-MM-DD-baseline.md` (date first, ISO 8601 — the `[date]-[name].md` convention) and fill every cell with a raw number or pass/fail. Compare to the Targets in `hobbes/BASELINE.md`. The filled file **is** the baseline.
 
 ## A. Lighthouse scores
 

@@ -6,8 +6,8 @@ Run it at the start of an engagement and at the start of each work cycle. It wil
 
 ## Tools
 
-- **PageSpeed Insights** — `pagespeed.web.dev`. The primary measurement tool. Runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* field data — real-user measurements over the last 28 days, the only trustworthy source for INP. Each analysis gets a shareable permalink to save as evidence.
-- **Lighthouse (Chrome DevTools)** — the local fallback for when PSI cannot reach a URL: an unpublished theme draft, a preview link, localhost, or anything gated. Same four Lighthouse categories, but lab data only — no field data, no real INP, and scores run ~10–15 points off PSI.
+- **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. The tool pulls lab and field **separately** and labels them, caps concurrency, retries, caches each call, flags incomplete runs, and writes a `hobbes/tools/psi-results.md` artifact. The API key lives git-ignored at `hobbes/.psi-key`. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete." That is real signal about a slow page, not a tool fault.
+- **Lighthouse (Chrome DevTools / `npx lighthouse`)** — the local fallback for when PSI cannot reach a URL: an unpublished theme draft, a preview link, localhost, or anything gated. Same four Lighthouse categories, but lab data only — no field data, no real INP, and scores run ~10–15 points off PSI.
 - **WAVE** — `wave.webaim.org` extension. The accessibility scan. It injects **Errors**, **Contrast Errors**, and **Alerts** straight into the rendered page — no DevTools panel to break. Errors and Contrast Errors are the failures (the recorded count); Alerts are review-not-fail. Free, reliable, fast.
 - **SiteOne Crawler** — the whole-site crawler. Free, open-source (MIT), no page cap. One crawl reports missing/duplicate titles and descriptions, missing H1s, broken links and redirects, plus accessibility checks (alt text, lang, form labels, ARIA, heading order) and slow URLs, as a sortable HTML report. macOS: `brew install janreges/tap/siteone-crawler`, or the desktop GUI app.
 - **Google Rich Results Test** — `search.google.com/test/rich-results`. Confirms the page's structured data is valid.
@@ -19,23 +19,22 @@ Run it at the start of an engagement and at the start of each work cycle. It wil
 
 - [ ] **Identify the client.** Record name, site URL, platform, date, who set it up, and anything else worth documenting.
 - [ ] **Lock the golden path.** Pick 3–4 important pages with exact URLs — typically home, collection, product. Reuse these exact URLs every cycle so results stay comparable.
-- [ ] **Establish the measurement method.** PageSpeed Insights (`pagespeed.web.dev`) is the standard — Google's standardized server runs it the same way every cycle, so the numbers stay comparable. Read both the Mobile and Desktop results. Only when a URL is not publicly reachable (theme draft, localhost, staging) fall back to local Lighthouse in Chrome Incognito with extensions off, measure 3× and take the median — and never mix PSI and local scores within one baseline.
+- [ ] **Establish the measurement method.** Hobbes runs the PSI API via `hobbes/tools/psi.py` — Google's standardized server runs it the same way every cycle, so numbers stay comparable. One pass captures Mobile and Desktop. Only when a URL is not publicly reachable (theme draft, localhost, staging) fall back to local Lighthouse (Chrome Incognito, extensions off, median of 3) — and never mix PSI and local scores within one baseline.
 
 ## The run — repeat for each page × mobile + desktop
 
 Do every group below for each of the 6 combinations: 3 pages (home, collection, product) × 2 devices. A few steps marked **once per site** are done a single time, not six.
 
-### Group A — Scores, speed & field data (PageSpeed Insights)
+### Group A — Scores, speed & field data (PSI API, run by Hobbes)
 
-PSI runs Lighthouse on Google's servers and returns the category scores, the lab metrics, and the real-user field data in one shot — so this single group fills Scorecard A and most of Scorecard B. Run it **once per page** (3 runs); each analysis covers both Mobile and Desktop, and Google's standardized server keeps the numbers comparable cycle to cycle.
+Hobbes runs `python3 hobbes/tools/psi.py`. It calls the PSI API for each golden-path page × mobile/desktop and fills **Scorecard A** (category scores), **B1** (lab metrics), and **B2** (field data) in one pass — writing them to `hobbes/tools/psi-results.md`. Hobbes then transcribes those numbers into the dated scorecard. What the tool guarantees, so the run-1 mistakes can't recur:
 
-1. Go to `pagespeed.web.dev`, paste the exact locked-in page URL, click **Analyze** (~30–60s).
-2. **Field data first** — the top panel, "Discover what your real users are experiencing." This is real-user CrUX over 28 days and the **only trustworthy INP**. Record real LCP, INP, and CLS in Scorecard B, marked "field". If the panel is absent the site lacks the traffic — write "no field data," lean on the lab numbers below, and flag INP as **unverified**. Field data is per page, not per device.
-3. **Category scores** — the four gauges. Record Performance, Accessibility, Best Practices, and SEO in Scorecard A. Toggle **Mobile** and **Desktop** at the top and record both; that is the two devices in one run.
-4. **Lab metrics** — the "Diagnose performance issues" section. Record FCP, LCP, TBT, CLS, and Speed Index in Scorecard B, for each device. Lab TBT is a stand-in for responsiveness, not real INP — that comes only from the field panel above.
-5. PSI's lab score is a single run; if Performance looks unstable, re-analyze 2–3× and take the median. Save the analysis **permalink** (PSI mints one per run, e.g. `pagespeed.web.dev/analysis/...`) into the findings doc as dated evidence.
+1. **Field and lab are pulled separately and labelled** — a CrUX field number can never land in a lab row (the failure behind the run-1 "Home LCP 1.6 vs 7.5" contradiction). B1 is lab only; B2 is field only.
+2. **Field is per page** (CrUX, 28 days — the only trustworthy INP). If a page lacks page-level data the tool marks it `origin agg.` (the whole-site average) instead of passing it off as the page's own number. No field data at all → the row says so, and INP is **unverified** for that page.
+3. **Incomplete runs are flagged ⚠.** PSI's mobile throttle is fixed and heavy, so a genuinely slow page may not finish inside the time limit. The tool records this rather than hiding it — the category scores stand, but late metrics (esp. LCP) on a ⚠ row do not; re-measure that page with `--fresh` and, if it still won't finish, treat the slowness itself as a finding.
+4. **It is built to be agent-reliable** — concurrency capped, every call retried, each success cached (a re-run resumes instead of starting over), and one failed call can't kill the whole run.
 
-**Non-public URLs (fallback).** PSI can only reach the live, public site. To baseline an unpublished theme draft, a preview URL, localhost, or anything gated, run Lighthouse locally instead: Chrome Incognito (extensions off) → DevTools → **Lighthouse** tab → Mode = Navigation, pick the Device, tick all four categories → **Analyze page load**, run 3× and take the median. Local scores run ~10–15 points off PSI, so never mix the two within one baseline — pick one source per page and stay on it every cycle.
+**Non-public URLs (fallback).** The PSI API only reaches the live, public site. To baseline an unpublished theme draft, a preview URL, localhost, or anything gated, run Lighthouse locally instead (Chrome Incognito, extensions off → DevTools → **Lighthouse** → pick the Device → run 3× and take the median). Local scores run ~10–15 points off PSI, so never mix the two within one baseline — pick one source per page and stay on it every cycle.
 
 ### Group B — Accessibility scan (WAVE)
 
@@ -101,7 +100,7 @@ If a target genuinely cannot be met (e.g. ad-funded performance), document the e
 **Non-Shopify ecommerce (WooCommerce / Magento / BigCommerce / headless).** Same three core pages. What changes:
 
 - Swap the platform tools — no Shopify speed report or `theme check`. Use Query Monitor (Woo), the built-in profiler (Magento), or a bundle analyzer (headless).
-- Add **TTFB** to the lab metrics. Self-hosting exposes server response time that Shopify hides; slow TTFB from uncached queries and plugin bloat is often the real villain.
+- **Weight TTFB harder.** TTFB is a standard Scorecard B column for every site, but on self-hosting it carries more diagnostic weight: you control the server, so slow TTFB from uncached queries and plugin bloat is often the real villain — not a fixed platform cost as on Shopify.
 - Headless (Next / Nuxt / Remix): check hydration cost, bundle size, and image-optimization config. These are dev-controlled, so a11y/perf targets are more achievable than on a locked SaaS theme.
 
 **Content-heavy / editorial / publisher.** Core pages shift to home, an article page, a category hub (add a listing/archive template if distinct). What changes:

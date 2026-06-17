@@ -1,12 +1,12 @@
-# SEO results — 2026-06-17 13:34
+# SEO results — 2026-06-17 14:14
 
-Captured by `hobbes/tools/seo.py` (Section D + E). Every cell is parsed
+Captured by `hobbes/tools/seo.py` — scorecard Section E. Every cell is parsed
 from page HTML/headers. Alt-text shows COVERAGE only — a human judges
 whether the alt that exists is meaningful.
 
 Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelboutique.com/collections/all-hazel-brand) · [Product](https://hazelboutique.com/products/the-capri-collection-baby-pink)
 
-## D. SEO checklist
+## E. SEO checklist
 
 | Item | Home | Collection | Product |
 |---|---|---|---|
@@ -19,9 +19,7 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | All images have meaningful alt | ⚠ 20/45 missing (quality: human) | ⚠ 44/88 missing (quality: human) | ⚠ 16/25 missing (quality: human) |
 | Indexable (robots OK) | ✓ | ✓ | ✓ |
 
-## E. Site level (once per site)
-
-| Item | Present |
+| Site-level (once per site) | Present |
 |---|---|
 | `sitemap.xml` | x |
 | `robots.txt` | x |

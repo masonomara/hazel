@@ -6,11 +6,11 @@ Golden path: [page 1 url] · [page 2 url] · [page 3 url]
 
 Copy this file to `YYYY-MM-DD-baseline.md` (date first, ISO 8601 — the `[date]-[name].md` convention) and fill every cell with a raw number or pass/fail. Compare to the Targets in `hobbes/BASELINE.md`. The filled file **is** the baseline.
 
-Sections A, B1, B2, C1, D and E are filled by the tools — `psi.py` → A / B1 / B2 / C1, `seo.py` → D / E; paste from their `*-results.md` artifacts. Section C2 (manual a11y) and the alt-text / contrast *quality* judgments are the human's to sign — a page is never marked pass on the automated rows alone.
+Sections A–E are filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E; paste from their `*-results.md` artifacts. Section F (manual a11y) and the alt-text / contrast *quality* judgments are the human's to sign — a page is never marked pass on the automated rows alone.
 
 ## A. Lighthouse scores (LAB — PSI server)
 
-`python3 hobbes/tools/psi.py`. Mobile uses PSI's fixed throttle (Moto G4 / slow 4G); desktop is unthrottled. A ⚠ on a row = PSI flagged the run incomplete (page too slow to finish in the time limit); the category scores stand, but treat late metrics (esp. LCP) on that row as unreliable and re-run `--fresh` if the score looks unstable.
+`python3 hobbes/tools/psi.py`. Mobile uses PSI's fixed throttle (Moto G4 / slow 4G); desktop is unthrottled. A ⚠ on a row = PSI cut the run at its time limit (the page never reached network-idle): the category scores and early metrics (B) still stand. A `✗cut` Performance score / LCP is the cutoff value, not a real paint — treat it as unknown and investigate why the page never idles rather than re-measuring (local Lighthouse hits the same wall).
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
@@ -21,9 +21,9 @@ Sections A, B1, B2, C1, D and E are filled by the tools — `psi.py` → A / B1 
 | Product — mobile |  |  |  |  |
 | Product — desktop |  |  |  |  |
 
-## B1. Lab metrics (LAB — not real INP; TBT is the lab stand-in)
+## B. Lab metrics (LAB — not real INP; TBT is the lab stand-in)
 
-Lab only. Real INP and the real-user verdict are in B2 — never put a field number in this table.
+Lab only. Real INP and the real-user verdict are in C — never put a field number in this table.
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
@@ -34,7 +34,7 @@ Lab only. Real INP and the real-user verdict are in B2 — never put a field num
 | Product — mobile |  |  |  |  |  |  |
 | Product — desktop |  |  |  |  |  |  |
 
-## B2. Field data (CrUX 28-day, per page — the only real INP)
+## C. Field data (CrUX 28-day, per page — the only real INP)
 
 Real users, per page (not per device). "origin agg." = the page lacks page-level CrUX so PSI returned the whole-site average — note it, don't treat it as the page's own number.
 
@@ -44,7 +44,7 @@ Real users, per page (not per device). "origin agg." = the page lacks page-level
 | Collection |  |  |  |  |
 | Product |  |  |  |  |
 
-## C1. Accessibility — automated (axe-core via PSI)
+## D. Accessibility — automated (axe-core via PSI)
 
 Filled by `psi.py` from PSI's accessibility audits (these are axe-core checks — no separate axe/WAVE run needed). `color-contrast` is the contrast-error count, `image-alt` the alt gaps. List each failing rule with its node count.
 
@@ -57,20 +57,9 @@ Filled by `psi.py` from PSI's accessibility audits (these are axe-core checks �
 | Product — mobile |  |  |
 | Product — desktop |  |  |
 
-## C2. Accessibility — manual (human sign-off; tools cannot judge these)
+## E. SEO checklist
 
-A page is never marked pass until these are signed. C1 gives the automated counts; here you judge keyboard flow, screen-reader sense, and whether the alt text that *exists* is meaningful.
-
-| Page / Device | Keyboard | Focus visible | Logical order | Screen reader | Alt meaningful | Contrast (by eye) | Reduced motion |
-|---|---|---|---|---|---|---|---|
-| Home — mobile |  |  |  |  |  |  |  |
-| Home — desktop |  |  |  |  |  |  |  |
-| Collection — mobile |  |  |  |  |  |  |  |
-| Collection — desktop |  |  |  |  |  |  |  |
-| Product — mobile |  |  |  |  |  |  |  |
-| Product — desktop |  |  |  |  |  |  |  |
-
-## D. SEO checklist
+Filled by `seo.py`. Per-page checks, plus the site-level files at the foot (once per site).
 
 | Item | Page 1 | Page 2 | Page 3 |
 |---|---|---|---|
@@ -83,9 +72,20 @@ A page is never marked pass until these are signed. C1 gives the automated count
 | All images have meaningful alt |  |  |  |
 | Indexable (robots OK) |  |  |  |
 
-## E. Site level (once per site)
-
-| Item | Present |
+| Site-level (once per site) | Present |
 |---|---|
 | `sitemap.xml` |  |
 | `robots.txt` |  |
+
+## F. Accessibility — manual (optional; human sign-off, tools cannot judge these)
+
+Optional per cycle — the automated baseline (A–E) stands on its own — but **a page cannot be certified fully pass until these manual rows are signed.** D gives the automated counts; here you judge keyboard flow, screen-reader sense, and whether the alt text that *exists* is meaningful.
+
+| Page / Device | Keyboard | Focus visible | Logical order | Screen reader | Alt meaningful | Contrast (by eye) | Reduced motion |
+|---|---|---|---|---|---|---|---|
+| Home — mobile |  |  |  |  |  |  |  |
+| Home — desktop |  |  |  |  |  |  |  |
+| Collection — mobile |  |  |  |  |  |  |  |
+| Collection — desktop |  |  |  |  |  |  |  |
+| Product — mobile |  |  |  |  |  |  |  |
+| Product — desktop |  |  |  |  |  |  |  |

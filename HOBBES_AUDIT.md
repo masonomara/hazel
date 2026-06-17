@@ -36,8 +36,6 @@ It exists in **no commit, ever** (checked full git history of `hobbes/scorecards
 
 <!-- i felt the process so far was not good enough to create a good consistent findings doc. We will get to this later after we refine the baseline collection process -->
 
-### 2.2 The lab-vs-field rule the guide preaches was not honored in the scorecard
-`BASELINE.md` warns three times that lab INP is fake and field rows must be marked "field" (lines 10, 35, 66); `TEMPLATE.md:22` says "Mark field-data rows 'field'." In the filled scorecard (section B, lines 24–31) **not one row is marked "field."** The numbers are a silent mix of lab Lighthouse and CrUX field data with no way to tell which is which — the exact failure the methodology exists to prevent.
 
 ### 2.3 The scorecard contradicts MISSION and CHANGELOG on the headline Home number
 This is the one that should bother you most, because it means a number is wrong and we don't know which:
@@ -132,11 +130,6 @@ Filled baseline scorecards live in `hobbes/scorecards/`.
 ### 2.4 Manual accessibility pass (Scorecard C) — entirely blank
 Every cell for Keyboard / Focus visible / Screen reader / Contrast fails / Alt coverage is empty across all six rows (scorecard lines 37–42). Group C (`BASELINE.md` lines 46–54) was not done. This is partially **acknowledged** (`MISSION.md:15,40` say the manual pass is "not yet run"), so it's a known hole, not a hidden one. But the consequence is hard: per `BASELINE.md:68`, **no page can be marked "pass"** until those rows are signed. The baseline is, by its own definition, provisional.
 
-### 2.5 SEO checklist (Scorecard D) — entirely blank, yet the work was clearly done
-Section D is empty in every cell (scorecard lines 46–55). But `MISSION.md:16` lists **specific** SEO findings: missing meta descriptions on Home + Collection, brand-only Home title, no Home `og:image`, Product `image-alt`, Home double-`h1`. So Group D **was performed** — the results just never got transcribed into the scorecard. The data lives in the narrative and not in the structured artifact. Same disease as 2.1: findings gathered, deliverable not filled.
-
-
-<!-- this shoudl be properly filled in. can you describe how I did the work so we can start to plan how we can have an agent do it for me? -->
 
 ### 2.6 Best Practices is measured but orphaned
 Scorecard A records Best Practices for all six combos (97/92/96/96/92/**76**). The target is ≥95 (`BASELINE.md:78`). Three combos **fail**, and Product desktop at **76** is the **worst single score on the entire board** — yet there is **no MISSION priority** tracking Best Practices. The three priorities are a11y, SEO, performance; Best Practices fell through the floor. The worst number we have is the one nobody owns.
@@ -162,13 +155,6 @@ The Best Practices range is the egregious one: CHANGELOG says 69–73, scorecard
 
 <!-- fix this please -->
 
-- **TTFB column added off-spec:** scorecard B carries a TTFB column (line 24); `TEMPLATE.md` has none, and `BASELINE.md:104` reserves TTFB for **non-Shopify** sites ("server response time that Shopify hides"). Hazel is Shopify. Harmless extra data, but it's drift — the template and the filled file have diverged.
-
-<!-- fix this please -->
-
-- **WAVE contradiction:** `MISSION.md:15,40` say the "WAVE scan … not yet run," but Scorecard C has WAVE error counts filled (59 / 134 / 13). Either WAVE ran and MISSION is stale, or those counts came from somewhere else (likely Lighthouse/axe, since the "axe failures" in MISSION are axe-core rule names that Lighthouse surfaces). Reconcile which tool actually produced those numbers.
-
-<!-- investiagte the process and let me know. again, main focus is trying to automate the abseline collection. -->
 
 ---
 

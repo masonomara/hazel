@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-seo.py — Section D + E SEO checks for the golden path, machine-read from each
-page's HTML. Step two of the agent baseline (step one is psi.py).
+seo.py — scorecard Section E (SEO checklist + site-level) for the golden path,
+machine-read from each page's HTML. Step two of the agent baseline (step one is psi.py).
 
 Eight checks per page (BASELINE.md Group D), all parseable from HTML or a header:
   title · meta description · canonical · single H1 + heading order ·
@@ -273,21 +273,19 @@ def main():
     L = [
         f"# SEO results — {stamp}",
         "",
-        "Captured by `hobbes/tools/seo.py` (Section D + E). Every cell is parsed",
+        "Captured by `hobbes/tools/seo.py` — scorecard Section E. Every cell is parsed",
         "from page HTML/headers. Alt-text shows COVERAGE only — a human judges",
         "whether the alt that exists is meaningful.",
         "",
         "Golden path: " + " · ".join(f"[{lbl}]({u})" for lbl, u in urls),
         "",
-        "## D. SEO checklist",
+        "## E. SEO checklist",
         "",
         "| Item | " + " | ".join(labels) + " |",
         "|" + "---|" * (len(labels) + 1),
         *[f"| {chk} | " + " | ".join(cell(lbl, chk) for lbl in labels) + " |" for chk in rows],
         "",
-        "## E. Site level (once per site)",
-        "",
-        "| Item | Present |",
+        "| Site-level (once per site) | Present |",
         "|---|---|",
         f"| `sitemap.xml` | {site_file(root, '/sitemap.xml')} |",
         f"| `robots.txt` | {site_file(root, '/robots.txt')} |",

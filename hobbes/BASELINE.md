@@ -8,7 +8,7 @@ Run it at the start of an engagement and at the start of each work cycle. It wil
 
 - **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. The tool pulls lab and field **separately** and labels them, caps concurrency, retries, caches each call, flags incomplete runs, and writes a `hobbes/tools/psi-results.md` artifact. The API key lives at `hobbes/tools/.psi-key`. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete." That is real signal about a slow page, not a tool fault.
 - **Lighthouse (Chrome DevTools / `npx lighthouse`)** — the local fallback for when PSI cannot reach a URL: an unpublished theme draft, a preview link, localhost, or anything gated. Same four Lighthouse categories, but lab data only — no field data, no real INP, and scores run ~10–15 points off PSI.
-- **WAVE** — `wave.webaim.org` extension. The accessibility scan. It injects **Errors**, **Contrast Errors**, and **Alerts** straight into the rendered page — no DevTools panel to break. Errors and Contrast Errors are the failures (the recorded count); Alerts are review-not-fail. Free, reliable, fast.
+- **Accessibility audits (axe-core via PSI)** — the automated a11y scan is already in the PSI run. `psi.py` reads Lighthouse's accessibility audits — which *are* axe-core checks — and reports each failing rule with its node count (Section D): `color-contrast` is the contrast-error count, `image-alt` the alt gaps. No separate scan needed. (WAVE — `wave.webaim.org` — stays available as an optional human spot-check, but it is not part of the automated run.)
 - **SiteOne Crawler** — the whole-site crawler. Free, open-source (MIT), no page cap. One crawl reports missing/duplicate titles and descriptions, missing H1s, broken links and redirects, plus accessibility checks (alt text, lang, form labels, ARIA, heading order) and slow URLs, as a sortable HTML report. macOS: `brew install janreges/tap/siteone-crawler`, or the desktop GUI app.
 - **Google Rich Results Test** — `search.google.com/test/rich-results`. Confirms the page's structured data is valid.
 - **Google Search Console** — Google's own search report. Free but needs client-granted access. Use it when you have it.
@@ -21,54 +21,57 @@ Run it at the start of an engagement and at the start of each work cycle. It wil
 - [ ] **Lock the golden path.** Pick 3–4 important pages with exact URLs — typically home, collection, product. Reuse these exact URLs every cycle so results stay comparable.
 - [ ] **Establish the measurement method.** Hobbes runs the PSI API via `hobbes/tools/psi.py` — Google's standardized server runs it the same way every cycle, so numbers stay comparable. One pass captures Mobile and Desktop. Only when a URL is not publicly reachable (theme draft, localhost, staging) fall back to local Lighthouse (Chrome Incognito, extensions off, median of 3) — and never mix PSI and local scores within one baseline.
 
-## The run — repeat for each page × mobile + desktop
+## The run
 
-Do every group below for each of the 6 combinations: 3 pages (home, collection, product) × 2 devices. A few steps marked **once per site** are done a single time, not six.
+The baseline comes in two tiers, and naming them keeps a partial run honest:
 
-### Group A — Scores, speed & field data (PSI API, run by Hobbes)
+- **MVP baseline (A–E) — fully automated.** Hobbes runs the two tools and fills every cell in sections A–E. This is a *complete* baseline on its own — a real, comparable, trustworthy snapshot. An A–E run is finished work, not a fraction of one.
+- **Above-and-beyond (F) — human.** The manual accessibility pass. Optional per cycle; the MVP baseline stands without it, but a page is not certified *fully* pass until F is signed.
 
-Hobbes runs `python3 hobbes/tools/psi.py`. It calls the PSI API for each golden-path page × mobile/desktop and fills **Scorecard A** (category scores), **B1** (lab metrics), and **B2** (field data) in one pass — writing them to `hobbes/tools/psi-results.md`. Hobbes then transcribes those numbers into the dated scorecard. What the tool guarantees, so the run-1 mistakes can't recur:
+The tools cover all 6 page×device combinations in one go; the manual pass is per page.
 
-1. **Field and lab are pulled separately and labelled** — a CrUX field number can never land in a lab row (the failure behind the run-1 "Home LCP 1.6 vs 7.5" contradiction). B1 is lab only; B2 is field only.
-2. **Field is per page** (CrUX, 28 days — the only trustworthy INP). If a page lacks page-level data the tool marks it `origin agg.` (the whole-site average) instead of passing it off as the page's own number. No field data at all → the row says so, and INP is **unverified** for that page.
-3. **Incomplete runs are flagged ⚠.** PSI's mobile throttle is fixed and heavy, so a genuinely slow page may not finish inside the time limit. The tool records this rather than hiding it — the category scores stand, but late metrics (esp. LCP) on a ⚠ row do not; re-measure that page with `--fresh` and, if it still won't finish, treat the slowness itself as a finding.
-4. **It is built to be agent-reliable** — concurrency capped, every call retried, each success cached (a re-run resumes instead of starting over), and one failed call can't kill the whole run.
+### 1. Automated capture (Hobbes)
 
-**Non-public URLs (fallback).** The PSI API only reaches the live, public site. To baseline an unpublished theme draft, a preview URL, localhost, or anything gated, run Lighthouse locally instead (Chrome Incognito, extensions off → DevTools → **Lighthouse** → pick the Device → run 3× and take the median). Local scores run ~10–15 points off PSI, so never mix the two within one baseline — pick one source per page and stay on it every cycle.
+**One command runs the whole MVP baseline:**
 
-### Group B — Accessibility scan (WAVE)
+```
+python3 hobbes/tools/baseline.py            # fresh capture (the real baseline)
+python3 hobbes/tools/baseline.py --resume   # reuse cache to recover a stalled run
+```
 
-6. One-time: install the free **WAVE** extension.
-7. On the page, click the **WAVE** icon. The left panel summarizes the page. Because WAVE injects into the page itself, there is no DevTools panel to fail.
-8. Record **Errors** and **Contrast Errors** in Scorecard C — these are the failures. **Alerts** are review-not-fail: skim them and copy anything real into the findings doc, along with the most common Error names.
+`baseline.py` runs **both tools together — `psi.py` then `seo.py`** — and stamps a dated `hobbes/scorecards/YYYY-MM-DD-baseline.md` from `TEMPLATE.md`: header and golden path filled, sections **A–E** pasted in (A–D from PSI, E from SEO), section **F** left blank for the human pass. It fetches fresh by default (a baseline must reflect the current site); if a run stalls partway the successful calls are cached, so `--resume` picks up the rest. If either tool errors it aborts rather than write a half-scorecard. The two tools it drives:
 
-### Group C — Manual accessibility pass (Human — tools cannot judge these)
+**`python3 hobbes/tools/psi.py`** — calls the PSI API for each golden-path page × mobile/desktop and fills **A** (category scores), **B** (lab metrics), **C** (field/CrUX), and **D** (accessibility — the failing axe audits, since PSI's a11y category *is* axe-core), writing `hobbes/tools/psi-results.md`. Run it standalone only to refresh A–D alone. What it guarantees, so the run-1 mistakes can't recur:
 
-9. **Keyboard only.** Set the mouse aside. Tab forward, Shift+Tab back, Enter/Space to activate. Try browse → open a product → add to cart → reach checkout without the mouse. Note anywhere you get stuck or cannot get out — a "trap".
-10. **Visible focus.** As you Tab, confirm you can always see what is selected (outline or ring). Note any element where the highlight vanishes.
-11. **Logical order.** Does Tab move in the order things appear on screen (roughly top to bottom)? Note strange jumps.
-12. **Screen reader.** Turn it on (Mac VoiceOver `Cmd+F5`; Windows NVDA/Narrator). Listen to the top of the page and one product. Does it make sense? Are buttons announced by what they do ("Add to cart") rather than just "button"?
-13. **Alt-text quality.** Confirm product images describe themselves ("sage green mock neck, front view") rather than a filename ("IMG_0421.jpg") or nothing. A tool only checks that alt text *exists*; you check that it is *useful*.
-14. **Color contrast.** Look for hard-to-read text — light gray on white, text over a busy photo, button text on hover. Note anything that strains.
-15. **Reduced motion.** Turn on the OS "reduce motion" setting (Mac: System Settings → Accessibility → Display → Reduce motion). Confirm animations actually calm down. Record pass/fail and any counts in Scorecard C.
+1. **Field and lab are pulled separately and labelled** — a CrUX field number can never land in a lab row (the failure behind run-1's "Home LCP 1.6 vs 7.5"). **B** is lab only; **C** is field only.
+2. **Field is per page** (CrUX, 28 days — the only trustworthy INP). A page without page-level data is marked `origin agg.` (the whole-site average), never passed off as the page's own; no data at all → INP **unverified**.
+3. **Incomplete runs are classified, not lumped.** A ⚠ row never reached network-idle — its early metrics (FCP, CLS, TBT, Speed Index, and the category scores) still stand; only a `✗cut` LCP / Performance score is the cutoff artifact, to be treated as unknown. Re-measuring won't help (local Lighthouse hits the same wall) — investigate why the page never idles.
+4. **Accessibility (D)** rides the same run — failing axe rules with node counts (`color-contrast` = contrast errors, `image-alt` = alt gaps). No separate WAVE/axe scan.
+5. **Agent-reliable** — concurrency capped, calls retried, each success cached (a re-run resumes), one failed call can't kill the run.
 
-### Group D — SEO checks (Both)
+**`python3 hobbes/tools/seo.py`** — fetches each page's HTML and fills **E** (SEO checklist + the site-level `sitemap.xml` / `robots.txt`), writing `hobbes/tools/seo-results.md`; run it standalone only to refresh E alone. It parses title, meta description, canonical, single-H1 + heading order, JSON-LD structured-data type, Open Graph/Twitter, image-alt **coverage**, and indexability. Alt-text *quality* is left to the human (F).
 
-16. **Title & description.** Right-click → View Page Source. Confirm a unique `<title>` and a `<meta name="description">`. Read them — relevant, specific, not generic.
-17. **Headings.** Exactly one `<h1>`; headings step down in order (H1 → H2 → H3) without skipping a level.
-18. **Structured data.** `search.google.com/test/rich-results` → paste the URL → confirm `Product` / `Breadcrumb` / `Organization` with no errors.
-19. **Open Graph.** In source, confirm `og:title`, `og:image`, etc. so shared links preview well.
-20. **Indexable.** The page is not accidentally `noindex`, and its canonical points to itself.
-21. **Whole-site crawl (once per site).** Run **SiteOne Crawler** to list missing titles, descriptions, alt text, broken links, redirects, and heading/ARIA issues across all pages at once — no page cap, one HTML report.
-22. **Site-level files (once per site).** Visit `/sitemap.xml` and `/robots.txt` and confirm both load. Record in Scorecard D/E.
+**Optional deeper SEO** (not automated, run when a per-page check flags something): the **Google Rich Results Test** (`search.google.com/test/rich-results`) validates structured-data *correctness* — seo.py only confirms a type is present — and **SiteOne Crawler** sweeps the whole site for missing titles/descriptions/alt and broken links.
 
-**Two numbers a green lab result will lie about:** INP (lab shows TBT only) and interaction-driven CLS. Never mark these "pass" on lab data — confirm with manual interaction or field data.
+**Non-public URLs (fallback).** The PSI API only reaches the live, public site. To baseline an unpublished theme draft, preview URL, localhost, or anything gated, run Lighthouse locally instead (Chrome Incognito, extensions off → DevTools → **Lighthouse** → pick the device → run 3× and take the median). Local scores run ~10–15 points off PSI, so never mix the two within one baseline.
 
-**The handoff:** Hobbes produces the scorecard; you sign off the accessibility and interaction rows before any page is marked pass. A page is never green on automated numbers alone.
+### 2. Manual accessibility pass — Section F (Human; tools cannot judge these)
+
+Optional per cycle — the automated baseline (A–E) stands on its own — but **a page is never certified fully pass until these are signed.** A page is never green on automated numbers alone.
+
+1. **Keyboard only.** Set the mouse aside. Tab forward, Shift+Tab back, Enter/Space to activate. Try browse → open a product → add to cart → reach checkout without the mouse. Note anywhere you get stuck or cannot get out — a "trap".
+2. **Visible focus.** As you Tab, confirm you can always see what is selected (outline or ring). Note any element where the highlight vanishes.
+3. **Logical order.** Does Tab move in the order things appear on screen (roughly top to bottom)? Note strange jumps.
+4. **Screen reader.** Turn it on (Mac VoiceOver `Cmd+F5`; Windows NVDA/Narrator). Listen to the top of the page and one product. Does it make sense? Are buttons announced by what they do ("Add to cart") rather than just "button"?
+5. **Alt-text quality.** Confirm product images describe themselves ("sage green mock neck, front view") rather than a filename ("IMG_0421.jpg") or nothing. A tool only checks that alt text *exists* (the coverage count is in E); you check that it is *useful*.
+6. **Color contrast.** Look for hard-to-read text — light gray on white, text over a busy photo, button text on hover. Note anything that strains (D gives the automated `color-contrast` count; this is the by-eye pass).
+7. **Reduced motion.** Turn on the OS "reduce motion" setting (Mac: System Settings → Accessibility → Display → Reduce motion). Confirm animations actually calm down. Record pass/fail in Section F.
+
+**Two numbers a green lab result will lie about:** INP (lab shows TBT only) and interaction-driven CLS. Never mark these "pass" on lab data — confirm with manual interaction or the field data in **C**.
 
 ## The scorecard
 
-Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD-baseline.md` and fill it in. That filled file is the baseline. **Filename convention: `[date]-[name].md`** — date first (ISO 8601), so a directory listing sorts chronologically. Same shape for every deliverable below.
+Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD-baseline.md` and fill it in. **First fill the header** — replace the `# Baseline scorecard — YYYY-MM-DD` title and the `Client / Site / Platform / Run by / Date / Golden path` line with real values (no leftover placeholders); then paste sections A–E from the tool artifacts. That filled file is the baseline. **Filename convention: `[date]-[name].md`** — date first (ISO 8601), so a directory listing sorts chronologically. Same shape for every deliverable below.
 
 ## Targets — the pass bar (same for every client)
 
@@ -79,8 +82,8 @@ Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD-baseline.m
 - **LCP:** ≤ 2.5s, desktop and mobile
 - **INP:** ≤ 200ms, desktop and mobile
 - **CLS:** ≤ 0.1, desktop and mobile
-- **WAVE errors / contrast errors:** 0 / 0, desktop and mobile
-- **Manual a11y:** keyboard pass · focus visible · screen reader pass · 0 contrast fails · 100% meaningful alt
+- **Accessibility audit failures (axe via PSI, Section D):** 0, including 0 `color-contrast`, desktop and mobile
+- **Manual a11y (Section F):** keyboard pass · focus visible · screen reader pass · 0 contrast fails · 100% meaningful alt
 - **SEO checklist:** every item passing
 
 ## Deliverables

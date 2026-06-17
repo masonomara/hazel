@@ -6,7 +6,7 @@ Golden path: [page 1 url] · [page 2 url] · [page 3 url]
 
 Copy this file to `YYYY-MM-DD-baseline.md` (date first, ISO 8601 — the `[date]-[name].md` convention) and fill every cell with a raw number or pass/fail. Compare to the Targets in `hobbes/BASELINE.md`. The filled file **is** the baseline.
 
-Sections A, B1, and B2 are filled by Hobbes from `hobbes/tools/psi.py` (PSI API) — paste from its `psi-results.md` artifact. Sections C and D are the human's to sign.
+Sections A, B1, B2, C1, D and E are filled by the tools — `psi.py` → A / B1 / B2 / C1, `seo.py` → D / E; paste from their `*-results.md` artifacts. Section C2 (manual a11y) and the alt-text / contrast *quality* judgments are the human's to sign — a page is never marked pass on the automated rows alone.
 
 ## A. Lighthouse scores (LAB — PSI server)
 
@@ -44,9 +44,24 @@ Real users, per page (not per device). "origin agg." = the page lacks page-level
 | Collection |  |  |  |  |
 | Product |  |  |  |  |
 
-## C. Accessibility detail
+## C1. Accessibility — automated (axe-core via PSI)
 
-| Page / Device | WAVE errors | WAVE contrast errors | Keyboard pass | Focus visible | Screen reader pass | Contrast fails | Alt coverage |
+Filled by `psi.py` from PSI's accessibility audits (these are axe-core checks — no separate axe/WAVE run needed). `color-contrast` is the contrast-error count, `image-alt` the alt gaps. List each failing rule with its node count.
+
+| Page / Device | Failing axe audits | Details (rule × nodes) |
+|---|---|---|
+| Home — mobile |  |  |
+| Home — desktop |  |  |
+| Collection — mobile |  |  |
+| Collection — desktop |  |  |
+| Product — mobile |  |  |
+| Product — desktop |  |  |
+
+## C2. Accessibility — manual (human sign-off; tools cannot judge these)
+
+A page is never marked pass until these are signed. C1 gives the automated counts; here you judge keyboard flow, screen-reader sense, and whether the alt text that *exists* is meaningful.
+
+| Page / Device | Keyboard | Focus visible | Logical order | Screen reader | Alt meaningful | Contrast (by eye) | Reduced motion |
 |---|---|---|---|---|---|---|---|
 | Home — mobile |  |  |  |  |  |  |  |
 | Home — desktop |  |  |  |  |  |  |  |

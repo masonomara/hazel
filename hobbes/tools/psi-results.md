@@ -1,4 +1,4 @@
-# PSI results — 2026-06-17 13:15
+# PSI results — 2026-06-17 13:42
 
 Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field
 are pulled and labelled SEPARATELY so they can't be mixed. Transcribe these
@@ -35,5 +35,18 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | Home | 1.581 | 104.0 | 0.08 | FAST |
 | Collection | 0.783 | 78.0 | 0.01 | FAST |
 | Product — origin agg. | 1.013 | 96.0 | 0.0 | FAST |
+
+## C. Accessibility — automated (axe-core via PSI)
+
+Failing axe audits straight from PSI's a11y category — `color-contrast` is the contrast-error count, `image-alt` the alt gaps. The manual rows (keyboard, focus visible, screen reader, contrast-by-eye, reduced motion) are NOT here — those stay human.
+
+| Page / Device | Failing axe audits | Details (rule × nodes) |
+|---|---|---|
+| Home — mobile ⚠ | 2 | label-content-name-mismatch×3, frame-title×1 |
+| Home — desktop ⚠ | 2 | label-content-name-mismatch×3, frame-title×1 |
+| Collection — mobile ⚠ | 4 | label-content-name-mismatch×4, color-contrast×1, frame-title×1, heading-order×1 |
+| Collection — desktop ⚠ | 3 | label-content-name-mismatch×4, color-contrast×1, frame-title×1 |
+| Product — mobile ⚠ | 3 | button-name×5, image-alt×2, frame-title×1 |
+| Product — desktop ⚠ | 3 | button-name×5, image-alt×2, frame-title×1 |
 
 > ⚠ Incomplete lab runs — PSI hit its time limit, numbers unreliable, re-measure with `--fresh`: Home mobile, Home desktop, Collection mobile, Collection desktop, Product mobile, Product desktop

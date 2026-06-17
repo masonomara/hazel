@@ -118,6 +118,23 @@ def field(metrics, mkey, scale=1.0):
     return round(m["percentile"] * scale, 3 if scale != 1 else 0)
 
 
+def a11y_fails(lh):
+    """Failing accessibility audits from PSI's Lighthouse run — these ARE
+    axe-core checks, so no separate axe run is needed. Returns a list of
+    (audit_id, failing_node_count) for the binary a11y audits that scored 0.
+    Manual checks (keyboard, screen reader, focus) come back as 'manual'
+    scoreDisplayMode and are intentionally excluded — those stay human."""
+    cat = lh.get("categories", {}).get("accessibility", {})
+    audits = lh.get("audits", {})
+    fails = []
+    for ref in cat.get("auditRefs", []):
+        a = audits.get(ref["id"], {})
+        if a.get("scoreDisplayMode") == "binary" and a.get("score") == 0:
+            nodes = len(a.get("details", {}).get("items", []))
+            fails.append((ref["id"], nodes))
+    return sorted(fails, key=lambda x: -x[1])
+
+
 def main():
     args = sys.argv[1:]
     fresh = "--fresh" in args  # ignore cache, re-fetch everything
@@ -152,7 +169,7 @@ def main():
     with ThreadPoolExecutor(max_workers=min(MAX_CONCURRENCY, len(jobs))) as ex:
         results = dict((j, d) for j, d in ex.map(run, jobs))
 
-    rows_a, rows_lab, rows_field = [], [], []
+    rows_a, rows_lab, rows_field, rows_c = [], [], [], []
     failed = [j for j, d in results.items() if d is None]
     warned = []  # lab runs PSI itself flagged as incomplete — numbers unreliable
     for label, url in urls:
@@ -172,6 +189,9 @@ def main():
                 f"{audit_s(lh,'server-response-time')} | {audit_ms(lh,'total-blocking-time')} | "
                 f"{audit_s(lh,'speed-index')} |"
             )
+            fails = a11y_fails(lh)
+            detail = ", ".join(f"{aid}×{n}" for aid, n in fails) or "none"
+            rows_c.append(f"| {label} — {strat}{mark} | {len(fails)} | {detail} |")
         # Field data (CrUX 28-day). PREFER page-level; use the origin aggregate
         # only if neither device has page-level data — and LABEL it when we do,
         # so a whole-site average is never mistaken for this page's real numbers.
@@ -217,6 +237,17 @@ def main():
         "| Page | LCP (s) | INP (ms) | CLS | Overall |",
         "|---|---|---|---|---|",
         *rows_field,
+        "",
+        "## C. Accessibility — automated (axe-core via PSI)",
+        "",
+        "Failing axe audits straight from PSI's a11y category — `color-contrast` is "
+        "the contrast-error count, `image-alt` the alt gaps. The manual rows "
+        "(keyboard, focus visible, screen reader, contrast-by-eye, reduced motion) "
+        "are NOT here — those stay human.",
+        "",
+        "| Page / Device | Failing axe audits | Details (rule × nodes) |",
+        "|---|---|---|",
+        *rows_c,
     ]
     if warned:
         L += ["", "> ⚠ Incomplete lab runs — PSI hit its time limit, numbers unreliable, "

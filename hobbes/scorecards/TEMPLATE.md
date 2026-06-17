@@ -1,4 +1,4 @@
-# Baseline scorecard — YYYY-MM
+# Baseline scorecard — YYYY-MM-DD
 
 Client: [name] · Site: [url] · Platform: [platform] · Run by: [name] · Date: [YYYY-MM-DD]
 

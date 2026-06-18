@@ -16,7 +16,9 @@ USAGE:
   python3 hobbes/tools/baseline.py --resume   # reuse cache (recover a stalled run)
   python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick rerun)
 
-Writes hobbes/scorecards/YYYY-MM-DD-baseline.md.
+Writes the whole cycle into one folder: hobbes/scorecards/YYYY-MM-DD/ —
+baseline.md plus the raw artifacts (raw/), the digests, and crawl.html, so the
+baseline and (hand-authored) findings.md sit beside the artifacts they came from.
 """
 
 import subprocess
@@ -66,14 +68,18 @@ def between(text, start, end):
 
 def main():
     no_crawl = "--no-crawl" in sys.argv[1:]
-    passthrough = [] if "--resume" in sys.argv[1:] else ["--fresh"]
+    date = datetime.now().strftime("%Y-%m-%d")
+    rundir = HOBBES / "scorecards" / date          # one folder per cycle
+    (rundir / "raw").mkdir(parents=True, exist_ok=True)
+    # Thread the cycle folder through every tool so raw artifacts + digests land together.
+    passthrough = ([] if "--resume" in sys.argv[1:] else ["--fresh"]) + ["--run-dir", str(rundir)]
     run_tool("psi.py", passthrough)
     run_tool("seo.py", passthrough)
     if not no_crawl:
         run_tool("crawl.py", passthrough)
 
-    psi = (TOOLS / "psi-results.md").read_text()
-    seo = (TOOLS / "seo-results.md").read_text()
+    psi = (rundir / "psi-results.md").read_text()
+    seo = (rundir / "seo-results.md").read_text()
     tmpl = TEMPLATE.read_text()
 
     abcd = after(psi, "## A.")                      # A, B, C, D + the ⚠/✗cut footnotes
@@ -86,10 +92,9 @@ def main():
     # crawl-results.md for findings). Just the count table, no competing header.
     crawl_counts = ""
     if not no_crawl:
-        crawl = (TOOLS / "crawl-results.md").read_text()
+        crawl = (rundir / "crawl-results.md").read_text()
         crawl_counts = between(crawl, "| Site-wide (crawl) | Count |", "## Detail")
 
-    date = datetime.now().strftime("%Y-%m-%d")
     golden = " · ".join(f"[{lbl}]({u})" for lbl, u in DEFAULT_URLS)
     doc = "\n".join([
         f"# Baseline scorecard — {date}",
@@ -113,11 +118,13 @@ def main():
         f,
     ]) + "\n"
 
-    out = HOBBES / "scorecards" / f"{date}-baseline.md"
+    out = rundir / "baseline.md"
     out.write_text(doc)
     print(f"\n✓ MVP baseline written → {out}", file=sys.stderr)
     print("  A–E filled from the tools; Section F (manual a11y) left for human sign-off.",
           file=sys.stderr)
+    print(f"  Cycle folder: {rundir} (raw/ + digests + crawl.html alongside).", file=sys.stderr)
+    print("  Findings: author findings.md in the same folder from the artifacts.", file=sys.stderr)
 
 
 if __name__ == "__main__":

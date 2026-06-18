@@ -19,7 +19,8 @@ USAGE:
   python3 hobbes/tools/seo.py                 # default golden path
   python3 hobbes/tools/seo.py URL [URL ...]   # custom URLs
   python3 hobbes/tools/seo.py --fresh         # ignore cache, re-fetch
-  python3 hobbes/tools/seo.py --out PATH      # write artifact elsewhere
+  python3 hobbes/tools/seo.py --out PATH      # write digest elsewhere
+  python3 hobbes/tools/seo.py --run-dir DIR   # cycle folder (raw/ + digest); default today's
 """
 
 import json
@@ -37,16 +38,29 @@ DEFAULT_URLS = [
     ("Collection", "https://hazelboutique.com/collections/all-hazel-brand"),
     ("Product", "https://hazelboutique.com/products/the-capri-collection-baby-pink"),
 ]
-CACHE_DIR = Path(__file__).resolve().parent  # *.seo.json here is git-ignored
+TOOLS = Path(__file__).resolve().parent
+HOBBES = TOOLS.parent
 MAX_CONCURRENCY = 4
 OG_REQUIRED = ["og:title", "og:image", "og:url", "og:type"]
 LD_KNOWN = {"Product", "BreadcrumbList", "Organization", "WebSite", "WebPage",
             "ItemList", "CollectionPage", "Article", "FAQPage"}
 
 
-def cache_path(url):
+def resolve_run_dir(args):
+    """Per-cycle output folder: hobbes/scorecards/<date>/. Raw *.seo.json caches
+    live in raw/; the digest sits at the top. baseline.py passes --run-dir so
+    psi/seo/crawl share one cycle folder; a standalone run defaults to today's."""
+    if "--run-dir" in args:
+        d = Path(args[args.index("--run-dir") + 1])
+    else:
+        d = HOBBES / "scorecards" / datetime.now().strftime("%Y-%m-%d")
+    (d / "raw").mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def cache_path(raw, url):
     slug = "".join(c if c.isalnum() else "_" for c in url)[:80]
-    return CACHE_DIR / f"{slug}.seo.json"
+    return raw / f"{slug}.seo.json"
 
 
 class Page(HTMLParser):
@@ -106,9 +120,9 @@ class Page(HTMLParser):
             self._ld.append(data)
 
 
-def fetch(url, fresh, tries=4, timeout=30):
+def fetch(url, fresh, raw, tries=4, timeout=30):
     """Returns {html, xrobots, final_url} or None. 4xx → page issue, no retry."""
-    cf = cache_path(url)
+    cf = cache_path(raw, url)
     if not fresh and cf.exists():
         print(f"  ⤿ cached {url}", file=sys.stderr, flush=True)
         return json.loads(cf.read_text())
@@ -236,16 +250,20 @@ def site_file(root, path):
 def main():
     args = sys.argv[1:]
     fresh = "--fresh" in args
-    out = Path(__file__).resolve().parent / "seo-results.md"
-    if "--out" in args:
-        i = args.index("--out")
-        out = Path(args[i + 1])
-        del args[i:i + 2]
+    rd = resolve_run_dir(args)
+    raw = rd / "raw"
+    out = rd / "seo-results.md"
+    for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
+        if flag in args:
+            i = args.index(flag)
+            if flag == "--out":
+                out = Path(args[i + 1])
+            del args[i:i + 2]
     positional = [a for a in args if a != "--fresh"]
     urls = [(f"URL{i+1}", u) for i, u in enumerate(positional)] or DEFAULT_URLS
 
     with ThreadPoolExecutor(max_workers=min(MAX_CONCURRENCY, len(urls))) as ex:
-        pages = list(ex.map(lambda lu: (lu, fetch(lu[1], fresh)), urls))
+        pages = list(ex.map(lambda lu: (lu, fetch(lu[1], fresh, raw)), urls))
 
     # Duplicate-title detection needs every title first.
     titles = []

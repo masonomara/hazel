@@ -12,9 +12,11 @@ USAGE:
   python3 hobbes/tools/psi.py                 # default golden path
   python3 hobbes/tools/psi.py URL [URL ...]   # custom URLs
   python3 hobbes/tools/psi.py --fresh         # ignore cache, re-fetch all
-  python3 hobbes/tools/psi.py --out PATH      # write artifact elsewhere
-Prints the scorecard tables AND writes them to hobbes/tools/psi-results.md
-(the durable artifact). The keyless PSI API is rate-capped to a shared pool
+  python3 hobbes/tools/psi.py --out PATH      # write digest elsewhere
+  python3 hobbes/tools/psi.py --run-dir DIR   # cycle folder (raw/ + digest); default today's
+Prints the scorecard tables AND writes them to the cycle folder
+hobbes/scorecards/<date>/psi-results.md (raw *.psi.json caches go in raw/).
+The keyless PSI API is rate-capped to a shared pool
 that is usually exhausted (HTTP 429) — a key is required, not optional.
 """
 
@@ -48,19 +50,32 @@ INCOMPLETE_SIG = "loaded too slowly"
 # An LCP this large on an incomplete run is the cutoff artifact, not a real paint
 # (real-but-slow LCPs sit well under this; our truncated ones were 13–21s).
 LCP_ARTIFACT_S = 8.0
-CACHE_DIR = Path(__file__).resolve().parent  # *.psi.json here is git-ignored
+TOOLS = Path(__file__).resolve().parent
+HOBBES = TOOLS.parent
 
 
-def cache_path(url, strategy):
+def resolve_run_dir(args):
+    """Per-cycle output folder: hobbes/scorecards/<date>/. Big raw JSON caches
+    live in raw/; the digest sits at the top. baseline.py passes --run-dir so
+    psi/seo/crawl share one cycle folder; a standalone run defaults to today's."""
+    if "--run-dir" in args:
+        d = Path(args[args.index("--run-dir") + 1])
+    else:
+        d = HOBBES / "scorecards" / datetime.now().strftime("%Y-%m-%d")
+    (d / "raw").mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def cache_path(raw, url, strategy):
     slug = "".join(c if c.isalnum() else "_" for c in url)[:80]
-    return CACHE_DIR / f"{slug}-{strategy}.psi.json"
+    return raw / f"{slug}-{strategy}.psi.json"
 
 
 def load_key():
     key = os.environ.get("PSI_API_KEY", "").strip()
     if key:
         return key
-    key_file = Path(__file__).resolve().parent / ".psi-key"  # alongside this script
+    key_file = TOOLS / ".psi-key"  # alongside this script
     if key_file.exists():
         raw = key_file.read_text().strip()
         # tolerate either "KEY" or "PSI_API_KEY=KEY"
@@ -146,11 +161,15 @@ def a11y_fails(lh):
 def main():
     args = sys.argv[1:]
     fresh = "--fresh" in args  # ignore cache, re-fetch everything
-    out = Path(__file__).resolve().parent / "psi-results.md"  # durable artifact
-    if "--out" in args:
-        i = args.index("--out")
-        out = Path(args[i + 1])
-        del args[i:i + 2]
+    rd = resolve_run_dir(args)
+    raw = rd / "raw"
+    out = rd / "psi-results.md"                   # durable digest, in the cycle folder
+    for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
+        if flag in args:
+            i = args.index(flag)
+            if flag == "--out":
+                out = Path(args[i + 1])
+            del args[i:i + 2]
     positional = [a for a in args if a != "--fresh"]
     urls = [(f"URL{i+1}", u) for i, u in enumerate(positional)] or DEFAULT_URLS
     key = load_key()
@@ -163,7 +182,7 @@ def main():
 
     def run(job):
         label, url, strat = job
-        cf = cache_path(url, strat)
+        cf = cache_path(raw, url, strat)
         if not fresh and cf.exists():
             print(f"  ⤿ cached {label} {strat}", file=sys.stderr, flush=True)
             return job, json.loads(cf.read_text())

@@ -13,7 +13,8 @@ Mirrors psi.py / seo.py: gentle live crawl, a cached crawl.json (reused on
 USAGE:
   python3 hobbes/tools/crawl.py            # reuse cached crawl.json if present
   python3 hobbes/tools/crawl.py --fresh    # re-crawl the site
-  python3 hobbes/tools/crawl.py --out PATH # write artifact elsewhere
+  python3 hobbes/tools/crawl.py --out PATH # write digest elsewhere
+  python3 hobbes/tools/crawl.py --run-dir DIR # cycle folder (raw/crawl.json + crawl.html + digest)
 """
 
 import json
@@ -25,12 +26,25 @@ from datetime import datetime
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
+HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
 from psi import DEFAULT_URLS  # single source of truth for the site
 
 BIN = "siteone-crawler"
-CACHE = TOOLS / "crawl.json"
 LIMITS = ["--max-reqs-per-sec=5", "--workers=3", "--timeout=10", "--max-visited-urls=2000"]
+
+
+def resolve_run_dir(args):
+    """Per-cycle output folder: hobbes/scorecards/<date>/. crawl.json lives in
+    raw/, the human-readable crawl.html and digest sit at the top. baseline.py
+    passes --run-dir so psi/seo/crawl share one cycle folder; standalone defaults
+    to today's."""
+    if "--run-dir" in args:
+        d = Path(args[args.index("--run-dir") + 1])
+    else:
+        d = HOBBES / "scorecards" / datetime.now().strftime("%Y-%m-%d")
+    (d / "raw").mkdir(parents=True, exist_ok=True)
+    return d
 
 
 def site_root():
@@ -38,21 +52,25 @@ def site_root():
     return f"{p.scheme}://{p.netloc}/"
 
 
-def run_crawl(fresh):
-    if not fresh and CACHE.exists():
-        print(f"  ⤿ cached crawl ({CACHE.name})", file=sys.stderr, flush=True)
-        return json.loads(CACHE.read_text())
+def run_crawl(fresh, cache, html_out):
+    if not fresh and cache.exists():
+        print(f"  ⤿ cached crawl ({cache.name})", file=sys.stderr, flush=True)
+        return json.loads(cache.read_text())
     if not shutil.which(BIN):
         sys.exit(f"✗ {BIN} not found — install: brew install janreges/tap/siteone-crawler")
     root = site_root()
     print(f"… crawling {root} (gentle: 5 req/s, 3 workers, ≤2000 urls)", file=sys.stderr, flush=True)
-    cmd = [BIN, f"--url={root}", "--output=json", f"--output-json-file={CACHE}",
+    # JSON → raw/ (the machine source); the full SiteOne HTML report → crawl.html
+    # (the robust human view, kept in the cycle folder, not dumped in tmp/). The
+    # default tmp/ text dump is disabled.
+    cmd = [BIN, f"--url={root}", "--output=json", f"--output-json-file={cache}",
+           f"--output-html-report={html_out}", "--output-text-file=",
            "--hide-progress-bar", "--no-color"] + LIMITS
     r = subprocess.run(cmd, stdout=subprocess.DEVNULL)
-    if r.returncode != 0 or not CACHE.exists():
+    if r.returncode != 0 or not cache.exists():
         sys.exit(f"✗ crawl failed (exit {r.returncode}).")
-    print("  ✓ crawl complete", file=sys.stderr, flush=True)
-    return json.loads(CACHE.read_text())
+    print(f"  ✓ crawl complete · report → {html_out.name}", file=sys.stderr, flush=True)
+    return json.loads(cache.read_text())
 
 
 def table_rows(tables, name):
@@ -62,11 +80,14 @@ def table_rows(tables, name):
 def main():
     args = sys.argv[1:]
     fresh = "--fresh" in args
-    out = TOOLS / "crawl-results.md"
+    rd = resolve_run_dir(args)
+    cache = rd / "raw" / "crawl.json"
+    html_out = rd / "crawl.html"
+    out = rd / "crawl-results.md"
     if "--out" in args:
         out = Path(args[args.index("--out") + 1])
 
-    data = run_crawl(fresh)
+    data = run_crawl(fresh, cache, html_out)
     tables = data.get("tables", {})
 
     broken = table_rows(tables, "404")

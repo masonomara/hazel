@@ -1,4 +1,4 @@
-# Crawl results — 2026-06-17 15:07
+# Crawl results — 2026-06-17 18:45
 
 Captured by `hobbes/tools/crawl.py` (SiteOne, gentle whole-site crawl). The
 count table feeds scorecard **Section E**; the detail feeds **findings**.

@@ -1,4 +1,4 @@
-# PSI results — 2026-06-17 15:02
+# PSI results — 2026-06-17 18:45
 
 Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field
 are pulled and labelled SEPARATELY so they can't be mixed. Transcribe these

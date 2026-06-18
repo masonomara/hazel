@@ -4,13 +4,11 @@ Client: [name] · Site: [url] · Platform: [platform] · Run by: [name] · Date:
 
 Golden path: [page 1 url] · [page 2 url] · [page 3 url]
 
-Copy this file to `YYYY-MM-DD-baseline.md` (date first, ISO 8601 — the `[date]-[name].md` convention) and fill every cell with a raw number or pass/fail. Compare to the Targets in `hobbes/BASELINE.md`. The filled file **is** the baseline.
+`✓` = pass / present · `✗` = fail / missing · `✗cut` = PSI run truncated before network-idle (value is the cutoff) · blank = human sign-off pending.
 
-Sections A–E are filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E; paste from their `*-results.md` artifacts. Section F (manual a11y) and the alt-text / contrast *quality* judgments are the human's to sign — a page is never marked pass on the automated rows alone.
+Filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E, `crawl.py` → F. Section G (manual a11y) is the human's to sign. The filled file **is** the baseline; compare each cycle to the previous and to the Targets in `hobbes/BASELINE.md`.
 
-## A. Lighthouse scores (LAB — PSI server)
-
-`python3 hobbes/tools/psi.py`. Mobile uses PSI's fixed throttle (Moto G4 / slow 4G); desktop is unthrottled. A ⚠ on a row = PSI cut the run at its time limit (the page never reached network-idle): the category scores and early metrics (B) still stand. A `✗cut` Performance score / LCP is the cutoff value, not a real paint — treat it as unknown and investigate why the page never idles rather than re-measuring (local Lighthouse hits the same wall).
+## A. Lighthouse scores
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
@@ -21,9 +19,7 @@ Sections A–E are filled by the tools — `psi.py` → A / B / C / D, `seo.py` 
 | Product — mobile |  |  |  |  |
 | Product — desktop |  |  |  |  |
 
-## B. Lab metrics (LAB — not real INP; TBT is the lab stand-in)
-
-Lab only. Real INP and the real-user verdict are in C — never put a field number in this table.
+## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
@@ -34,32 +30,26 @@ Lab only. Real INP and the real-user verdict are in C — never put a field numb
 | Product — mobile |  |  |  |  |  |  |
 | Product — desktop |  |  |  |  |  |  |
 
-## C. Field data (CrUX 28-day, per page — the only real INP)
+## C. Field data (CrUX 28-day)
 
-Real users, per page (not per device). "origin agg." = the page lacks page-level CrUX so PSI returned the whole-site average — note it, don't treat it as the page's own number.
-
-| Page | LCP (s) | INP (ms) | CLS | Overall |
+| Page | LCP (s) | INP (ms) | CLS | Pass |
 |---|---|---|---|---|
 | Home |  |  |  |  |
 | Collection |  |  |  |  |
 | Product |  |  |  |  |
 
-## D. Accessibility — automated (axe-core via PSI)
+## D. Accessibility — automated (axe via PSI)
 
-Filled by `psi.py` from PSI's accessibility audits (these are axe-core checks — no separate axe/WAVE run needed). `color-contrast` is the contrast-error count, `image-alt` the alt gaps. List each failing rule with its node count.
+| Page / Device | Failing audits | Pass | Details (rule × nodes) |
+|---|---|---|---|
+| Home — mobile |  |  |  |
+| Home — desktop |  |  |  |
+| Collection — mobile |  |  |  |
+| Collection — desktop |  |  |  |
+| Product — mobile |  |  |  |
+| Product — desktop |  |  |  |
 
-| Page / Device | Failing axe audits | Details (rule × nodes) |
-|---|---|---|
-| Home — mobile |  |  |
-| Home — desktop |  |  |
-| Collection — mobile |  |  |
-| Collection — desktop |  |  |
-| Product — mobile |  |  |
-| Product — desktop |  |  |
-
-## E. SEO checklist
-
-Filled by `seo.py`. Per-page checks, plus the site-level files at the foot (once per site).
+## E. SEO checklist (golden path)
 
 | Item | Page 1 | Page 2 | Page 3 |
 |---|---|---|---|
@@ -69,19 +59,62 @@ Filled by `seo.py`. Per-page checks, plus the site-level files at the foot (once
 | Single H1 + ordered headings |  |  |  |
 | Valid structured data |  |  |  |
 | Open Graph / Twitter tags |  |  |  |
-| All images have meaningful alt |  |  |  |
-| Indexable (robots OK) |  |  |  |
+| All images have alt |  |  |  |
+| Indexable |  |  |  |
 
-| Site-level (once per site) | Present |
+| Site-level | Present |
 |---|---|
-| `sitemap.xml` |  |
-| `robots.txt` |  |
+| sitemap.xml |  |
+| robots.txt |  |
 
-## F. Accessibility — manual (optional; human sign-off, tools cannot judge these)
+## F. Site-wide (whole-site crawl)
 
-Optional per cycle — the automated baseline (A–E) stands on its own — but **a page cannot be certified fully pass until these manual rows are signed.** D gives the automated counts; here you judge keyboard flow, screen-reader sense, and whether the alt text that *exists* is meaningful.
+| SiteOne quality score (0–10) | Value |
+|---|---|
+| Performance |  |
+| SEO |  |
+| Security |  |
+| Accessibility |  |
+| Best practices |  |
 
-| Page / Device | Keyboard | Focus visible | Logical order | Screen reader | Alt meaningful | Contrast (by eye) | Reduced motion |
+| SEO / structure | Count | Pass |
+|---|---|---|
+| Broken links (4xx) |  |  |
+| Redirects |  |  |
+| Missing titles |  |  |
+| Duplicate titles |  |  |
+| Missing meta descriptions |  |  |
+| Pages with multiple H1 |  |  |
+| Pages with skipped heading levels |  |  |
+
+| Accessibility | Count | Pass |
+|---|---|---|
+| Pages missing image alt |  |  |
+| Pages missing aria-labels |  |  |
+| Pages missing roles |  |  |
+| Pages missing html lang |  |  |
+
+| Best practices | Count | Pass |
+|---|---|---|
+| Pages with invalid inline SVG |  |  |
+| Pages with duplicate inline SVG |  |  |
+| Pages with non-clickable phone numbers |  |  |
+| Valid HTML |  |  |
+
+| Security | Pass |
+|---|---|
+| HSTS header |  |
+| Content-Security-Policy |  |
+| Referrer-Policy |  |
+| Permissions-Policy |  |
+| Brotli compression |  |
+| HTTPS / valid TLS cert |  |
+
+## G. Accessibility — manual (human sign-off)
+
+Tools cannot judge these. A page is not certified fully pass until these rows are signed: keyboard flow, visible focus, logical order, screen-reader sense, whether the alt that exists is meaningful, contrast by eye, reduced motion.
+
+| Page / Device | Keyboard | Focus visible | Logical order | Screen reader | Alt meaningful | Contrast | Reduced motion |
 |---|---|---|---|---|---|---|---|
 | Home — mobile |  |  |  |  |  |  |  |
 | Home — desktop |  |  |  |  |  |  |  |

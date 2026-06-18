@@ -10,23 +10,23 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile | 66 ✗cut | 97 | 88 | 92 |
-| Home — desktop | 68 | 97 | 88 | 92 |
-| Collection — mobile | 46 ✗cut | 93 | 96 | 92 |
-| Collection — desktop | 71 | 94 | 96 | 92 |
-| Product — mobile | 49 | 88 | 96 | 92 |
-| Product — desktop | 72 | 88 | 73 | 92 |
+| Home — mobile | 63 ✗cut | 97 | 92 | 92 |
+| Home — desktop | 89 | 97 | 92 | 92 |
+| Collection — mobile | 38 ✗cut | 93 | 96 | 92 |
+| Collection — desktop | 91 | 94 | 92 | 92 |
+| Product — mobile | 73 | 88 | 96 | 92 |
+| Product — desktop | 88 | 88 | 73 | 92 |
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile | 11.18 ✗cut | 0.035 | 1.97 | 0.01 | 233 | 4.91 |
-| Home — desktop | 2.06 | 0.011 | 0.57 | 0.01 | 487 | 1.45 |
-| Collection — mobile | 19.85 ✗cut | 0 | 5.81 | 0.01 | 465 | 7.56 |
-| Collection — desktop | 1.53 | 0.011 | 0.61 | 0.01 | 516 | 1.37 |
-| Product — mobile | 5.63 | 0.0 | 1.98 | 0.01 | 1444 | 4.83 |
-| Product — desktop | 1.65 | 0.015 | 0.57 | 0.01 | 461 | 1.37 |
+| Home — mobile | 10.31 ✗cut | 0.082 | 1.97 | 0.01 | 258 | 4.89 |
+| Home — desktop | 1.89 | 0.01 | 0.61 | 0.01 | 118 | 1.31 |
+| Collection — mobile | 13.81 ✗cut | 0 | 3.55 | 0.01 | 1145 | 7.18 |
+| Collection — desktop | 1.57 | 0.014 | 0.63 | 0.01 | 145 | 1.21 |
+| Product — mobile | 5.81 | 0.0 | 1.96 | 0.01 | 148 | 4.33 |
+| Product — desktop | 1.85 | 0.01 | 0.61 | 0.01 | 146 | 1.38 |
 
 ## C. Field data (CrUX 28-day)
 
@@ -65,7 +65,7 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | sitemap.xml | ✓ |
 | robots.txt | ✓ |
 
-## F. Site-wide (whole-site crawl — 164 pages)
+## F. Site-wide (whole-site crawl — 200 pages)
 
 | SiteOne quality score (0–10) | Value |
 |---|---|
@@ -83,21 +83,21 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | Duplicate titles | 1 | ✗ |
 | Missing meta descriptions | 51 | ✗ |
 | Pages with multiple H1 | 2 | ✗ |
-| Pages with skipped heading levels | 165 | ✗ |
+| Pages with skipped heading levels | 204 | ✗ |
 
 | Accessibility | Count | Pass |
 |---|---|---|
-| Pages missing image alt | 164 | ✗ |
-| Pages missing aria-labels | 164 | ✗ |
-| Pages missing roles | 164 | ✗ |
+| Pages missing image alt | 203 | ✗ |
+| Pages missing aria-labels | 203 | ✗ |
+| Pages missing roles | 203 | ✗ |
 | Pages missing html lang | 0 | ✓ |
 
 | Best practices | Count | Pass |
 |---|---|---|
-| Pages with invalid inline SVG | 165 | ✗ |
-| Pages with duplicate inline SVG | 17 | ✗ |
+| Pages with invalid inline SVG | 204 | ✗ |
+| Pages with duplicate inline SVG | 23 | ✗ |
 | Pages with non-clickable phone numbers | 1 | ✗ |
-| Valid HTML | 164 | ✓ |
+| Valid HTML | 200 | ✓ |
 
 | Security | Pass |
 |---|---|

@@ -1,4 +1,4 @@
-# SEO results — 2026-06-18 09:29
+# SEO results — 2026-06-18 10:19
 
 Captured by `hobbes/tools/seo.py` — scorecard Section E. Every cell is parsed
 from page HTML/headers. Alt-text shows COVERAGE only — a human judges

@@ -2,10 +2,9 @@
 """
 baseline.py — one-command MVP baseline runner.
 
-Runs psi.py (A–D), seo.py (E), and crawl.py (site-wide counts into E), then
-stamps a dated scorecard from TEMPLATE.md with the header populated and sections
-A–E pasted in. Section F (manual a11y) is left blank for the human — that's the
-above-and-beyond pass.
+Runs psi.py (A–D), seo.py (E), and crawl.py (site-wide F), then stamps a dated
+scorecard from TEMPLATE.md with the header populated and sections A–F pasted in.
+Section G (manual a11y) is left blank for the human — the above-and-beyond pass.
 
 A baseline should reflect the CURRENT site, so this fetches fresh by default.
 If a fresh run stalls partway, every successful call is still cached, so
@@ -18,7 +17,7 @@ USAGE:
 
 Writes the whole cycle into one folder: hobbes/scorecards/YYYY-MM-DD/ —
 baseline.md plus the raw artifacts (raw/), the digests, and crawl.html, so the
-baseline and (hand-authored) findings.md sit beside the artifacts they came from.
+baseline and the generated findings.md sit beside the artifacts they came from.
 """
 
 import subprocess
@@ -122,7 +121,8 @@ def main():
     print("  A–F filled from the tools; Section G (manual a11y) left for human sign-off.",
           file=sys.stderr)
     print(f"  Cycle folder: {rundir} (raw/ + digests + crawl.html alongside).", file=sys.stderr)
-    print("  Findings: author findings.md in the same folder from the artifacts.", file=sys.stderr)
+    print("  Next: python3 hobbes/tools/findings.py — builds findings.md (the problem catalog) from raw/.",
+          file=sys.stderr)
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ Each priority is a **baseline → target** so "done" is not a matter of opinion.
 
 ## Active builds
 
-- **Hazel storefront** - cleaned up and running better (base theme fork stripped, fonts and tokens set, mobile fixed). Step 0 baseline captured 2026-06-11 — numbers in the scorecard (`hobbes/scorecards/2026-06-11-baseline.md`), gaps in the findings doc (`2026-06-11-findings.md`). Next: work the findings shortlist — a11y alt/button-name, the missing meta descriptions, the double-`h1`, and Home mobile lab perf.
+- **Hazel storefront** - cleaned up and running better (base theme fork stripped, fonts and tokens set, mobile fixed). Step 0 baseline captured 2026-06-11 — numbers in the scorecard (`hobbes/scorecards/2026-06-11/baseline.md`), gaps in the findings doc (`2026-06-11-findings.md`). Next: work the findings shortlist — a11y alt/button-name, the missing meta descriptions, the double-`h1`, and Home mobile lab perf.
 
 ## Needs work
 

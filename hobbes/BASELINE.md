@@ -25,8 +25,8 @@ Run it at the start of an engagement and at the start of each work cycle. It wil
 
 The baseline comes in two tiers, and naming them keeps a partial run honest:
 
-- **MVP baseline (A–E) — fully automated.** Hobbes runs the two tools and fills every cell in sections A–E. This is a *complete* baseline on its own — a real, comparable, trustworthy snapshot. An A–E run is finished work, not a fraction of one.
-- **Above-and-beyond (F) — human.** The manual accessibility pass. Optional per cycle; the MVP baseline stands without it, but a page is not certified *fully* pass until F is signed.
+- **MVP baseline (A–F) — fully automated.** Hobbes runs the three tools and fills every cell in sections A–F. This is a *complete* baseline on its own — a real, comparable, trustworthy snapshot. An A–F run is finished work, not a fraction of one.
+- **Above-and-beyond (G) — human.** The manual accessibility pass. Optional per cycle; the MVP baseline stands without it, but a page is not certified *fully* pass until G is signed.
 
 The tools cover all 6 page×device combinations in one go; the manual pass is per page.
 
@@ -37,10 +37,11 @@ The tools cover all 6 page×device combinations in one go; the manual pass is pe
 ```
 python3 hobbes/tools/baseline.py            # fresh capture (the real baseline)
 python3 hobbes/tools/baseline.py --resume   # reuse cache to recover a stalled run
+python3 hobbes/tools/baseline.py --no-crawl # skip the whole-site crawl (quick A–E rerun)
 ```
 
-`baseline.py` runs **both tools together — `psi.py` then `seo.py`** — and stamps a dated `hobbes/scorecards/YYYY-MM-DD/baseline.md` from `TEMPLATE.md` (the
-cycle folder also holds the raw artifacts in `raw/`, the digests, and `crawl.html`): header and golden path filled, sections **A–E** pasted in (A–D from PSI, E from SEO), section **F** left blank for the human pass. It fetches fresh by default (a baseline must reflect the current site); if a run stalls partway the successful calls are cached, so `--resume` picks up the rest. If either tool errors it aborts rather than write a half-scorecard. The two tools it drives:
+`baseline.py` runs **all three tools together — `psi.py` then `seo.py` then `crawl.py`** — and stamps a dated `hobbes/scorecards/YYYY-MM-DD/baseline.md` from `TEMPLATE.md` (the
+cycle folder also holds the raw artifacts in `raw/`, the digests, and `crawl.html`): header and golden path filled, sections **A–F** pasted in (A–D from PSI, E from SEO, F from the crawl), section **G** left blank for the human pass. It fetches fresh by default (a baseline must reflect the current site); if a run stalls partway the successful calls are cached, so `--resume` picks up the rest. If any tool errors it aborts rather than write a half-scorecard. The three tools it drives:
 
 **`python3 hobbes/tools/psi.py`** — calls the PSI API for each golden-path page × mobile/desktop and fills **A** (category scores), **B** (lab metrics), **C** (field/CrUX), and **D** (accessibility — the failing axe audits, since PSI's a11y category *is* axe-core), writing `hobbes/scorecards/<date>/psi-results.md`. Run it standalone only to refresh A–D alone. What it guarantees, so the run-1 mistakes can't recur:
 
@@ -52,13 +53,15 @@ cycle folder also holds the raw artifacts in `raw/`, the digests, and `crawl.htm
 
 **`python3 hobbes/tools/seo.py`** — fetches each page's HTML and fills **E** (SEO checklist + the site-level `sitemap.xml` / `robots.txt`), writing `hobbes/scorecards/<date>/seo-results.md`; run it standalone only to refresh E alone. It parses title, meta description, canonical, single-H1 + heading order, JSON-LD structured-data type, Open Graph/Twitter, image-alt **coverage**, and indexability. Alt-text *quality* is left to the human (F).
 
-**Optional deeper SEO** (not automated, run when a per-page check flags something): the **Google Rich Results Test** (`search.google.com/test/rich-results`) validates structured-data *correctness* — seo.py only confirms a type is present — and **SiteOne Crawler** sweeps the whole site for missing titles/descriptions/alt and broken links.
+**`python3 hobbes/tools/crawl.py`** — runs the **SiteOne Crawler** across the whole site (no page cap) and fills **F** (site-wide quality grades plus SEO/structure, accessibility, best-practice, and security-header counts), writing `hobbes/scorecards/<date>/crawl-results.md` and the sortable `crawl.html`. Where psi.py and seo.py judge the three golden-path pages, crawl.py judges *every* page — so **F** is where site-wide rot surfaces that a 3-page sample misses: meta descriptions absent across dozens of pages, image-alt gaps sitewide, missing security headers. Per-URL detail stays in `crawl-results.md` for the findings author. Skip it with `--no-crawl` for a quick A–E refresh.
+
+**Optional deeper SEO** (not automated, run when a per-page check flags something): the **Google Rich Results Test** (`search.google.com/test/rich-results`) validates structured-data *correctness* — seo.py only confirms a type is present.
 
 **Non-public URLs (fallback).** The PSI API only reaches the live, public site. To baseline an unpublished theme draft, preview URL, localhost, or anything gated, run Lighthouse locally instead (Chrome Incognito, extensions off → DevTools → **Lighthouse** → pick the device → run 3× and take the median). Local scores run ~10–15 points off PSI, so never mix the two within one baseline.
 
-### 2. Manual accessibility pass — Section F (Human; tools cannot judge these)
+### 2. Manual accessibility pass — Section G (Human; tools cannot judge these)
 
-Optional per cycle — the automated baseline (A–E) stands on its own — but **a page is never certified fully pass until these are signed.** A page is never green on automated numbers alone.
+Optional per cycle — the automated baseline (A–F) stands on its own — but **a page is never certified fully pass until these are signed.** A page is never green on automated numbers alone.
 
 1. **Keyboard only.** Set the mouse aside. Tab forward, Shift+Tab back, Enter/Space to activate. Try browse → open a product → add to cart → reach checkout without the mouse. Note anywhere you get stuck or cannot get out — a "trap".
 2. **Visible focus.** As you Tab, confirm you can always see what is selected (outline or ring). Note any element where the highlight vanishes.
@@ -66,13 +69,13 @@ Optional per cycle — the automated baseline (A–E) stands on its own — but 
 4. **Screen reader.** Turn it on (Mac VoiceOver `Cmd+F5`; Windows NVDA/Narrator). Listen to the top of the page and one product. Does it make sense? Are buttons announced by what they do ("Add to cart") rather than just "button"?
 5. **Alt-text quality.** Confirm product images describe themselves ("sage green mock neck, front view") rather than a filename ("IMG_0421.jpg") or nothing. A tool only checks that alt text *exists* (the coverage count is in E); you check that it is *useful*.
 6. **Color contrast.** Look for hard-to-read text — light gray on white, text over a busy photo, button text on hover. Note anything that strains (D gives the automated `color-contrast` count; this is the by-eye pass).
-7. **Reduced motion.** Turn on the OS "reduce motion" setting (Mac: System Settings → Accessibility → Display → Reduce motion). Confirm animations actually calm down. Record pass/fail in Section F.
+7. **Reduced motion.** Turn on the OS "reduce motion" setting (Mac: System Settings → Accessibility → Display → Reduce motion). Confirm animations actually calm down. Record pass/fail in Section G.
 
 **Two numbers a green lab result will lie about:** INP (lab shows TBT only) and interaction-driven CLS. Never mark these "pass" on lab data — confirm with manual interaction or the field data in **C**.
 
 ## The scorecard
 
-Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD-baseline.md` and fill it in. **First fill the header** — replace the `# Baseline scorecard — YYYY-MM-DD` title and the `Client / Site / Platform / Run by / Date / Golden path` line with real values (no leftover placeholders); then paste sections A–E from the tool artifacts. That filled file is the baseline. **Filename convention: `[date]-[name].md`** — date first (ISO 8601), so a directory listing sorts chronologically. Same shape for every deliverable below.
+`baseline.py` stamps the scorecard for you: it copies `TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD/baseline.md`, fills the header and golden path from the client metadata in `baseline.py`, and pastes sections **A–F** from the tool artifacts — leaving **G** blank for the human pass. That filled file **is** the baseline. **Layout: one dated folder per cycle** (`hobbes/scorecards/YYYY-MM-DD/`) holding `baseline.md`, the hand-authored `findings.md`, the digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`), `crawl.html`, and the `raw/` artifacts — one cycle in one place, sorting chronologically by folder name. Before you trust the file, confirm the header carries no leftover placeholders.
 
 ## Targets — the pass bar (same for every client)
 
@@ -84,13 +87,21 @@ Copy `hobbes/scorecards/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD-baseline.m
 - **INP:** ≤ 200ms, desktop and mobile
 - **CLS:** ≤ 0.1, desktop and mobile
 - **Accessibility audit failures (axe via PSI, Section D):** 0, including 0 `color-contrast`, desktop and mobile
-- **Manual a11y (Section F):** keyboard pass · focus visible · screen reader pass · 0 contrast fails · 100% meaningful alt
-- **SEO checklist:** every item passing
+- **SEO checklist (Section E, golden path):** every item passing
+- **Manual a11y (Section G):** keyboard pass · focus visible · screen reader pass · 0 contrast fails · 100% meaningful alt
+
+**Site-wide crawl (Section F) — every page, not just the golden path:**
+
+- **SEO / structure:** 0 broken links · 0 missing or duplicate titles · 0 missing meta descriptions · 0 pages with multiple H1 · 0 pages with skipped heading levels
+- **Accessibility:** 0 pages missing image alt · 0 missing aria-labels · 0 missing roles · 0 missing html lang
+- **Best practices:** 0 invalid inline SVG · 0 non-clickable phone numbers · 100% valid HTML
+- **Security headers:** HSTS · Content-Security-Policy · Referrer-Policy · Permissions-Policy · Brotli compression · valid HTTPS/TLS — all present
+- **SiteOne quality scores (0–10):** diagnostic context, not a hard gate — investigate any category below 8. Redirects and duplicate inline SVG are reported for awareness, not pass/fail.
 
 ## Deliverables
 
-- `hobbes/scorecards/YYYY-MM-DD-baseline.md` — the filled scorecard (the numbers).
-- `hobbes/scorecards/YYYY-MM-DD-findings.md` — each failure as: *page → what is failing → the fix → effort (S/M/L)*.
+- `hobbes/scorecards/YYYY-MM-DD/baseline.md` — the filled scorecard (the numbers). Stamped by `baseline.py`.
+- `hobbes/scorecards/YYYY-MM-DD/findings.md` — hand-authored, each failure as: *page → what is failing → the fix → effort (S/M/L)*.
 - `hobbes/MISSION.md` — priorities updated with each gap, written `baseline → target` so it is testable.
 
 ## Site-type adaptations

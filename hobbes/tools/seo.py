@@ -190,40 +190,26 @@ def analyze(url, data, dup_titles):
     title = " ".join(p.title.split())
     m = p.metas
 
-    if not title:
-        t_cell = "✗ empty"
-    elif title in dup_titles:
-        t_cell = "✗ duplicate"
-    else:
-        t_cell = "✓"
+    t_cell = "✓" if (title and title not in dup_titles) else "✗"
 
     desc = m.get("description", "").strip()
-    d_cell = "✓" if desc else "✗ missing"
+    d_cell = "✓" if desc else "✗"
 
-    c_cell = "✓" if p.canonical and norm(p.canonical) == norm(data["final_url"]) else (
-        "✗ missing" if not p.canonical else "✗ not self")
+    c_cell = "✓" if (p.canonical and norm(p.canonical) == norm(data["final_url"])) else "✗"
 
-    h_cell = "✓" if (p.h1 == 1 and head_ok(p.headings)) else (
-        f"✗ {p.h1} h1" if p.h1 != 1 else "✗ skips level")
+    h_cell = "✓" if (p.h1 == 1 and head_ok(p.headings)) else "✗"
 
     types, err = ld_types(p.jsonld)
     good = [t for t in types if t in LD_KNOWN]
-    sd_cell = ("✗ parse error" if err else
-               (f"✓ {','.join(dict.fromkeys(good))}" if good else
-                ("✗ none" if not types else f"⚠ {','.join(dict.fromkeys(types))}")))
+    sd_cell = "✓" if (good and not err) else "✗"
 
     missing_og = [r.replace("og:", "") for r in OG_REQUIRED if not m.get(r)]
-    og_cell = "✓" if not missing_og else "✗ no " + ",".join(missing_og)
+    og_cell = "✓" if not missing_og else "✗"
 
-    if p.imgs == 0:
-        alt_cell = "no imgs"
-    elif p.imgs_no_alt == 0:
-        alt_cell = f"✓ 0/{p.imgs} (quality: human)"
-    else:
-        alt_cell = f"⚠ {p.imgs_no_alt}/{p.imgs} missing (quality: human)"
+    alt_cell = "✓" if p.imgs_no_alt == 0 else "✗"
 
     noindex = "noindex" in m.get("robots", "").lower() or "noindex" in data["xrobots"].lower()
-    i_cell = "✗ noindex" if noindex else "✓"
+    i_cell = "✗" if noindex else "✓"
 
     return {
         "Unique, descriptive title": t_cell,
@@ -232,8 +218,8 @@ def analyze(url, data, dup_titles):
         "Single H1 + ordered headings": h_cell,
         "Valid structured data": sd_cell,
         "Open Graph / Twitter tags": og_cell,
-        "All images have meaningful alt": alt_cell,
-        "Indexable (robots OK)": i_cell,
+        "All images have alt": alt_cell,
+        "Indexable": i_cell,
         "_title": title or "(none)",
     }
 
@@ -242,9 +228,9 @@ def site_file(root, path):
     try:
         req = urllib.request.Request(root + path, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=20) as r:
-            return "x" if r.status == 200 else f"✗ HTTP {r.status}"
-    except Exception as e:
-        return f"✗ {type(e).__name__}"
+            return "✓" if r.status == 200 else "✗"
+    except Exception:
+        return "✗"
 
 
 def main():
@@ -279,8 +265,7 @@ def main():
     labels = [lbl for lbl, _ in urls]
     rows = ["Unique, descriptive title", "Meta description present", "Canonical correct",
             "Single H1 + ordered headings", "Valid structured data",
-            "Open Graph / Twitter tags", "All images have meaningful alt",
-            "Indexable (robots OK)"]
+            "Open Graph / Twitter tags", "All images have alt", "Indexable"]
 
     def cell(lbl, check):
         r = results.get(lbl)
@@ -297,16 +282,16 @@ def main():
         "",
         "Golden path: " + " · ".join(f"[{lbl}]({u})" for lbl, u in urls),
         "",
-        "## E. SEO checklist",
+        "## E. SEO checklist (golden path)",
         "",
         "| Item | " + " | ".join(labels) + " |",
         "|" + "---|" * (len(labels) + 1),
         *[f"| {chk} | " + " | ".join(cell(lbl, chk) for lbl in labels) + " |" for chk in rows],
         "",
-        "| Site-level (once per site) | Present |",
+        "| Site-level | Present |",
         "|---|---|",
-        f"| `sitemap.xml` | {site_file(root, '/sitemap.xml')} |",
-        f"| `robots.txt` | {site_file(root, '/robots.txt')} |",
+        f"| sitemap.xml | {site_file(root, '/sitemap.xml')} |",
+        f"| robots.txt | {site_file(root, '/robots.txt')} |",
         "",
         "## Page titles (read them — is any brand-only or generic?)",
         "",

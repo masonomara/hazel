@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-crawl.py — whole-site SiteOne crawl. Summary counts feed scorecard Section E
-(site-level); the per-URL detail feeds the findings doc.
+crawl.py — whole-site SiteOne crawl. Emits scorecard Section F (site-wide
+grades + counts); the per-URL detail feeds the findings doc.
 
-Covers what the golden-path tools can't: every URL on the site. Reports broken
-links, redirects, missing titles, duplicate titles, missing meta descriptions,
-and missing H1s — site-wide.
+Covers what the golden-path tools can't: every URL on the site. Section F holds
+SiteOne's 0–10 quality grades plus site-wide counts — broken links, redirects,
+missing/duplicate titles, missing meta descriptions, multiple/skipped headings,
+missing alt/aria/roles/lang, invalid/duplicate SVGs, and the security headers.
 
 Mirrors psi.py / seo.py: gentle live crawl, a cached crawl.json (reused on
---resume / re-crawled on --fresh), and a durable hobbes/tools/crawl-results.md.
+--resume / re-crawled on --fresh), and a durable crawl-results.md in the cycle folder.
 
 USAGE:
   python3 hobbes/tools/crawl.py            # reuse cached crawl.json if present
@@ -18,6 +19,7 @@ USAGE:
 """
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -77,6 +79,44 @@ def table_rows(tables, name):
     return (tables.get(name) or {}).get("rows") or []
 
 
+def quality_scores(data):
+    """SiteOne's weighted 0–10 grades, keyed by category name."""
+    cats = ((data.get("qualityScores") or {}).get("categories")) or []
+    return {c.get("name"): c.get("score") for c in cats}
+
+
+def rollup_texts(data):
+    """Every headline line SiteOne computed — summary items + quality-score
+    deduction reasons. Page-level counts ('52 page(s) with …') live ONLY here,
+    not in the per-URL tables, so the scorecard reads them from this rollup."""
+    texts = [i.get("text", "") for i in ((data.get("summary") or {}).get("items") or [])]
+    for c in ((data.get("qualityScores") or {}).get("categories")) or []:
+        for d in (c.get("deductions") or []):
+            texts.append(d.get("reason", ""))
+    return texts
+
+
+def count_for(texts, needle):
+    """First integer in the first rollup line that mentions `needle` (case-
+    insensitive), else 0 — e.g. count_for(t, 'skipped heading') -> 52."""
+    nl = needle.lower()
+    for t in texts:
+        if nl in t.lower():
+            m = re.search(r"\d+", t)
+            if m:
+                return int(m.group())
+    return 0
+
+
+def header_set(tables, name):
+    """A security header counts as 'set' only if the crawl flagged no critical/
+    warning responses for it; if it's absent from the table, nothing flagged it."""
+    for r in table_rows(tables, "security"):
+        if (r.get("header") or "").lower() == name.lower():
+            return int(r.get("critical") or 0) == 0 and int(r.get("warning") or 0) == 0
+    return True
+
+
 def main():
     args = sys.argv[1:]
     fresh = "--fresh" in args
@@ -89,15 +129,37 @@ def main():
 
     data = run_crawl(fresh, cache, html_out)
     tables = data.get("tables", {})
+    qs = quality_scores(data)
+    texts = rollup_texts(data)
 
+    seo = table_rows(tables, "seo")
+    n = len(seo)
     broken = table_rows(tables, "404")
     redirects = table_rows(tables, "redirects")
-    seo = table_rows(tables, "seo")
     missing_title = [r for r in seo if not (r.get("title") or "").strip()]
     missing_desc = [r for r in seo if not (r.get("description") or "").strip()]
-    missing_h1 = [r for r in seo if not (r.get("h1") or "").strip()]
     dup_title = [r for r in table_rows(tables, "non-unique-titles") if (r.get("title") or "").strip()]
-    dup_desc = [r for r in table_rows(tables, "non-unique-descriptions") if (r.get("description") or "").strip()]
+
+    # Page-level counts — SiteOne's own rollup (not derivable from the per-URL tables).
+    multi_h1 = count_for(texts, "multiple <h1>")
+    skipped_h = count_for(texts, "skipped heading")
+    no_alt = count_for(texts, "without image alt")
+    no_aria = count_for(texts, "without aria")
+    no_roles = count_for(texts, "without role")
+    no_lang = count_for(texts, "missing html lang") or count_for(texts, "without html lang")
+    invalid_svg = count_for(texts, "invalid inline svg")
+    dup_svg = count_for(texts, "duplicated inline svg")
+    phone = count_for(texts, "non-clickable")
+    no_brotli = count_for(texts, "brotli")
+    invalid_html = count_for(texts, "invalid html")
+    tls_ok = any("certificate is valid" in t.lower() for t in texts) or site_root().startswith("https")
+
+    def p(ok):
+        return "✓" if ok else "✗"
+
+    def qsv(name):
+        s = qs.get(name)
+        return f"{s:.1f}" if isinstance(s, (int, float)) else "—"
 
     def path(r):
         return r.get("urlPathAndQuery") or "/"
@@ -109,21 +171,53 @@ def main():
     L = [
         f"# Crawl results — {stamp}",
         "",
-        "Captured by `hobbes/tools/crawl.py` (SiteOne, gentle whole-site crawl). The",
-        "count table feeds scorecard **Section E**; the detail feeds **findings**.",
+        "Captured by `hobbes/tools/crawl.py` (SiteOne, gentle whole-site crawl).",
+        "The Section F block below feeds the scorecard; the detail feeds **findings**.",
         "",
-        f"Site: {site_root()} · HTML pages analysed: {len(seo)}",
+        f"Site: {site_root()} · HTML pages analysed: {n}",
         "",
-        "## Site-wide (crawl) — Section E counts",
+        f"## F. Site-wide (whole-site crawl — {n} pages)",
         "",
-        "| Site-wide (crawl) | Count |",
+        "| SiteOne quality score (0–10) | Value |",
         "|---|---|",
-        f"| Broken links (4xx/5xx) | {len(broken)} |",
-        f"| Redirects | {len(redirects)} |",
-        f"| Missing titles | {len(missing_title)} |",
-        f"| Duplicate titles | {len(dup_title)} |",
-        f"| Missing meta descriptions | {len(missing_desc)} |",
-        f"| Missing H1 | {len(missing_h1)} |",
+        f"| Performance | {qsv('Performance')} |",
+        f"| SEO | {qsv('SEO')} |",
+        f"| Security | {qsv('Security')} |",
+        f"| Accessibility | {qsv('Accessibility')} |",
+        f"| Best practices | {qsv('Best Practices')} |",
+        "",
+        "| SEO / structure | Count | Pass |",
+        "|---|---|---|",
+        f"| Broken links (4xx) | {len(broken)} | {p(len(broken) == 0)} |",
+        f"| Redirects | {len(redirects)} | {p(len(redirects) == 0)} |",
+        f"| Missing titles | {len(missing_title)} | {p(len(missing_title) == 0)} |",
+        f"| Duplicate titles | {len(dup_title)} | {p(len(dup_title) == 0)} |",
+        f"| Missing meta descriptions | {len(missing_desc)} | {p(len(missing_desc) == 0)} |",
+        f"| Pages with multiple H1 | {multi_h1} | {p(multi_h1 == 0)} |",
+        f"| Pages with skipped heading levels | {skipped_h} | {p(skipped_h == 0)} |",
+        "",
+        "| Accessibility | Count | Pass |",
+        "|---|---|---|",
+        f"| Pages missing image alt | {no_alt} | {p(no_alt == 0)} |",
+        f"| Pages missing aria-labels | {no_aria} | {p(no_aria == 0)} |",
+        f"| Pages missing roles | {no_roles} | {p(no_roles == 0)} |",
+        f"| Pages missing html lang | {no_lang} | {p(no_lang == 0)} |",
+        "",
+        "| Best practices | Count | Pass |",
+        "|---|---|---|",
+        f"| Pages with invalid inline SVG | {invalid_svg} | {p(invalid_svg == 0)} |",
+        f"| Pages with duplicate inline SVG | {dup_svg} | {p(dup_svg == 0)} |",
+        f"| Pages with non-clickable phone numbers | {phone} | {p(phone == 0)} |",
+        f"| Valid HTML | {n - invalid_html} | {p(invalid_html == 0)} |",
+        "",
+        "| Security | Pass |",
+        "|---|---|",
+        f"| HSTS header | {p(header_set(tables, 'Strict-Transport-Security'))} |",
+        f"| Content-Security-Policy | {p(header_set(tables, 'Content-Security-Policy'))} |",
+        f"| Referrer-Policy | {p(header_set(tables, 'Referrer-Policy'))} |",
+        f"| Permissions-Policy | {p(header_set(tables, 'Permissions-Policy'))} |",
+        f"| Brotli compression | {p(no_brotli == 0)} |",
+        f"| HTTPS / valid TLS cert | {p(tls_ok)} |",
         "",
         "## Detail — for findings",
         "",
@@ -141,9 +235,6 @@ def main():
         "",
         "### Missing meta descriptions",
         *detail(missing_desc, path),
-        "",
-        "### Missing H1",
-        *detail(missing_h1, path),
     ]
     report = "\n".join(L) + "\n"
     print(report)

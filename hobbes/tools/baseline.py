@@ -82,18 +82,18 @@ def main():
     seo = (rundir / "seo-results.md").read_text()
     tmpl = TEMPLATE.read_text()
 
-    abcd = after(psi, "## A.")                      # A, B, C, D + the ⚠/✗cut footnotes
+    abcd = after(psi, "## A.")                      # A, B, C, D (+ failed-call note)
     e = between(seo, "## E.", "## Page titles")     # E + site-level
-    f = after(tmpl, "## F.")                        # manual a11y, blank for the human
-    if not (abcd and e and f):
+    g = after(tmpl, "## G.")                        # manual a11y, blank for the human
+    if not (abcd and e and g):
         sys.exit("✗ couldn't extract sections — check psi-results.md / seo-results.md / TEMPLATE.md")
 
-    # Site-wide crawl counts fold into Section E (the per-URL detail stays in
-    # crawl-results.md for findings). Just the count table, no competing header.
-    crawl_counts = ""
+    # F — site-wide grades + counts straight from crawl.py (per-URL detail stays
+    # in crawl-results.md for findings).
+    f = ""
     if not no_crawl:
         crawl = (rundir / "crawl-results.md").read_text()
-        crawl_counts = between(crawl, "| Site-wide (crawl) | Count |", "## Detail")
+        f = between(crawl, "## F. Site-wide", "## Detail")
 
     golden = " · ".join(f"[{lbl}]({u})" for lbl, u in DEFAULT_URLS)
     doc = "\n".join([
@@ -104,24 +104,22 @@ def main():
         "",
         f"Golden path: {golden}",
         "",
-        "**MVP baseline** — sections A–E captured automatically (`psi.py` → A–D, "
-        "`seo.py` → E per-page, `crawl.py` → E site-wide counts). Section F (manual "
-        "a11y) is the above-and-beyond pass, blank pending human sign-off; a page is "
-        "not certified fully pass until F is signed.",
+        "`✓` = pass / present · `✗` = fail / missing · `✗cut` = PSI run truncated "
+        "before network-idle (value is the cutoff) · blank = human sign-off pending.",
         "",
         abcd,
         "",
         e,
         "",
-        crawl_counts,
-        "",
         f,
+        "",
+        g,
     ]) + "\n"
 
     out = rundir / "baseline.md"
     out.write_text(doc)
     print(f"\n✓ MVP baseline written → {out}", file=sys.stderr)
-    print("  A–E filled from the tools; Section F (manual a11y) left for human sign-off.",
+    print("  A–F filled from the tools; Section G (manual a11y) left for human sign-off.",
           file=sys.stderr)
     print(f"  Cycle folder: {rundir} (raw/ + digests + crawl.html alongside).", file=sys.stderr)
     print("  Findings: author findings.md in the same folder from the artifacts.", file=sys.stderr)

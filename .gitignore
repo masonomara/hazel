@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Generated crawl/tool outputs
+/tmp/
+/hazel-crawl-*.html
+
+# macOS
+.DS_Store

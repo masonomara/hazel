@@ -205,7 +205,7 @@ def main():
             lh = (results[(label, url, strat)] or {}).get("lighthouseResult", {})
             warns = lh.get("runWarnings") or []
             incomplete = any(INCOMPLETE_SIG in w.lower() for w in warns)  # classify, don't lump
-            mark = " ⚠" if incomplete else ""   # ⚠ = page never idled (kept, on purpose)
+            mark = ""   # truncated values are flagged per-cell with ✗cut; no row-level ⚠
             if incomplete:
                 idle_fail.append((label, strat))
 
@@ -229,7 +229,8 @@ def main():
             )
             fails = a11y_fails(lh)
             detail = ", ".join(f"{aid}×{n}" for aid, n in fails) or "none"
-            rows_c.append(f"| {label} — {strat}{mark} | {len(fails)} | {detail} |")
+            passd = "✓" if not fails else "✗"
+            rows_c.append(f"| {label} — {strat}{mark} | {len(fails)} | {passd} | {detail} |")
         # Field data (CrUX 28-day). PREFER page-level; use the origin aggregate
         # only if neither device has page-level data — and LABEL it when we do,
         # so a whole-site average is never mistaken for this page's real numbers.
@@ -239,14 +240,16 @@ def main():
         fm = le.get("metrics", {})
         tag = " — origin agg." if (fm and le.get("origin_fallback") is True) else ""
         if fm:
+            oc = le.get("overall_category", "")
+            passc = "✓" if oc == "FAST" else ("✗" if oc else "—")
             rows_field.append(
                 f"| {label}{tag} | {field(fm,'LARGEST_CONTENTFUL_PAINT_MS',0.001)} | "
                 f"{field(fm,'INTERACTION_TO_NEXT_PAINT')} | "
                 f"{field(fm,'CUMULATIVE_LAYOUT_SHIFT_SCORE',0.01)} | "
-                f"{le.get('overall_category','—')} |"
+                f"{passc} |"
             )
         else:
-            rows_field.append(f"| {label} | no field data | no field data | no field data | — |")
+            rows_field.append(f"| {label} | — | — | — | — |")
 
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     L = [
@@ -259,49 +262,30 @@ def main():
         "",
         "Golden path: " + " · ".join(f"[{lbl}]({u})" for lbl, u in urls),
         "",
-        "## A. Lighthouse scores (LAB — PSI server)",
+        "## A. Lighthouse scores",
         "",
         "| Page / Device | Performance | Accessibility | Best Practices | SEO |",
         "|---|---|---|---|---|",
         *rows_a,
         "",
-        "## B. Lab metrics (LAB — not real INP; TBT is the lab stand-in)",
+        "## B. Lab metrics",
         "",
         "| Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |",
         "|---|---|---|---|---|---|---|",
         *rows_lab,
         "",
-        "## C. Field data (CrUX 28-day, per page — the only real INP)",
+        "## C. Field data (CrUX 28-day)",
         "",
-        "| Page | LCP (s) | INP (ms) | CLS | Overall |",
+        "| Page | LCP (s) | INP (ms) | CLS | Pass |",
         "|---|---|---|---|---|",
         *rows_field,
         "",
-        "## D. Accessibility — automated (axe-core via PSI)",
+        "## D. Accessibility — automated (axe via PSI)",
         "",
-        "Failing axe audits straight from PSI's a11y category — `color-contrast` is "
-        "the contrast-error count, `image-alt` the alt gaps. The manual rows "
-        "(keyboard, focus visible, screen reader, contrast-by-eye, reduced motion) "
-        "are NOT here — those stay human.",
-        "",
-        "| Page / Device | Failing axe audits | Details (rule × nodes) |",
-        "|---|---|---|",
+        "| Page / Device | Failing audits | Pass | Details (rule × nodes) |",
+        "|---|---|---|---|",
         *rows_c,
     ]
-    if idle_fail:
-        L += ["",
-              "> ⚠ **Never reached network-idle** — PSI cut these runs at its time "
-              "limit. The early metrics still hold: FCP, CLS, TBT, Speed Index and the "
-              "Accessibility / SEO / Best-Practices scores are trustworthy. "
-              "Re-measuring won't help (local Lighthouse hits the same wall) — "
-              "**investigate why the page never idles** (a background script keeping "
-              "the network busy). Rows: " + ", ".join(f"{l} {s}" for l, s in idle_fail)]
-    if lcp_cut:
-        L += ["",
-              "> ✗cut **LCP truncated** — on these rows the LCP, and its LCP-weighted "
-              "Performance score, is the cutoff value rather than a real paint. Treat "
-              "both as unknown, not as the page's number: "
-              + ", ".join(f"{l} {s}" for l, s in lcp_cut)]
     if failed:
         L += ["", "> ✗ Failed calls (cells show — above): "
               + ", ".join(f"{lbl} {strat}" for lbl, _u, strat in failed)]

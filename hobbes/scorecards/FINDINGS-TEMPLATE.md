@@ -9,7 +9,9 @@ This is the **problem catalog** — dense, deterministic, agent-facing. It sits 
 
 ## How this is built — and why it repeats
 
-`findings.py` reads the cycle's raw artifacts (`raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json`) and extracts every problem **verbatim** — no judgment, no prose written fresh per run. Every list is sorted by a stable key, so the same raw produces the same findings, IDs and all. Re-run it as often as you like; the document does not drift. Where a list is capped for length the cap is stated (`+N more`) — coverage is never silently dropped.
+`findings.py` reads the cycle's raw artifacts (`raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json`) and extracts every problem **verbatim** — no judgment, no prose written fresh per run. Every list is sorted by a stable key, so the same raw produces the same findings, IDs and all. Re-run it as often as you like; the document does not drift.
+
+**Total coverage, by construction.** Every failing check in the raw becomes a finding — there is no shortlist, no curated id list, no mission weighting deciding what is "worth" surfacing. Performance audits in particular are enumerated straight from the Lighthouse category (using Lighthouse's own title and description as the explainer), so when the tool renames an audit — as it renamed most opportunities to the `*-insight` family — nothing falls silently through a hardcoded match. Where a list is capped for length the cap is stated (`+N more`); where an audit carries no clean resource list its Lighthouse `displayValue` stands in as evidence and the finding still appears. Coverage is never silently dropped. The depth of evidence varies with what the raw exposes; the *presence* of a finding for every failure does not.
 
 What is **not** deterministic, and therefore is **not** here:
 - **The fix.** Which file, which line, which approach → the plan.
@@ -33,18 +35,18 @@ Every finding is one block with the same shape:
   - … (+N more)
 ```
 
-- **Domains** run in MISSION priority order so impact is easy to weigh: `A11Y`, `SEO`, `PERF`, `SEC`, `BP`.
+- **Domains** run in a fixed reading order — `A11Y`, `SEO`, `PERF`, `SEC`, `BP` — **not** a priority ranking. Findings does not weigh impact; that is the plan's job, rated against `MISSION.md`. The order here is just stable and predictable so IDs don't move between cycles.
 - **IDs are stable** within a cycle (`A11Y-1`, `SEO-3` …) — quote them in the plan.
 - **Scope** separates the **golden path** (the 3 locked pages, measured deep by PSI/seo) from **sitewide** (every page, measured broad by the crawl). A problem on both is worse than one on either.
 - **Evidence is raw.** A selector is the real DOM selector; a snippet is the real HTML; bytes/ms are the real numbers. Trust them, and open `raw/` or `crawl.html` to go deeper.
 
 ## Sections
 
-1. **A11Y — Accessibility** (MISSION priority 1). Golden-path axe failures (PSI), aggregated per rule with node counts and sample selectors; plus sitewide a11y prevalence from the crawl.
-2. **SEO — SEO & discoverability** (priority 2). Golden-path checklist failures with specifics; plus sitewide: missing meta descriptions (full list), duplicate titles, broken links, heading-structure errors, Open Graph coverage.
-3. **PERF — Performance** (priority 3). Per page×device scores and lab metrics with the field-data (CrUX) verdict for context, then the top opportunities per page (render-blocking, image delivery, JS bootup, main-thread work, byte weight, unused/legacy/duplicated JS) with the real resources behind them.
-4. **SEC — Security.** Missing/weak response headers with the crawler's recommendation, compression, TLS.
-5. **BP — Best practices / structure.** PSI best-practice failures (console errors, deprecations, …) and crawl structural issues (inline SVG, non-clickable phone, header bloat).
+1. **A11Y — Accessibility.** Golden-path axe failures (PSI), aggregated per rule with node counts and sample selectors; plus sitewide a11y prevalence from the crawl's per-analysis **element-level** counts (critical/warning), not blunt one-flag-per-page totals.
+2. **SEO — SEO & discoverability.** Golden-path checklist failures with specifics; plus sitewide: missing meta descriptions (full list), duplicate titles, **duplicate meta descriptions**, heading-structure errors, Open Graph coverage, broken links.
+3. **PERF — Performance.** Per page×device scores and lab metrics with the field-data (CrUX) verdict for context, then **every failing performance audit** enumerated from the Lighthouse category — render-blocking, image delivery, cache lifetimes, JS bootup, main-thread work, byte weight, unused/legacy/minify/duplicated JS+CSS, unsized images, forced reflow, LCP discovery, layout-shift culprits, network chains — with the real resources behind each; plus the crawl's **slowest URLs** sitewide.
+4. **SEC — Security.** Missing/weak response headers with the crawler's recommendation, CORS, compression, TLS.
+5. **BP — Best practices / structure.** PSI best-practice failures (console errors, deprecations, …) and the crawl's structural best-practice table (invalid/duplicate/large inline SVG, non-clickable phone, DOM depth), enumerated row by row. Checks the crawl files under best-practices but that another domain owns — heading structure, title/description uniqueness, Brotli — are reported in that home section, not duplicated here.
 
 A domain with no failing checks prints a one-line `— all checks pass` and no blocks.
 

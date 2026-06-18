@@ -199,23 +199,25 @@ def a11y_findings(psi, crawl):
             f"PSI Lighthouse · accessibility · `{rule}`",
             "0 failing a11y audits (BASELINE §D)", f"{len(nodes)} node(s), {len(e['pages'])} run(s)",
             ", ".join(sorted(e["pages"])), "", ev))
-    # sitewide prevalence (crawl rollup) — coarse page-level flags
-    texts = rollup_texts(crawl)
-    n = len(table_rows(crawl.get("tables", {}), "seo"))
-    no_alt, no_aria, no_roles = (count_for(texts, "without image alt"),
-                                 count_for(texts, "without aria"),
-                                 count_for(texts, "without role"))
-    if no_alt or no_aria or no_roles:
+    # sitewide prevalence — the crawl's per-analysis element counts (critical/warning),
+    # far richer than the one-flag-per-page rollup. PSI rules above stay authoritative
+    # for the golden path; this is the scale beyond it.
+    tables = crawl.get("tables", {})
+    n = len(table_rows(tables, "seo"))
+    acc = [r for r in table_rows(tables, "accessibility")
+           if int(r.get("critical") or 0) + int(r.get("warning") or 0) > 0]
+    if acc:
+        acc.sort(key=lambda r: -(int(r.get("critical") or 0) + int(r.get("warning") or 0)))
+        total = sum(int(r.get("critical") or 0) + int(r.get("warning") or 0) for r in acc)
         out.append(F(
             "Sitewide a11y prevalence",
-            "How widespread the golden-path a11y gaps are across all pages.",
-            "SiteOne's blunt page-level flags — one missing-alt image flags the whole page. They show prevalence, not per-node detail; the PSI rules above are authoritative for the golden path.",
-            "SiteOne crawl · summary rollup",
-            "0 pages (BASELINE §F)", f"alt {no_alt}, aria {no_aria}, roles {no_roles} of {n}",
+            "How widespread the a11y gaps are across the whole site — element-level counts.",
+            "SiteOne's per-analysis totals over every crawled page: real element counts, not the blunt one-flag-per-page rollup. The PSI rules above are authoritative for the golden path; this shows the scale beyond it.",
+            "SiteOne crawl · accessibility table",
+            "0 issues (BASELINE §F)", f"{total} flagged element(s) across {n} pages",
             "", f"{n} pages crawled",
-            [f"{no_alt} page(s) with an image missing alt",
-             f"{no_aria} page(s) flagged without aria labels",
-             f"{no_roles} page(s) flagged without role attributes"]))
+            [f"{r.get('analysisName')}: {int(r.get('critical') or 0)} critical, "
+             f"{int(r.get('warning') or 0)} warning" for r in acc]))
     return out
 
 
@@ -321,7 +323,20 @@ def seo_findings(seo_html, crawl):
             "0 duplicate titles (BASELINE §F)", f"{len(dups)} duplicated title(s)",
             "", "", [f'"{trunc(r.get("title"), 70)}" ×{r.get("count")}' for r in dups]))
 
-    # 6 — broken links
+    # 6 — duplicate meta descriptions (distinct from missing; empties overlap #1)
+    dup_desc = sorted((r for r in table_rows(tables, "non-unique-descriptions")
+                       if (r.get("description") or "").strip() and int(r.get("count") or 0) > 1),
+                      key=lambda r: -int(r.get("count") or 0))
+    if dup_desc:
+        out.append(F(
+            "Duplicate meta descriptions",
+            "Two or more pages share an identical meta description.",
+            "Duplicate descriptions blur how pages differ in search and weaken each snippet; templated descriptions repeated across products/collections are the usual cause. (Empty descriptions are counted in the missing-description finding above, not here.)",
+            "SiteOne crawl · non-unique-descriptions",
+            "0 duplicate descriptions (BASELINE §F)", f"{len(dup_desc)} duplicated description(s)",
+            "", "", [f'"{trunc(r.get("description"), 70)}" ×{r.get("count")}' for r in dup_desc]))
+
+    # 7 — broken links
     broken = table_rows(tables, "404")
     if broken:
         out.append(F(
@@ -334,16 +349,27 @@ def seo_findings(seo_html, crawl):
     return out
 
 
-# Performance opportunity audits: friendly name + candidate ids (first present wins).
-PERF_AUDITS = [
-    ("Total byte weight", ["total-byte-weight"]),
-    ("Unused JavaScript", ["unused-javascript"]),
-    ("JS bootup (parse/compile/exec)", ["bootup-time"]),
-    ("Main-thread work", ["mainthread-work-breakdown"]),
-    ("Render-blocking resources", ["render-blocking-resources"]),
-    ("Responsive / modern images", ["uses-responsive-images", "modern-image-formats", "uses-optimized-images"]),
-    ("Legacy JavaScript", ["legacy-javascript"]),
-]
+# The bare timing metrics — these ARE the numbers in scorecard §A/§B, not
+# resource-level opportunities, so they ride the overview finding, not their own
+# block. Everything else in the performance category is enumerated (no allowlist):
+# a hand-keyed list of audit ids silently drops audits the moment Lighthouse
+# renames one (it renamed most to the `*-insight` family), which is exactly the
+# rot this rewrite removes.
+PERF_METRIC_AUDITS = {
+    "first-contentful-paint", "largest-contentful-paint", "speed-index",
+    "total-blocking-time", "interactive", "max-potential-fid",
+    "cumulative-layout-shift", "first-meaningful-paint",
+}
+
+
+def lh_text(audit):
+    """Lighthouse's own title + description, cleaned of markdown links. Using the
+    tool's own copy means a new/renamed audit can never land here blank or be
+    dropped — there is no id we have to recognise first."""
+    title = (audit.get("title") or "").strip()
+    desc = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", (audit.get("description") or ""))
+    desc = re.sub(r"\s+", " ", desc).strip()
+    return title, desc
 
 
 def _item_url(it):
@@ -353,18 +379,68 @@ def _item_url(it):
     return it.get("url") or s or it.get("groupLabel") or it.get("group") or ""
 
 
+def _item_label(it):
+    """A printable identity for any Lighthouse details item, however shaped:
+    a URL, else a DOM node (label/selector/snippet), else a reason/cause string.
+    Returns None when nothing usable is present (the item is then skipped and the
+    audit falls back to its Lighthouse displayValue — never dropped)."""
+    if not isinstance(it, dict):
+        return trunc(str(it), 90)
+    s = it.get("source")
+    if isinstance(s, dict):
+        s = s.get("url")
+    u = it.get("url") or s
+    if isinstance(u, str) and u.startswith("http"):
+        return short_url(u)
+    node = it.get("node")
+    if isinstance(node, dict):
+        lbl = node.get("nodeLabel") or node.get("selector") or node.get("snippet")
+        if lbl:
+            return trunc(lbl, 90)
+    if isinstance(u, str) and u.strip():
+        return trunc(u, 90)
+    for k in ("reason", "cause", "groupLabel", "label"):
+        if it.get(k):
+            return trunc(str(it[k]), 90)
+    return None
+
+
 def _item_bytes(it):
     return it.get("wastedBytes") or it.get("totalBytes") or it.get("transferSize") or 0
 
 
 def _item_ms(it):
-    return it.get("wastedMs") or it.get("duration") or it.get("blockingTime") or it.get("total") or 0
+    return (it.get("wastedMs") or it.get("duration") or it.get("blockingTime")
+            or it.get("reflowTime") or it.get("total") or 0)
 
 
-def perf_findings(psi):
+def _flatten_items(items):
+    """Yield leaf detail items. The `*-insight` audits wrap a sub-table or
+    checklist one level down (details.items → [{type:table/checklist, items:…}]);
+    flatten those so the real rows (a source URL, a failing check, a culprit node)
+    surface instead of an opaque wrapper."""
+    if isinstance(items, dict):                       # checklist {key:{label,value}}
+        for v in items.values():
+            if isinstance(v, dict) and "value" in v and v.get("label"):
+                if v.get("value") is False:
+                    yield {"label": v["label"]}
+            elif isinstance(v, dict):
+                yield from _flatten_items(v)
+        return
+    if isinstance(items, list):
+        for it in items:
+            if (isinstance(it, dict) and isinstance(it.get("items"), (list, dict))
+                    and not (it.get("url") or it.get("node"))):
+                yield from _flatten_items(it["items"])
+            else:
+                yield it
+
+
+def perf_findings(psi, crawl):
     out = []
-    # overview: lab + field per page×device
-    ev = []
+    # ── overview: lab perf + the metrics behind it, per page × device ──
+    # The score range is computed from the runs, not hand-typed, so it can't drift.
+    ev, scores = [], []
     for label, url in DEFAULT_URLS:
         for strat in STRATS:
             lh = psi.get((label, strat))
@@ -376,48 +452,61 @@ def perf_findings(psi):
                 v = au.get(aid, {}).get("numericValue")
                 return round(v / div, nd) if v is not None else "—"
             perf = lh.get("categories", {}).get("performance", {}).get("score")
-            perf = round(perf * 100) if perf is not None else "—"
+            perf = round(perf * 100) if perf is not None else None
+            if isinstance(perf, int):
+                scores.append(perf)
             warns = lh.get("runWarnings") or []
             cut = " ✗cut" if any("loaded too slowly" in w.lower() for w in warns) else ""
-            ev.append(f"{label} — {strat}: perf {perf}{cut} · LCP {num('largest-contentful-paint')}s · "
-                      f"TBT {num('total-blocking-time', 1, 0)}ms · SI {num('speed-index')}s · "
-                      f"CLS {num('cumulative-layout-shift', 1, 3)}")
-    # field verdict (CrUX) per page — pulled from the full PSI doc would need loadingExperience;
-    # the scorecard §C already carries it. Note it here as context.
+            ev.append(f"{label} — {strat}: perf {perf if perf is not None else '—'}{cut} · "
+                      f"LCP {num('largest-contentful-paint')}s · TBT {num('total-blocking-time', 1, 0)}ms · "
+                      f"SI {num('speed-index')}s · CLS {num('cumulative-layout-shift', 1, 3)}")
+    rng = f"{min(scores)}–{max(scores)}" if scores else "—"
     out.append(F(
-        "Lab performance below target (mobile)",
+        "Lab performance below target",
         "Lighthouse Performance score and the lab metrics behind it, per page × device.",
-        "PSI's mobile run is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so mobile scores run far below desktop and a heavy page can be cut before network-idle (LCP marked ✗cut — treat that LCP as unknown, not as the failure). Cross-check the real-user verdict in baseline.md §C: CrUX may already pass even where lab fails. The MISSION target is still lab ≥ 90.",
+        "PSI's mobile run is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so mobile scores run far below desktop and a heavy page can be cut before network-idle (LCP marked ✗cut — treat that LCP as unknown, not as the failure). Cross-check the real-user verdict in baseline.md §C: CrUX may already pass even where lab fails. The pass bar is still lab ≥ 90.",
         "PSI Lighthouse · performance",
-        "Performance ≥ 90, mobile + desktop (MISSION 3)", "mobile 46–72, desktop 68–72 (see §A)",
-        "all golden pages, mobile", "", ev))
+        "Performance ≥ 90, mobile + desktop (BASELINE Targets)", f"score range {rng} across runs (see §A)",
+        "all golden pages × device", "", ev))
 
-    # opportunity audits — aggregate across the 3 mobile runs (where perf hurts)
-    for name, ids in PERF_AUDITS:
-        merged = {}   # url -> (bytes, ms)
-        used = None
-        for label, url in DEFAULT_URLS:
-            lh = psi.get((label, "mobile"))
-            if not lh:
-                continue
-            au = lh.get("audits", {})
-            for aid in ids:
-                a = au.get(aid)
-                items = a.get("details", {}).get("items") if a else None
-                if items:
-                    used = aid
-                    for it in items:
-                        k = _item_url(it) or "(unknown)"
-                        b, m = _item_bytes(it), _item_ms(it)
-                        pb, pm = merged.get(k, (0, 0))
-                        merged[k] = (max(pb, b), max(pm, m))
-                    break
-        if not merged:
+    # ── every other failing perf audit, enumerated — NO allowlist ──
+    # Each audit's items are merged across the mobile runs (where perf fails). When
+    # an audit carries no clean resource list, its Lighthouse displayValue stands in
+    # as evidence — so a finding is emitted either way and nothing is silently lost.
+    agg = {}   # aid -> {runs:set, title, desc, merged:{label:(bytes,ms)}, disp:set}
+    for label, url in DEFAULT_URLS:
+        lh = psi.get((label, "mobile"))
+        if not lh:
             continue
-        rows = sorted(merged.items(), key=lambda kv: (-(kv[1][0]), -(kv[1][1]), kv[0]))
+        cat = lh.get("categories", {}).get("performance", {})
+        au = lh.get("audits", {})
+        for ref in cat.get("auditRefs", []):
+            aid = ref["id"]
+            if aid in PERF_METRIC_AUDITS:
+                continue
+            a = au.get(aid, {})
+            if a.get("score") is None or a.get("score") >= 1:
+                continue
+            title, desc = lh_text(a)
+            e = agg.setdefault(aid, {"runs": set(), "title": title, "desc": desc,
+                                     "merged": {}, "disp": set()})
+            e["runs"].add(label)
+            dv = (a.get("displayValue") or "").strip()
+            if dv:
+                e["disp"].add(dv)
+            for it in _flatten_items((a.get("details") or {}).get("items")):
+                lbl = _item_label(it)
+                if not lbl:
+                    continue
+                b, m = _item_bytes(it), _item_ms(it)
+                pb, pm = e["merged"].get(lbl, (0, 0))
+                e["merged"][lbl] = (max(pb, b), max(pm, m))
+    for aid in sorted(agg, key=lambda a: (-len(agg[a]["merged"]), -len(agg[a]["runs"]), a)):
+        e = agg[aid]
+        rows = sorted(e["merged"].items(), key=lambda kv: (-(kv[1][0]), -(kv[1][1]), kv[0]))
         ev = []
         for k, (b, m) in rows[:8]:
-            parts = [short_url(k)]
+            parts = [k]
             if b:
                 parts.append(kb(b))
             if m:
@@ -425,15 +514,40 @@ def perf_findings(psi):
             ev.append(" · ".join(parts))
         if len(rows) > 8:
             ev.append(f"(+{len(rows) - 8} more — see raw/*.psi.json)")
+        if not ev:
+            ev = sorted(e["disp"]) or ["(see raw/*.psi.json)"]
         tot_b = sum(b for _, (b, _) in rows)
         tot_m = sum(m for _, (_, m) in rows)
-        measured = (f"{kb(tot_b)} across {len(rows)}" if tot_b else f"{ms(tot_m)} across {len(rows)}")
+        disp = " · ".join(sorted(e["disp"]))
+        if rows and tot_b:
+            measured = f"{kb(tot_b)} across {len(rows)} resource(s)"
+        elif rows and tot_m:
+            measured = f"{ms(tot_m)} across {len(rows)} resource(s)"
+        else:
+            measured = disp or f"flagged on {len(e['runs'])} page(s)"
         out.append(F(
-            name, f"PSI opportunity/diagnostic: {name.lower()}.",
-            "Each entry is a real resource Lighthouse flagged on the mobile run — the JS/CSS/image bytes and main-thread time dragging the score. These are the levers behind the low mobile Performance number.",
-            f"PSI Lighthouse · `{used}` (mobile runs)",
-            "Performance ≥ 90 (MISSION 3)", measured,
+            e["title"] or aid,
+            (e["desc"] or f"Lighthouse performance opportunity ({aid})."), "",
+            f"PSI Lighthouse · performance · `{aid}` (mobile runs)",
+            "Performance ≥ 90 (BASELINE Targets)", measured,
             "golden pages, mobile", "", ev))
+
+    # ── sitewide: slowest URLs by server response (the crawl's own timing) ──
+    slow = table_rows(crawl.get("tables", {}), "slowest-urls")
+    if slow:
+        rows = sorted(slow, key=lambda r: -float(r.get("requestTime") or 0))
+        ev = [f"{short_url(r.get('url'))} · {float(r.get('requestTime') or 0):.2f}s ({r.get('statusCode')})"
+              for r in rows[:12]]
+        if len(rows) > 12:
+            ev.append(f"(+{len(rows) - 12} more — see crawl.html)")
+        out.append(F(
+            "Slowest URLs (server response, sitewide)",
+            "The slowest pages to respond across the whole crawl — server response / TTFB-class timing.",
+            "SiteOne's per-URL request timing, a broad complement to the golden-path lab metrics. Slow server response delays everything downstream; a consistently slow template or collection is worth a look even when the golden path looks fine.",
+            "SiteOne crawl · slowest-urls",
+            "Fast server response, all pages (BASELINE Targets)",
+            f"slowest {float(rows[0].get('requestTime') or 0):.2f}s; top {len(rows)} listed",
+            "", f"{len(rows)} slowest of crawl", ev))
     return out
 
 
@@ -506,33 +620,44 @@ def bp_findings(psi, crawl):
         out.append(F(
             f"{aid}", what, why,
             f"PSI Lighthouse · best-practices · `{aid}`",
-            "Best Practices ≥ 95 (MISSION)", f"on {len(e['pages'])} run(s)",
+            "Best Practices ≥ 95 (BASELINE Targets)", f"on {len(e['pages'])} run(s)",
             ", ".join(sorted(e["pages"])), "", ev or ["(see raw/*.psi.json)"]))
-    # crawl structural
-    texts = rollup_texts(crawl)
-    n = len(table_rows(crawl.get("tables", {}), "seo"))
-    for needle, title, why in [
-        ("invalid inline svg", "Invalid inline SVG",
-         "Malformed inline SVG markup — can render wrong or bloat the DOM. Usually a theme snippet or app-injected icon."),
-        ("duplicated inline svg", "Duplicated inline SVG",
-         "The same SVG inlined many times instead of defined once and referenced (<use>). Minor HTML bloat; common in Dawn — low priority."),
-        ("non-clickable", "Non-clickable phone number",
-         "A phone number shown as text with no tel: link. On mobile it can't be tapped to call."),
-    ]:
-        c = count_for(texts, needle)
-        if c:
-            out.append(F(
-                title, f"{c} page(s) flagged: {needle}.", why,
-                "SiteOne crawl · summary rollup",
-                "0 pages (BASELINE §F)", f"{c} of {n}",
-                "", f"{c} / {n}", [f"{c} page(s) flagged — see crawl.html"]))
+    # crawl structural — enumerate every flagged row of the best-practices table,
+    # so a new SiteOne check can't fall through a hardcoded needle list. Curated
+    # context where we have it; the analysis name itself otherwise.
+    BP_CRAWL_WHY = {
+        "Invalid inline SVGs": "Malformed inline SVG markup — can render wrong or bloat the DOM. Usually a theme snippet or app-injected icon.",
+        "Duplicate inline SVGs": "The same SVG inlined many times instead of defined once and referenced (<use>). Minor HTML bloat; common in Dawn — low priority.",
+        "Non-clickable phone numbers": "A phone number shown as text with no tel: link. On mobile it can't be tapped to call.",
+        "Large inline SVGs": "Oversized inline SVGs bloat the HTML payload — consider an external asset or <use> reference.",
+        "DOM depth": "Deeply nested DOM raises style/layout cost and memory. Usually a section/snippet nesting issue.",
+    }
+    # SiteOne's best-practices table folds in checks other domains already own —
+    # skip them here so a problem is reported once, in its home section.
+    BP_CRAWL_SKIP = {"Heading structure", "Title uniqueness", "Description uniqueness",
+                     "Brotli support"}
+    tables = crawl.get("tables", {})
+    n = len(table_rows(tables, "seo"))
+    bp_rows = [r for r in table_rows(tables, "best-practices")
+               if (r.get("analysisName") not in BP_CRAWL_SKIP)
+               and int(r.get("critical") or 0) + int(r.get("warning") or 0) > 0]
+    bp_rows.sort(key=lambda r: -(int(r.get("critical") or 0) + int(r.get("warning") or 0)))
+    for r in bp_rows:
+        name = r.get("analysisName") or "best-practice issue"
+        crit, warn = int(r.get("critical") or 0), int(r.get("warning") or 0)
+        why = BP_CRAWL_WHY.get(name, "Structural/best-practice issue SiteOne flagged across the site. Open crawl.html for the per-URL list.")
+        out.append(F(
+            name, f"{name} — flagged sitewide by the crawl.", why,
+            "SiteOne crawl · best-practices table",
+            "0 issues (BASELINE §F)", f"{crit} critical, {warn} warning",
+            "", f"of {n} pages", [f"{crit} critical, {warn} warning — see crawl.html"]))
     return out
 
 
 # ── render ───────────────────────────────────────────────────────────────────
 def render_finding(fid, f):
     L = [f"### {fid} · {f['title']}",
-         f"- **What / why:** {f['what']} {f['why']}",
+         f"- **What / why:** {' '.join(x for x in (f['what'], f['why']) if x)}",
          f"- **Source:** {f['source']}",
          f"- **Target → measured:** {f['target']} → {f['measured']}"]
     scope = []
@@ -548,9 +673,9 @@ def render_finding(fid, f):
 
 
 DOMAINS = [
-    ("A11Y", "Accessibility", "MISSION priority 1"),
-    ("SEO", "SEO & discoverability", "MISSION priority 2"),
-    ("PERF", "Performance", "MISSION priority 3"),
+    ("A11Y", "Accessibility", ""),
+    ("SEO", "SEO & discoverability", ""),
+    ("PERF", "Performance", ""),
     ("SEC", "Security", ""),
     ("BP", "Best practices / structure", ""),
 ]
@@ -573,7 +698,7 @@ def main():
     sections = {
         "A11Y": a11y_findings(psi, crawl),
         "SEO": seo_findings(seo_html, crawl),
-        "PERF": perf_findings(psi),
+        "PERF": perf_findings(psi, crawl),
         "SEC": sec_findings(crawl),
         "BP": bp_findings(psi, crawl),
     }
@@ -587,6 +712,9 @@ def main():
         f"Site: {site.scheme}://{site.netloc}/ · Generated {stamp} by `hobbes/tools/findings.py` from `raw/`.",
         "",
         f"The problem catalog — dense, deterministic, agent-facing. {total} findings. "
+        "Every failing check is enumerated straight from `raw/` — no shortlist, no mission "
+        "weighting, no hand-picking; same raw always yields the same findings. Where a list "
+        "is long it is capped with an explicit `+N more`, never silently trimmed. "
         "Numbers and scorecard in `baseline.md`; the fix, effort, and impact are the **plan's** job, not this file's. "
         "See `hobbes/scorecards/FINDINGS-TEMPLATE.md`.",
     ]

@@ -1,4 +1,4 @@
-# PSI results — 2026-06-18 10:19
+# PSI results — 2026-06-18 12:06
 
 Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field
 are pulled and labelled SEPARATELY so they can't be mixed. Transcribe these
@@ -11,23 +11,23 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile | 63 ✗cut | 97 | 92 | 92 |
-| Home — desktop | 89 | 97 | 92 | 92 |
-| Collection — mobile | 38 ✗cut | 93 | 96 | 92 |
-| Collection — desktop | 91 | 94 | 92 | 92 |
-| Product — mobile | 73 | 88 | 96 | 92 |
-| Product — desktop | 88 | 88 | 73 | 92 |
+| Home — mobile | 53 ✗cut | 97 | 96 | 92 |
+| Home — desktop | 73 | 97 | 92 | 92 |
+| Collection — mobile | 49 ✗cut | 93 | 92 | 92 |
+| Collection — desktop | 80 | 94 | 96 | 92 |
+| Product — mobile | 66 | 88 | 96 | 92 |
+| Product — desktop | 72 | 88 | 77 | 92 |
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile | 10.31 ✗cut | 0.082 | 1.97 | 0.01 | 258 | 4.89 |
-| Home — desktop | 1.89 | 0.01 | 0.61 | 0.01 | 118 | 1.31 |
-| Collection — mobile | 13.81 ✗cut | 0 | 3.55 | 0.01 | 1145 | 7.18 |
-| Collection — desktop | 1.57 | 0.014 | 0.63 | 0.01 | 145 | 1.21 |
-| Product — mobile | 5.81 | 0.0 | 1.96 | 0.01 | 148 | 4.33 |
-| Product — desktop | 1.85 | 0.01 | 0.61 | 0.01 | 146 | 1.38 |
+| Home — mobile | 20.65 ✗cut | 0.063 | 4.38 | 0.01 | 240 | 8.17 |
+| Home — desktop | 2.15 | 0.01 | 0.61 | 0.01 | 349 | 1.4 |
+| Collection — mobile | 20.04 ✗cut | 0 | 3.67 | 0.01 | 460 | 7.61 |
+| Collection — desktop | 1.62 | 0.013 | 0.63 | 0.01 | 304 | 1.34 |
+| Product — mobile | 5.63 | 0.0 | 2.26 | 0.01 | 320 | 4.85 |
+| Product — desktop | 1.62 | 0.01 | 0.61 | 0.01 | 490 | 1.3 |
 
 ## C. Field data (CrUX 28-day)
 

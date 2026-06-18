@@ -14,6 +14,7 @@ USAGE:
   python3 hobbes/tools/baseline.py            # fresh capture (correct baseline)
   python3 hobbes/tools/baseline.py --resume   # reuse cache (recover a stalled run)
   python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick rerun)
+  python3 hobbes/tools/baseline.py --full     # crawl the entire sitemap, not the sample (slow)
 
 Writes the whole cycle into one folder: hobbes/scorecards/YYYY-MM-DD/ —
 baseline.md plus the raw artifacts (raw/), the digests, and crawl.html, so the
@@ -67,6 +68,7 @@ def between(text, start, end):
 
 def main():
     no_crawl = "--no-crawl" in sys.argv[1:]
+    full = "--full" in sys.argv[1:]
     date = datetime.now().strftime("%Y-%m-%d")
     rundir = HOBBES / "scorecards" / date          # one folder per cycle
     (rundir / "raw").mkdir(parents=True, exist_ok=True)
@@ -75,7 +77,8 @@ def main():
     run_tool("psi.py", passthrough)
     run_tool("seo.py", passthrough)
     if not no_crawl:
-        run_tool("crawl.py", passthrough)
+        # --full cascades to crawl.py only: the whole sitemap instead of the sample.
+        run_tool("crawl.py", passthrough + (["--full"] if full else []))
 
     psi = (rundir / "psi-results.md").read_text()
     seo = (rundir / "seo-results.md").read_text()

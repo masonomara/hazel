@@ -6,6 +6,9 @@ scorecard-ready markdown. Hobbes runs this; the human signs the manual rows.
 WHY THIS EXISTS: run-1 numbers were transcribed by hand and field data got
 mixed into lab rows (see hobbes-baseline.md 2.3/2.4/2.8). This pulls lab and
 field SEPARATELY from the PSI API and labels them, so the mix can't happen.
+Each page×device is measured 3× and the MEDIAN run is kept — single-run lab
+scores swing too much to compare cycle-to-cycle (a page drew perf 89 then 73
+an hour apart). CrUX field data is 28-day, so the median doesn't touch it.
 
 KEY: read from $PSI_API_KEY, else from hobbes/tools/.psi-key (alongside this script).
 USAGE:
@@ -42,6 +45,12 @@ CATEGORIES = ["performance", "accessibility", "best-practices", "seo"]
 # queue-wait + run-time and blows the timeout — that was the real stall. Cap
 # concurrency low so calls actually run when sent, not after a queue.
 MAX_CONCURRENCY = 3
+# Lab scores swing run-to-run (a heavy page measured twice an hour apart drew
+# perf 89 then 73 while CrUX sat still) — single-run lab numbers aren't comparable
+# cycle-to-cycle. So each page×strategy is measured RUNS times and the median run
+# (by performance score) is kept. CrUX field data is 28-day and identical across
+# runs, so it isn't affected.
+RUNS = 3
 # A runWarning containing this = PSI cut the run at its time limit (the page never
 # reached network-idle). It does NOT void the run: metrics that resolved before
 # the cut (FCP, CLS, TBT, Speed Index, and the a11y/SEO/Best-Practices scores) are
@@ -69,6 +78,28 @@ def resolve_run_dir(args):
 def cache_path(raw, url, strategy):
     slug = "".join(c if c.isalnum() else "_" for c in url)[:80]
     return raw / f"{slug}-{strategy}.psi.json"
+
+
+def run_cache_path(raw, url, strategy, i):
+    """Per-run cache for the median-of-3 (run 0/1/2). The selected median is
+    written to cache_path() — the canonical doc the scorecard AND findings read —
+    so downstream sees one coherent run, while these keep the raw three for resume."""
+    slug = "".join(c if c.isalnum() else "_" for c in url)[:80]
+    return raw / f"{slug}-{strategy}-r{i}.psi.json"
+
+
+def perf_score(d):
+    """Performance category score 0–1 of a PSI doc, or -1 if absent (sorts last)."""
+    s = (d or {}).get("lighthouseResult", {}).get("categories", {}).get("performance", {}).get("score")
+    return s if s is not None else -1.0
+
+
+def median_run(runs):
+    """The median PSI doc by performance score — Lighthouse's own guidance for a
+    stable number is the median *run*, not per-metric medians (which would build an
+    incoherent frankenstein doc). Returns one real, internally-consistent run."""
+    ordered = sorted(runs, key=perf_score)
+    return ordered[len(ordered) // 2]
 
 
 def load_key():
@@ -183,18 +214,34 @@ def main():
     def run(job):
         label, url, strat = job
         cf = cache_path(raw, url, strat)
-        if not fresh and cf.exists():
+        if not fresh and cf.exists():   # canonical median already chosen — reuse
             print(f"  ⤿ cached {label} {strat}", file=sys.stderr, flush=True)
-            return job, json.loads(cf.read_text())
-        print(f"… fetching {label} {strat}", file=sys.stderr, flush=True)
-        d = fetch(url, strat, key)
-        if d is not None:
-            cf.write_text(json.dumps(d))  # checkpoint — never re-pay for a success
-            print(f"  ✓ {label} {strat}", file=sys.stderr, flush=True)
-        return job, d
+            return job, json.loads(cf.read_text()), None
+        runs = []
+        for i in range(RUNS):
+            rf = run_cache_path(raw, url, strat, i)
+            if not fresh and rf.exists():
+                runs.append(json.loads(rf.read_text()))
+                continue
+            print(f"… fetching {label} {strat} (run {i+1}/{RUNS})", file=sys.stderr, flush=True)
+            d = fetch(url, strat, key)
+            if d is not None:
+                rf.write_text(json.dumps(d))   # checkpoint each run — never re-pay
+                runs.append(d)
+        if not runs:
+            return job, None, None
+        med = median_run(runs)
+        cf.write_text(json.dumps(med))          # canonical = the median run
+        spread = sorted(round(perf_score(d) * 100) for d in runs if perf_score(d) >= 0)
+        print(f"  ✓ {label} {strat} — perf {round(perf_score(med)*100)} "
+              f"(median of {len(runs)}: {'/'.join(map(str, spread)) or '—'})",
+              file=sys.stderr, flush=True)
+        return job, med, spread
 
     with ThreadPoolExecutor(max_workers=min(MAX_CONCURRENCY, len(jobs))) as ex:
-        results = dict((j, d) for j, d in ex.map(run, jobs))
+        triples = list(ex.map(run, jobs))
+    results = {j: d for j, d, _ in triples}
+    spreads = {j: sp for j, d, sp in triples if sp}
 
     rows_a, rows_lab, rows_field, rows_c = [], [], [], []
     failed = [j for j, d in results.items() if d is None]
@@ -251,14 +298,27 @@ def main():
         else:
             rows_field.append(f"| {label} | — | — | — | — |")
 
+    # Per-page×device perf-score spread across the 3 runs — shows the volatility the
+    # median smooths over, so the human can judge how shaky a cell is. Omitted for
+    # cells served from cache (no fresh runs this pass).
+    spread_bits = []
+    for label, url in urls:
+        for strat in ("mobile", "desktop"):
+            sp = spreads.get((label, url, strat))
+            if sp:
+                spread_bits.append(f"{label} — {strat} {'/'.join(map(str, sp))}")
+    spread_note = ([f"> Perf-score spread across 3 runs (median kept): {' · '.join(spread_bits)}.", ""]
+                   if spread_bits else [])
+
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     L = [
         f"# PSI results — {stamp}",
         "",
         "Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field",
-        "are pulled and labelled SEPARATELY so they can't be mixed. Transcribe these",
-        "into scorecard sections A–D; SEO (E) comes from seo.py and the manual a11y",
-        "rows (F) are signed by a human.",
+        "are pulled and labelled SEPARATELY so they can't be mixed. Each page×device",
+        "is the **median of 3 runs** (lab scores swing; the median is the comparable",
+        "number). Transcribe these into scorecard sections A–D; SEO (E) comes from",
+        "seo.py and the manual a11y rows (F) are signed by a human.",
         "",
         "Golden path: " + " · ".join(f"[{lbl}]({u})" for lbl, u in urls),
         "",
@@ -268,6 +328,7 @@ def main():
         "|---|---|---|---|---|",
         *rows_a,
         "",
+        *spread_note,
         "## B. Lab metrics",
         "",
         "| Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |",

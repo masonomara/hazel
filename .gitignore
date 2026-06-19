@@ -4,7 +4,6 @@ __pycache__/
 
 # Generated crawl/tool outputs
 /tmp/
-/hazel-crawl-*.html
 
 # PSI median-of-3: keep the canonical median doc, drop the 3 raw per-run captures
 hobbes/scorecards/*/raw/*-r[0-9].psi.json
@@ -12,5 +11,5 @@ hobbes/scorecards/*/raw/*-r[0-9].psi.json
 # macOS
 .DS_Store
 
-# Secrets — never commit (the PSI key was historically tracked; rotate it)
+# Secrets — never commit (PSI key was historically tracked; rotate it)
 hobbes/tools/.psi-key

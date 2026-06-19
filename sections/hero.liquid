@@ -60,14 +60,13 @@
           tabindex="0"
         {% else %}
           role="button" aria-disabled="true"
+          tabindex="-1"
         {% endif %}
         target="_top"
         class="slideshow__slide grid__item grid--1-col slider__slide"
         id="Slide-{{ section.id }}-{{ forloop.index | plus: index_offset }}"
         {{ block.shopify_attributes }}
         aria-roledescription="slide"
-        aria-label="Slide {{ forloop.index | plus: index_offset }} of {{ forloop.length }}"
-        tabindex="0"
         style="position: relative; overflow: hidden;"
       >
         {%- if block.settings.video == null and block.settings.video_url != null -%}
@@ -127,14 +126,13 @@
         tabindex="0"
       {% else %}
         role="link" aria-disabled="true"
+        tabindex="-1"
       {% endif %}
       target="_top"
       class="slideshow__slide grid__item grid--1-col slider__slide"
       id="Slide-{{ section.id }}-{{ forloop.index }}"
       {{ block.shopify_attributes }}
       aria-roledescription="{{ 'sections.slideshow.slide' | t }}"
-      aria-label="{{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
-      tabindex="-1"
       style="position: relative; overflow: hidden;"
     >
       {%- if block.settings.video == null and block.settings.video_url != null -%}

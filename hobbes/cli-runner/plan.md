@@ -216,7 +216,7 @@ Nothing to wire. Have the cycle write `diff.md` into `$GITHUB_STEP_SUMMARY` and 
 - **Cloud (GitHub Actions):** GitHub repo secrets — `PSI_API_KEY`, `ANTHROPIC_API_KEY` — injected as env vars. That's the whole set.
 - **Local:** a gitignored `hobbes/tools/.psi-key` (already ignored) or a shell env var; Claude Code uses your existing local auth.
 
-No Shopify credentials, no Slack, no other service. The merged PR is the entire handoff.
+No Shopify credentials, no Slack, no other service. The merged PR is the entire handoff. **The per-client "which key goes where" runbook lives in `cli-runner/SETUP.md`** (secrets table + GitHub-app install + the branch-prefix fix).
 
 ### Phase 6 (PARKED — explicitly *not* part of the Claude-Code-only build) — Managed Agents
 A future option worth keeping on the table — but deliberately deferred, because it's a **different surface: the Anthropic API (hosted agent loop), not Claude Code.** Per the §3 "Claude Code only" rule, we don't build it now. **Parking it costs nothing — Phases 0–5 don't block it:** the same `hobbes` CLI, `hobbes.toml`, templates, and GitHub repo work unchanged whether the agent stages are driven by `claude-code-action` (now) or a Managed Agents scheduled deployment (later).

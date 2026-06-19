@@ -1,0 +1,39 @@
+# Publish — YYYY-MM-DD
+
+Site: [url] · Cycle: [YYYY-MM-DD] · Branch / PR: [link] · Released by [human].
+
+This is the **release** stage — the only stage that touches the live store. Execution built and verified the work on a branch and opened a PR; publish takes that reviewed work **live**. Because going live is irreversible and outward-facing, this stage is **human-owned**: Hobbes assists, but a human reviews, signs off, and publishes. The CLAUDE.md hard line lives here.
+
+## Where this sits
+
+`baseline` → `findings` → `plan` → `execute` (branch + PR ready) → **`publish` (review → sign-off → merge → go live)** → loop back to `baseline` for the next cycle.
+
+## The hard line — read before anything
+
+Publish crosses the things Hobbes may **not** do alone (CLAUDE.md): publish externally, change the live store, merge nontrivial work to `main`. So Hobbes's role here is bounded, on purpose:
+
+- **Hobbes may:** summarize the PR, answer review comments, make requested code changes (looping back through the `execute` gates), draft the `CHANGELOG.md` entry, and push to an **unpublished / dev theme** for preview.
+- **Only a human may, and only on explicit sign-off:** merge to `main`, and **publish the live theme. Only Mason publishes the live theme — never without sign-off.** Hobbes never runs the live publish itself, and never assumes a past approval carries to this release.
+
+If you are unsure whether a step is over the line, it is. Stop and hand it back.
+
+## The steps
+
+1. **Review.** Open the PR for the human. Summarize what shipped, the finding IDs it closes, what was verified (theme check clean, mobile + desktop), and what's deferred to a human (content at scale, an app-removal decision). Address review comments — any code change loops back through the `execute` quality gates before it's re-offered.
+
+2. **Sign-off.** Mason signs off on the code. Where the change is **brand-visible** (layout, type, motion, anything a shopper sees), Jenna signs off too — she owns brand and final sign-off (CONTEXT.md). Don't merge brand-visible work without her nod.
+
+3. **Merge.** On sign-off, merge the branch to `main` — the source of truth.
+
+4. **Preview on a dev theme.** Push to an **unpublished / dev theme and preview** — never straight to live. Coordinate `settings_data.json` so the theme editor and the push don't clobber each other (it's admin-generated). Verify mobile + desktop on the preview.
+
+5. **Go live — human only.** **Mason publishes the live theme.** Hobbes does not run this step. Immediately after, verify the live store on mobile + desktop.
+
+6. **Close the loop.** Draft the `CHANGELOG.md` entry — what shipped, why, the finding IDs closed, and the result. Update `MISSION.md` to mark the gaps that closed. Then the next cycle re-baselines and **diffs against this one**: the closed findings and any regressions are the proof the release actually worked. A finding isn't "done" because it was coded — it's done when the next baseline shows it gone.
+
+## Pointers
+
+- `execute.md` / the PR — what's being released.
+- `DEVELOPMENT.md` — the deploy mechanics (Shopify CLI, dev-theme-first, only Mason publishes, don't break the live store).
+- `CONTEXT.md` — who signs off (Mason on code, Jenna on brand-visible).
+- `CHANGELOG.md` · `MISSION.md` — what publish updates to close the loop and tee up the next cycle.

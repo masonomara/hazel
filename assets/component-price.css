@@ -106,7 +106,7 @@
 
 .price-item--sold-out {
     text-transform: uppercase;
-    color: rgba(var(--color-foreground), 0.4);
+    color: rgb(var(--color-foreground));
 }
 
 .price--center {

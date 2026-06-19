@@ -35,6 +35,7 @@ The tools cover all 6 page×device combinations in one go; the manual pass is pe
 **The operator runs two commands — everything else cascades:**
 
 ```
+python3 hobbes/cli.py cycle          # 0. one-shot: baseline + findings + diff (the patrol)
 python3 hobbes/tools/baseline.py     # 1. capture: cascades psi → seo → crawl, stamps the scorecard
 python3 hobbes/tools/findings.py     # 2. catalog: builds findings.md from the cycle's raw/ artifacts
 
@@ -45,6 +46,8 @@ python3 hobbes/tools/baseline.py --full     # crawl the ENTIRE sitemap, not the 
 ```
 
 `psi.py`, `seo.py`, and `crawl.py` are **cascaded by `baseline.py`** — you do not run them by hand. Each is documented below so you know what feeds which section, and each can be run standalone to refresh one section in isolation, but the normal operator path is the two commands above.
+
+Per-client config — the golden path, client metadata, and the PSI-key *location* (never the key itself) — lives in `hobbes/hobbes.toml`, read by every tool through `hobbes/tools/config.py`. One source; no hardcoded URLs. `hobbes/cli.py` also exposes `diff` (cycle-over-cycle regressions) and `status` (which stage the newest cycle is at).
 
 `baseline.py` runs **all three tools together — `psi.py` then `seo.py` then `crawl.py`** — and stamps a dated `hobbes/scorecards/YYYY-MM-DD/baseline.md` from `TEMPLATE.md` (the
 cycle folder also holds the raw artifacts in `raw/`, the digests, and `crawl.html`): header and golden path filled, sections **A–F** pasted in (A–D from PSI, E from SEO, F from the crawl), section **G** left blank for the human pass. It fetches fresh by default (a baseline must reflect the current site); if a run stalls partway the successful calls are cached, so `--resume` picks up the rest. `--full` cascades to the crawl only. If any tool errors it aborts rather than write a half-scorecard. The three cascaded tools:

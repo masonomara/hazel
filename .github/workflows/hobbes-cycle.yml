@@ -1,0 +1,56 @@
+# Hobbes deterministic patrol: baseline -> findings -> diff, weekly + on demand.
+# Pure Python (stdlib) + the SiteOne crawler binary. No LLM. Opens a cycle PR;
+# GitHub email is the notification. Writes only to GitHub.
+name: Hobbes cycle
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"        # Mondays 13:00 UTC
+  workflow_dispatch:            # the manual button
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:                   # one cycle at a time
+  group: hobbes-cycle
+  cancel-in-progress: false
+
+jobs:
+  patrol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install SiteOne crawler
+        # SiteOne is now a zero-dependency Rust binary. Confirm the exact asset
+        # name/version on https://github.com/janreges/siteone-crawler/releases
+        # and pin it here instead of `latest`.
+        run: |
+          curl -fsSL -o /tmp/siteone.tar.gz \
+            https://github.com/janreges/siteone-crawler/releases/latest/download/siteone-crawler-linux-x64.tar.gz
+          sudo tar -xzf /tmp/siteone.tar.gz -C /usr/local/bin siteone-crawler
+          siteone-crawler --version
+
+      - name: Run cycle
+        env:
+          PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
+        run: |
+          python3 hobbes/cli.py cycle
+          DATE=$(date +%F)
+          echo "CYCLE_DATE=$DATE" >> "$GITHUB_ENV"
+          SUMMARY=$(python3 hobbes/tools/diff.py --run-dir "hobbes/scorecards/$DATE" | tail -1)
+          echo "DIFF_SUMMARY=$SUMMARY" >> "$GITHUB_ENV"
+          cat "hobbes/scorecards/$DATE/diff.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open cycle PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: hobbes/cycle-${{ env.CYCLE_DATE }}
+          title: "Baseline ${{ env.CYCLE_DATE }} — ${{ env.DIFF_SUMMARY }}"
+          body-path: hobbes/scorecards/${{ env.CYCLE_DATE }}/diff.md
+          add-paths: hobbes/scorecards/${{ env.CYCLE_DATE }}/**

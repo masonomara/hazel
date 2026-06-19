@@ -33,11 +33,8 @@ from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
-DEFAULT_URLS = [
-    ("Home", "https://hazelboutique.com/"),
-    ("Collection", "https://hazelboutique.com/collections/all-hazel-brand"),
-    ("Product", "https://hazelboutique.com/products/the-capri-collection-baby-pink"),
-]
+from config import golden_path  # one source of the golden path (shared with psi.py)
+DEFAULT_URLS = golden_path()
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 MAX_CONCURRENCY = 4

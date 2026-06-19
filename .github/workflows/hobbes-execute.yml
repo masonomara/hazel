@@ -1,0 +1,35 @@
+# Hobbes agent stages (plan -> execute), Claude Code only, manual trigger only.
+# It writes theme-code changes on a branch and opens a PR for review. It writes
+# only to GitHub: no Shopify CLI, no publish. Verification + publish are human.
+name: Hobbes execute
+
+on:
+  workflow_dispatch:
+    inputs:
+      budget:
+        description: "Effort budget (points) for batch selection"
+        default: "10"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # opus + high effort for code work; confirm flag names against the action's docs.
+          claude_args: "--model claude-opus-4-8"
+          prompt: |
+            Run the Hobbes plan + execute stages on the latest cycle.
+            Read hobbes/scorecards/PLAN-TEMPLATE.md and hobbes/scorecards/EXECUTE-TEMPLATE.md
+            and follow them exactly. Effort budget: ${{ inputs.budget }}.
+            Write plan.md and execution.md into the latest hobbes/scorecards/<date>/ folder,
+            make the theme-code changes on a branch, and OPEN A PULL REQUEST for human review.
+            Hard rules: write only to GitHub. Do NOT run the Shopify CLI. Do NOT publish.
+            Verification (Theme Check, browser) and the live publish are the human's, at review.

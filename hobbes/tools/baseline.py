@@ -32,14 +32,9 @@ TEMPLATE = HOBBES / "scorecards" / "TEMPLATE.md"
 
 sys.path.insert(0, str(TOOLS))
 from psi import DEFAULT_URLS  # single source of truth for the golden path
+from config import client_meta
 
-# Client metadata — edit per client. The golden path lives in psi.py / seo.py.
-CONFIG = {
-    "client": "Hazel Boutique",
-    "site": "hazelboutique.com",
-    "platform": "Shopify Advanced",
-    "run_by": "Mason",
-}
+CONFIG = client_meta()  # [client] from hobbes.toml
 
 
 def run_tool(name, passthrough):
@@ -101,7 +96,7 @@ def main():
     doc = "\n".join([
         f"# Baseline scorecard — {date}",
         "",
-        f"Client: {CONFIG['client']} · Site: {CONFIG['site']} · Platform: "
+        f"Client: {CONFIG['name']} · Site: {CONFIG['site']} · Platform: "
         f"{CONFIG['platform']} · Run by: {CONFIG['run_by']} · Date: {date}",
         "",
         f"Golden path: {golden}",

@@ -24,7 +24,6 @@ that is usually exhausted (HTTP 429) — a key is required, not optional.
 """
 
 import json
-import os
 import sys
 import urllib.parse
 import urllib.request
@@ -32,12 +31,9 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
-# Golden path — keep in sync with the locked URLs in the scorecard.
-DEFAULT_URLS = [
-    ("Home", "https://hazelboutique.com/"),
-    ("Collection", "https://hazelboutique.com/collections/all-hazel-brand"),
-    ("Product", "https://hazelboutique.com/products/the-capri-collection-baby-pink"),
-]
+# Golden path + PSI key come from hobbes.toml via config.py (one source per client).
+from config import golden_path, psi_key
+DEFAULT_URLS = golden_path()
 ENDPOINT = "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed"
 CATEGORIES = ["performance", "accessibility", "best-practices", "seo"]
 # PSI runs Lighthouse server-side; a heavy mobile page takes ~60s. Firing all
@@ -103,15 +99,10 @@ def median_run(runs):
 
 
 def load_key():
-    key = os.environ.get("PSI_API_KEY", "").strip()
-    if key:
-        return key
-    key_file = TOOLS / ".psi-key"  # alongside this script
-    if key_file.exists():
-        raw = key_file.read_text().strip()
-        # tolerate either "KEY" or "PSI_API_KEY=KEY"
-        return raw.split("=", 1)[1].strip() if "=" in raw else raw
-    sys.exit("No key: set $PSI_API_KEY or create hobbes/tools/.psi-key")
+    key = psi_key()
+    if not key:
+        sys.exit("No PSI key: set $PSI_API_KEY or create hobbes/tools/.psi-key")
+    return key
 
 
 def fetch(url, strategy, key, tries=8, timeout=75):

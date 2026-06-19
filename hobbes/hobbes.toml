@@ -1,0 +1,21 @@
+# Per-client config. The engine (tools/) reads this; the instance fills it.
+# Secrets are NEVER stored here — only the env-var name and file path to find them.
+
+[client]
+name     = "Hazel Boutique"
+site     = "hazelboutique.com"
+platform = "Shopify Advanced"
+run_by   = "Mason"
+
+[golden_path]
+home       = "https://hazelboutique.com/"
+collection = "https://hazelboutique.com/collections/all-hazel-brand"
+product    = "https://hazelboutique.com/products/the-capri-collection-baby-pink"
+
+[secrets]
+psi_key_env  = "PSI_API_KEY"            # checked first
+psi_key_file = "hobbes/tools/.psi-key"  # repo-relative fallback; git-ignored
+
+[cycle]
+branch_prefix = "hobbes/"
+effort_budget = 10

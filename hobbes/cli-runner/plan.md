@@ -243,72 +243,60 @@ What it would add when/if adopted: Anthropic hosts the loop + a per-session cont
 
 **Sequencing & gates.** Phases 0 → 1 are local and come first. **Phase 1 ends with a full real cycle that closes a finding — that gate must pass before Phases 2–3 automate anything.** Phases 2 and 3 are independent of each other once Phase 1 is done. Phase 6 is parked. Distribution (Phase 7) comes after Hazel runs green end-to-end.
 
-### Phase 0 — Config extraction (prerequisite; local)
-- [ ] Confirm the toolchain: Python ≥ 3.11 locally and on the CI runner (`tomllib` is stdlib 3.11+); record it in `DEVELOPMENT.md`.
-- [ ] **Secret hygiene first:** confirm `hobbes/tools/.psi-key` is git-ignored and *not* in history; add it to `.gitignore` if missing. If it was ever committed, rotate the PSI key.
-- [ ] Write `hobbes/hobbes.toml`: `[client]` (name/site/platform/run_by) · `[golden_path]` (home/collection/product) · `[secrets]` (`psi_key_env`, `psi_key_file`) · `[cycle]` (`branch_prefix`, `effort_budget`).
-- [ ] Add `hobbes/tools/config.py`: `cfg()` (`tomllib` + `lru_cache`) · `golden_path()` → `[(label,url)]` · `client_meta()` → `[client]` · `psi_key()` (env-name first, then file).
-- [ ] `psi.py`: replace hardcoded `DEFAULT_URLS` with `golden_path()`; rewrite `load_key()` to call `config.psi_key()`.
-- [ ] `seo.py`: replace its **own duplicate** `DEFAULT_URLS` with `golden_path()` (removes the drift bug).
-- [ ] `baseline.py`: replace the hardcoded `CONFIG` dict with `client_meta()`. (`crawl.py` imports `DEFAULT_URLS` from `psi.py` — confirm it inherits the change.)
-- [ ] **Parity check:** run `baseline.py --fresh` + `findings.py`; confirm golden-path URLs, client header, and section numbers match the committed `2026-06-18` cycle (config extraction must not change outputs).
+### Phase 0 — Config extraction (prerequisite; local) — ✅ DONE
+- [x] Confirm the toolchain: Python 3.14 locally (`tomllib` stdlib); recorded in `DEVELOPMENT.md`.
+- [x] **Secret hygiene:** `.psi-key` was **tracked + in history** (commit `260cf2b`). Untracked (`git rm --cached`) + added to `.gitignore`. ⚠ **You must rotate the PSI key** — it's exposed in history.
+- [x] Wrote `hobbes/hobbes.toml` (`[client]`/`[golden_path]`/`[secrets]`/`[cycle]`).
+- [x] Added `hobbes/tools/config.py` (`cfg`, `golden_path`, `client_meta`, `psi_key`).
+- [x] `psi.py`: `DEFAULT_URLS = golden_path()`; `load_key()` → `psi_key()`; removed now-unused `import os`.
+- [x] `seo.py`: duplicate `DEFAULT_URLS` → `golden_path()`.
+- [x] `baseline.py`: `CONFIG = client_meta()`; `CONFIG['client']` → `CONFIG['name']`. (`crawl.py` inherits via `from psi import DEFAULT_URLS` — confirmed.)
+- [x] **Parity check:** all 6 tools `py_compile`; `DEFAULT_URLS`/`CONFIG` assert-equal to the originals; `findings.py` re-run on cached raw is **byte-identical** to the committed `2026-06-18`. (Full live `baseline --fresh` parity is left for the next real cycle — it would overwrite the gold standard and isn't needed to prove the wiring.)
 
-### Phase 1 — CLI + cycle-diff + first real cycle (local)
-- [ ] Decide invocation: `python hobbes/cli.py <cmd>` (no package) vs `python -m hobbes.cli` (needs `__init__.py`). Pick the script form for simplicity.
-- [ ] Write `hobbes/cli.py` (argparse): `baseline` · `findings` · `diff` · `cycle` (= baseline `--fresh` → findings → diff) · `status` (read newest `scorecards/<date>/`, report the stage from which artifacts exist) · `plan`/`execute` stubs that print the stage prompt + inputs (the real agent run is Phase 3).
-- [ ] Write `hobbes/tools/diff.py`:
-  - [ ] Locate the two most-recent cycle folders (extend `findings.latest_run_dir()` to also return the prior).
-  - [ ] Parse `baseline.md` §A (scores), §C (field), §F (counts) from both cycles.
-  - [ ] Flag **regressions** (a cell that slipped vs prior or dropped below its `BASELINE.md` target) and **improvements**; compute findings-count delta per domain from `findings.md`.
-  - [ ] Write `diff.md` + a one-line summary string (for the PR title).
-  - [ ] Handle the first-cycle case (no prior → "baseline established, nothing to diff").
-- [ ] Run `python hobbes/cli.py cycle` end-to-end locally; eyeball `diff.md` against a hand check.
-- [ ] **GATE — one full real cycle:** with `2026-06-18/plan.md` in hand, run `execute` on the SYS-1 + SYS-2 a11y batch → open a PR → (human reviews, merges, publishes to Shopify outside Hobbes) → re-baseline → `diff` → **confirm ≥1 finding closed and no regressions.** Only then start Phase 2/3.
+### Phase 1 — CLI + cycle-diff + first real cycle (local) — ✅ code done · cycle running · gate ⛔ needs you
+- [x] Invocation: `python3 hobbes/cli.py <cmd>` (script form, no package).
+- [x] Wrote `hobbes/cli.py`: `cycle` · `baseline` · `findings` · `diff` · `status` · `plan`/`execute` stubs (print template + findings + the GitHub-only instruction). `status` verified.
+- [x] Wrote `hobbes/tools/diff.py`:
+  - [x] Locates the two most-recent cycle folders with a `baseline.md`.
+  - [x] Parses §A scores + §F counts + the findings total. (§C field deferred — CrUX is 28-day, slow-moving; low value to diff.)
+  - [x] Flags regressions (score slipped / count grew / more findings) and improvements.
+  - [x] Writes `diff.md` + a one-line summary (PR title).
+  - [x] First-cycle case **and** a non-comparable-prior guard (it caught the old `⚠`-label format silently reporting "0 changes" — fixed to say so honestly).
+- [~] `python3 hobbes/cli.py cycle` end-to-end — **running now** (creates `2026-06-19/`), which also gives a real same-format second cycle to verify the live diff.
+- [ ] ⛔ **GATE — one full real cycle** (execute a11y batch → PR → **human merges + publishes to Shopify** → re-baseline → confirm a finding closed). Blocked: the human publish is yours — I can't do it. Everything up to the PR is buildable (Phase 3).
 
-### Phase 2 — Deterministic patrol in GitHub Actions
-- [ ] Add repo secret `PSI_API_KEY`.
-- [ ] Write `.github/workflows/hobbes-cycle.yml`:
-  - [ ] Triggers: `schedule` (weekly cron) + `workflow_dispatch` (manual button).
-  - [ ] `permissions: { contents: write, pull-requests: write }`; a `concurrency` group so only one cycle runs at a time.
-  - [ ] Steps: `actions/checkout@v4` → `actions/setup-python@v5` (3.12) → download the SiteOne Linux release binary to `/usr/local/bin` → `python hobbes/cli.py cycle` with `PSI_API_KEY` in `env`.
-  - [ ] Export `CYCLE_DATE` + `DIFF_SUMMARY` to `$GITHUB_ENV`; write `diff.md` into `$GITHUB_STEP_SUMMARY`.
-  - [ ] `peter-evans/create-pull-request@v6` → branch `hobbes/cycle-<date>`, title from `DIFF_SUMMARY`, body = `diff.md`.
-- [ ] Pin action + SiteOne release versions for reproducibility.
-- [ ] Confirm `crawl.py`'s `shutil.which("siteone-crawler")` finds the binary in CI.
-- [ ] Trigger `workflow_dispatch` once; confirm green run, cycle PR opened, GitHub email received, step-summary renders the diff table.
+### Phase 2 — Deterministic patrol in GitHub Actions — ✅ file written · secret + run ⛔ need you
+- [ ] ⛔ Add repo secret `PSI_API_KEY` (GitHub UI — yours).
+- [x] Wrote `.github/workflows/hobbes-cycle.yml`: `schedule` cron + `workflow_dispatch`; `contents`/`pull-requests: write`; `concurrency`; checkout → setup-python 3.12 → SiteOne binary → `cli.py cycle` (PSI key in `env`) → export `CYCLE_DATE`/`DIFF_SUMMARY` + `diff.md` → `$GITHUB_STEP_SUMMARY` → `create-pull-request`.
+- [~] Pinned actions to majors (`@v4/@v5/@v6`); SiteOne uses `latest` with a comment to pin once the exact release-asset name is confirmed.
+- [x] `crawl.py`'s `shutil.which("siteone-crawler")` finds it locally; the CI download step puts it on `PATH`. (Couldn't run CI to confirm there.)
+- [ ] ⛔ Trigger `workflow_dispatch` once (needs the secret + merge to the default branch — yours).
 
-### Phase 3 — Agent stages in GitHub Actions (Claude Code only)
-- [ ] Run `/install-github-app` (installs the GitHub app + sets the `ANTHROPIC_API_KEY` secret).
-- [ ] Write `.github/workflows/hobbes-execute.yml`:
-  - [ ] Trigger: `workflow_dispatch` only (it writes code — never auto-fire), with a `budget` input (default `10`).
-  - [ ] `permissions: { contents: write, pull-requests: write }`.
-  - [ ] `anthropics/claude-code-action@v1` with `anthropic_api_key` + a prompt that reads `findings.md` + `PLAN-TEMPLATE.md`/`EXECUTE-TEMPLATE.md`, selects the batch by the budget, runs plan → execute, and **opens a PR — writing only to GitHub, never running Shopify CLI, never publishing.**
-  - [ ] Set model/effort in the action config (opus, high).
-- [ ] Dry-run on the a11y batch; review the PR — assert: `plan.md`/`execution.md` written, changes scoped to the batch, no Shopify CLI invoked, no publish, PR opened for review.
+### Phase 3 — Agent stages in GitHub Actions (Claude Code only) — ✅ file written · setup + run ⛔ need you
+- [ ] ⛔ Run `/install-github-app` (installs the app + sets `ANTHROPIC_API_KEY`) — yours.
+- [x] Wrote `.github/workflows/hobbes-execute.yml`: `workflow_dispatch` only + `budget` input; `contents`/`pull-requests: write`; `anthropics/claude-code-action@v1` with a prompt that follows the PLAN/EXECUTE templates, opens a PR, and **writes only to GitHub — no Shopify CLI, no publish.** (Confirm the action's exact input flag names against its docs.)
+- [ ] ⛔ Dry-run on the a11y batch + review the PR (needs the app + CI — yours).
 
-### Phase 4 — Notifications (GitHub-native only)
-- [ ] Confirm `diff.md` → `$GITHUB_STEP_SUMMARY` + PR body in the cycle workflow (wiring is in Phase 2).
-- [ ] Confirm GitHub email arrives on both the cycle PR and the execute PR; check repo watch / notification settings.
-- [ ] (No Slack, no webhook endpoint, no third service — by design.)
+### Phase 4 — Notifications (GitHub-native only) — ✅ wired
+- [x] `diff.md` → `$GITHUB_STEP_SUMMARY` + PR body (in `hobbes-cycle.yml`).
+- [ ] ⛔ Confirm GitHub email arrives on the cycle / execute PRs (needs a real run — yours).
+- [x] No Slack / webhook / third service — by design.
 
-### Phase 5 — Secrets (GitHub, never the TOML)
-- [ ] Add `PSI_API_KEY` + `ANTHROPIC_API_KEY` as GitHub repo secrets (only these two).
-- [ ] Confirm `hobbes.toml` holds only secret *names/paths*, never values.
-- [ ] Re-confirm `hobbes/tools/.psi-key` git-ignored (Phase 0) and that `.psi-key`/env is what local runs use.
+### Phase 5 — Secrets (GitHub, never the TOML) — ✅ done where I can · creation ⛔ yours
+- [ ] ⛔ Add `PSI_API_KEY` + `ANTHROPIC_API_KEY` as GitHub repo secrets (yours).
+- [x] `hobbes.toml` holds only secret *names/paths* (`psi_key_env`, `psi_key_file`), no values — confirmed.
+- [x] `.psi-key` git-ignored + untracked; local runs use it / the env var. (⚠ rotate the key — it's in history.)
 
 ### Phase 6 — Managed Agents (PARKED — not built; door open)
-- [ ] Nothing to build now. Keep Phases 0–5 surface-agnostic so MA stays a drop-in later (CLI / `hobbes.toml` / templates / repo unchanged).
-- [ ] (later — only once the Claude-Code path is proven *and* MA is GA) author the Hobbes agent + scheduled deployment; webhook → notify.
+- [x] Nothing built. Phases 0–5 are surface-agnostic (CLI / toml / templates / repo unchanged) — MA stays a drop-in.
+- [ ] (later — only once the Claude-Code path is proven *and* MA is GA) author the agent + scheduled deployment.
 
-### Phase 7 — Distribution (after Hazel runs green end-to-end)
-- [ ] Draw the engine/instance line: **engine** = `tools/`, the 5 templates, `cli.py`, `.github/workflows/` (identical per client); **instance** = `hobbes.toml`, `MISSION`/`DEVELOPMENT`/`CONTEXT`/`CHANGELOG`, `scorecards/` (per client).
-- [ ] Pick the distribution mechanism: git submodule vs pip-style installer vs vendored copy (recommend submodule).
-- [ ] Promote the proven engine into the stale `~/Documents/hobbes` seed (currently pre-tooling).
-- [ ] Drop engine + workflows into a second client repo; fill its `hobbes.toml`; confirm a green cycle PR.
+### Phase 7 — Distribution (after Hazel runs green end-to-end) — gated, not started
+- [ ] ⛔ Gated on the Phase 1 real-cycle gate (Hazel proving out end-to-end). The engine/instance line is drafted in §3; promotion to the stale `~/Documents/hobbes` seed + a second client repo wait until a cycle closes a finding for real.
 
 ### Cross-cutting / docs
-- [ ] Update `BASELINE.md` + the seed `README.md` to document the `hobbes` CLI and the runner.
-- [ ] Add a `CHANGELOG.md` line when the runner ships.
+- [x] `BASELINE.md` documents `hobbes/cli.py` (cycle/diff/status) + the `hobbes.toml`/`config.py` config; `DEVELOPMENT.md` notes Python ≥ 3.11.
+- [ ] Update the stale seed `README.md` (Phase 7) and add a `CHANGELOG.md` line **when the runner actually ships** (merged + first green run) — not yet.
 
 ---
 

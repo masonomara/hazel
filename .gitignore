@@ -11,3 +11,6 @@ hobbes/scorecards/*/raw/*-r[0-9].psi.json
 
 # macOS
 .DS_Store
+
+# Secrets — never commit (the PSI key was historically tracked; rotate it)
+hobbes/tools/.psi-key

@@ -225,17 +225,23 @@ What it would add when/if adopted: Anthropic hosts the loop + a per-session cont
 
 ---
 
-## 6. Risks / walls (carried from the earlier analysis, now with mitigations)
+## 6. Risks / walls — with status (a hardening pass closed several)
 
-| Wall | Severity | Mitigation |
+| Wall | Severity | Status / mitigation |
 |---|---|---|
-| Config still hardcoded (2 duplicate `DEFAULT_URLS`) | low, must-do | Phase 0 `hobbes.toml` + `config.py` |
-| Agent stages unattended (reliability/cost/off-rails) | high | Keep plan/execute **manual-trigger only**; PR-gated; budget cap; never auto-fire across sites |
-| Hobbes touching Shopify | n/a by design | Hobbes only writes to GitHub (branches/PRs). All Shopify work — preview, verify, publish — is the human's, outside the system. No Shopify CLI, no Shopify secrets |
-| SiteOne binary in CI (no Docker image yet) | low | Download the Rust release binary to `PATH` (Phase 2) |
-| Cycle collision (weekly fires while last PR open) | medium | Date-stamped branches + `create-pull-request` upserts; one open cycle PR at a time |
-| Cost ×6 sites ×weekly | medium | Deterministic patrol is ~free; gate the agent stages behind human trigger |
-| Cross-cycle finding-ID drift in `diff.py` | medium | Diff `baseline.md` numbers (positional, stable) for regressions; findings by domain count, not ID |
+| **Diff reports fake improvements from a collapsed crawl** | **high** | ✅ FIXED — `diff.py` tiers **Field** (CrUX, trustworthy) / **Lab** (volatile, labelled) / **§F counts** (compared only when crawl-coverage ratio ≥ 0.8; else omitted + ⚠ in the PR title). |
+| PSI lab scores read as regressions (noise) | medium | ✅ FIXED — lab split into its own "volatile" section; CrUX field is the headline regression signal. |
+| `hobbes/` branch-prefix collision (cycle workflow can't open PRs) | medium | ✅ FIXED — flat `branch_prefix = "hobbes-"` + `branch: hobbes-cycle-<date>`; can't collide with a branch named `hobbes`. |
+| "Theme Check clean" can't be a hard gate (pre-existing error) | low | ✅ FIXED — EXECUTE gate is now "no *new* offenses in touched files," not zero. |
+| Config hardcoded (2 duplicate `DEFAULT_URLS`) | low | ✅ FIXED — Phase 0 `hobbes.toml` + `config.py`. |
+| Secret-in-repo-file (`.psi-key` was committed + in history) | medium | Partial — env-var-first + `.gitignore` rule shipped; **rotate the key** (it's in history). |
+| Crawl coverage not reproducible (Shopify throttles 200→185→4 pages) | medium | OPEN — the diff now guards + surfaces it, but the throttle-driven sample collapse is external; wants a crawl 429-backoff/retry pass. |
+| **Engine vs instance not separated** (branch tangle, biting now) | **high** | OPEN — structural. Tooling + client work intertwined in one repo; every cross-branch move is fragile. **Move the Phase-7 split up.** |
+| Sitewide changes ship unverified (no browser in execute) | medium | OPEN by design — human browser-verifies at review; flag sitewide changes (e.g. the cart drawer) prominently. |
+| Agent stages unattended (reliability/cost/off-rails) | high | Keep plan/execute **manual-trigger only**; PR-gated; budget cap; never auto-fire across sites. |
+| Hobbes touching Shopify | n/a by design | Hobbes only writes to GitHub; all Shopify work is the human's. No Shopify CLI/secrets. |
+| SiteOne binary in CI (no Docker image) | low | Download the Rust release binary to `PATH` (Phase 2). |
+| Cost ×6 sites ×weekly | medium | Deterministic patrol ~free; gate agent stages behind human trigger. |
 
 ---
 

@@ -33,9 +33,9 @@ Write the plan to `execution.md` in the cycle folder. Each task names the system
 
 ## Quality gates — from `DEVELOPMENT.md`, not hardcoded
 
-The "done means" bar belongs to the stack, and it lives in `DEVELOPMENT.md` — read it. The gate is **"the project's checker stays green,"** whatever that checker is. For this theme (Liquid + vanilla JS, Dawn fork, **no build toolchain, no TypeScript**):
+The "done means" bar belongs to the stack, and it lives in `DEVELOPMENT.md` — read it. The gate is **"no *new* offenses from this change,"** not "zero offenses" — a real repo carries pre-existing ones (this theme already has a Theme Check error in `icon-shop-pay.liquid`), so a zero-offense gate would block every PR forever. Diff the checker output against the base, not against zero. For this theme (Liquid + vanilla JS, Dawn fork, **no build toolchain, no TypeScript**):
 
-- **Run `shopify theme check` continuously** — this is the theme's checker (the role "typecheck" plays elsewhere). Keep it clean; no new errors.
+- **Run `shopify theme check` continuously** — the theme's checker (the role "typecheck" plays elsewhere). The bar is **no new offenses in the files you touched**; pre-existing ones elsewhere are out of scope.
 - **Browser-verify every change on mobile + desktop.** No new console errors.
 - **Keep the fork upgrade-safe** — self-contained snippets, Hazel overrides in the appended `base.css` section, minimal Dawn-core edits. Do not hand-edit `settings_data.json`.
 - **No regression** against the `baseline.md` targets.

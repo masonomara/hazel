@@ -50,7 +50,7 @@ jobs:
       - name: Open cycle PR
         uses: peter-evans/create-pull-request@v6
         with:
-          branch: hobbes/cycle-${{ env.CYCLE_DATE }}
+          branch: hobbes-cycle-${{ env.CYCLE_DATE }}
           title: "Baseline ${{ env.CYCLE_DATE }} — ${{ env.DIFF_SUMMARY }}"
           body-path: hobbes/scorecards/${{ env.CYCLE_DATE }}/diff.md
           add-paths: hobbes/scorecards/${{ env.CYCLE_DATE }}/**

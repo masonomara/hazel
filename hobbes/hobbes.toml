@@ -17,5 +17,5 @@ psi_key_env  = "PSI_API_KEY"            # checked first
 psi_key_file = "hobbes/tools/.psi-key"  # repo-relative fallback; git-ignored
 
 [cycle]
-branch_prefix = "hobbes/"
+branch_prefix = "hobbes-"   # flat, never collides with a branch literally named "hobbes"
 effort_budget = 10

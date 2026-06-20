@@ -27,9 +27,9 @@ If you are unsure whether a step is over the line, it is. Stop and hand it back.
 
 4. **Preview on a dev theme (Mason, in Shopify — outside Hobbes).** Push to an **unpublished / dev theme and preview** — never straight to live. Coordinate `settings_data.json` so the theme editor and the push don't clobber each other (it's admin-generated). Verify mobile + desktop on the preview.
 
-5. **Go live — human only.** **Mason publishes the live theme.** Hobbes does not run this step. Immediately after, verify the live store on mobile + desktop.
+5. **Go live — human only.** **Mason publishes the live theme.** Hobbes does not run this step. Immediately after, verify the live store on mobile + desktop, then **add the `published` label to the PR** — that label is the explicit "it's live now" signal that fires the `review` phase. (Adding it before the change is actually live would measure the old site.)
 
-6. **Close the loop.** Draft the `CHANGELOG.md` entry — what shipped, why, the finding IDs closed, and the result. Update `MISSION.md` to mark the gaps that closed. The **`review` phase fires automatically** once the merged change is live (`.github/workflows/hobbes-review.yml`): it re-baselines the live site, diffs against the pre-publish baseline, and **comments the before/after on the PR**. Read it by latency — alt/heading/meta crawl counts and lab a11y/SEO scores move immediately; **field/CrUX is a 28-day average and won't show for weeks** (the next regular cycle confirms it). A finding isn't "done" because it was coded — it's done when the baseline shows it gone.
+6. **Close the loop.** Draft the `CHANGELOG.md` entry — what shipped, why, the finding IDs closed, and the result. Update `MISSION.md` to mark the gaps that closed. Adding the `published` label in step 5 fires the **`review` phase** (`.github/workflows/hobbes-review.yml`): it re-baselines the live site, diffs against the pre-publish baseline, and **comments the before/after on the PR**. Read it by latency — alt/heading/meta crawl counts and lab a11y/SEO scores move immediately; **field/CrUX is a 28-day average and won't show for weeks** (the next regular cycle confirms it). A finding isn't "done" because it was coded — it's done when the baseline shows it gone.
 
 ## Pointers
 

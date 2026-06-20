@@ -1,17 +1,18 @@
-# Hobbes review — post-publish verification. When a Hobbes execute PR (or any
-# theme PR) is merged to the default branch and the change is live, re-baseline
-# the LIVE site, diff it against the pre-publish baseline, and comment the
-# before/after on the PR. Deterministic (no LLM). Writes only a PR comment.
+# Hobbes review — post-publish verification, fired by an explicit GitHub signal.
+# The operator publishes the theme live (however that works for this client), then
+# adds the `published` label to the PR. THAT is the trigger: this re-baselines the
+# LIVE site, diffs against the pre-publish baseline, and comments the before/after
+# on the PR. Deterministic (no LLM). Writes only a PR comment.
 #
-# TRIGGER ASSUMPTION: merging the PR makes the change live (the default branch is
-# connected to the *published* Shopify theme). If publishing is a separate manual
-# step, change `on:` to fire after publish instead — otherwise this measures the
-# pre-change live site and reports a false "no change".
+# Why a label, not the merge event: "merged" does not mean "live" — every client's
+# Shopify is wired differently, so the trigger must not guess at live state. The
+# label is a safe, GitHub-native signal the human controls and only adds once the
+# change is actually serving users. (Create the label once: `gh label create published`.)
 name: Hobbes review
 
 on:
   pull_request:
-    types: [closed]
+    types: [labeled]
 
 permissions:
   contents: read
@@ -19,11 +20,12 @@ permissions:
 
 jobs:
   review:
-    # Only merged PRs into the default branch, and not the data-only cycle PRs.
+    # Fires only when `published` is added to a merged PR on the default branch —
+    # the operator's explicit "it's live now, verify it" signal.
     if: >
+      github.event.label.name == 'published' &&
       github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == github.event.repository.default_branch &&
-      !startsWith(github.event.pull_request.head.ref, 'hobbes-cycle-')
+      github.event.pull_request.base.ref == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,8 +41,8 @@ jobs:
           sudo tar -xzf /tmp/siteone.tar.gz -C /usr/local/bin siteone-crawler
           siteone-crawler --version
 
-      - name: Wait for the published change to reach the live site
-        run: sleep 180   # Shopify sync + CDN propagation; tune per store
+      - name: Brief CDN cushion
+        run: sleep 60    # the `published` label already means it's live; small buffer for CDN cache
 
       - name: Re-baseline the live site + diff vs the pre-publish baseline
         env:

@@ -32,8 +32,9 @@ jobs:
 
       - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # opus + high effort for code work; confirm flag names against the action's docs.
+          # Auth via the Claude Code subscription (Pro/Max), NOT a pay-per-token API key.
+          # Generate once with `claude setup-token`, store as the CLAUDE_CODE_OAUTH_TOKEN secret.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: "--model claude-opus-4-8"
           prompt: |
             Run the Hobbes plan + execute stages on the latest cycle.

@@ -9,17 +9,17 @@ One-time wiring to turn the Hobbes cycle into an automated cloud runner. Do this
 | Key | What it is | Where to get it | **Cloud** (GitHub) | **Local** |
 |---|---|---|---|---|
 | `PSI_API_KEY` | Google PageSpeed Insights API key | Google Cloud Console → enable the *PageSpeed Insights API* → Credentials → API key (restrict it to that API) | repo secret | `hobbes/tools/.psi-key` (git-ignored) |
-| `ANTHROPIC_API_KEY` | Claude API key (drives the execute action) | console.anthropic.com → API keys | repo secret | not needed — local Claude Code uses your own login |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Claude Code **subscription** token (Pro/Max) — drives the execute action. **Not** a pay-per-token API key | run **`claude setup-token`** locally and copy the token | repo secret | not needed — local Claude Code uses your own login |
 
-**Cloud:** repo → **Settings → Secrets and variables → Actions → New repository secret** → add both by the exact names above. The workflows inject them as env vars; `config.py` reads `$PSI_API_KEY` first, then the file.
+**Cloud:** repo → **Settings → Secrets and variables → Actions → New repository secret** → add both by the exact names above. `PSI_API_KEY` is injected as an env var (`config.py` reads it first, then the file); `CLAUDE_CODE_OAUTH_TOKEN` is read by `claude-code-action`. A headless runner has no Claude login, so the execute stage needs this token stored as a secret — but it's your subscription, not the API.
 
-**Local:** `echo 'YOUR_PSI_KEY' > hobbes/tools/.psi-key` (the file is git-ignored). Claude Code uses your existing local auth — no key file.
+**Local:** `echo 'YOUR_PSI_KEY' > hobbes/tools/.psi-key` (the file is git-ignored). Claude Code uses your existing local auth — no token needed locally.
 
-That's the whole secret surface: two keys, both GitHub-scoped. No Shopify credentials anywhere — Hobbes never touches Shopify.
+That's the whole secret surface: two values, both GitHub-scoped. No Anthropic API key, no Shopify credentials anywhere — the deterministic stages (cycle, review) use no Claude at all; only `execute` does, via your Claude Code subscription.
 
 ## 2. Claude Code GitHub app
 
-From Claude Code, run **`/install-github-app`** — it installs the GitHub app and wires the `ANTHROPIC_API_KEY` secret used by `.github/workflows/hobbes-execute.yml`.
+From Claude Code, run **`/install-github-app`** — it installs the GitHub app (repo permissions for the action). Auth itself is the `CLAUDE_CODE_OAUTH_TOKEN` secret from `claude setup-token` above, used by `.github/workflows/hobbes-execute.yml`.
 
 ## 3. Fix the branch-prefix collision (if present)
 

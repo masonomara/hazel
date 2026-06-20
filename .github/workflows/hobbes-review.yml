@@ -35,11 +35,17 @@ jobs:
           python-version: "3.12"
 
       - name: Install SiteOne crawler
+        # Versioned asset name + unpacks to siteone-crawler/siteone-crawler; resolve
+        # the URL from the API and strip the top dir onto PATH. (glibc x64 build.)
         run: |
-          curl -fsSL -o /tmp/siteone.tar.gz \
-            https://github.com/janreges/siteone-crawler/releases/latest/download/siteone-crawler-linux-x64.tar.gz
-          sudo tar -xzf /tmp/siteone.tar.gz -C /usr/local/bin siteone-crawler
-          siteone-crawler --version
+          URL=$(curl -s https://api.github.com/repos/janreges/siteone-crawler/releases/latest \
+            | grep -o 'https://[^"]*-linux-x64\.tar\.gz' | grep -v musl | head -1)
+          echo "SiteOne asset: $URL"
+          curl -fsSL -o /tmp/siteone.tar.gz "$URL"
+          mkdir -p "$HOME/siteone"
+          tar -xzf /tmp/siteone.tar.gz -C "$HOME/siteone" --strip-components=1
+          echo "$HOME/siteone" >> "$GITHUB_PATH"
+          "$HOME/siteone/siteone-crawler" --version
 
       - name: Brief CDN cushion
         run: sleep 60    # the `published` label already means it's live; small buffer for CDN cache

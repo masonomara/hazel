@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write        # claude-code-action fetches an OIDC token → exchanges for the Claude GitHub App token
 
 jobs:
   execute:

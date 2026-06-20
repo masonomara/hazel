@@ -52,6 +52,11 @@ def client_meta():
     return cfg()["client"]
 
 
+def effort_budget():
+    """Effort points an execute batch may spend — single source for the CLI and CI."""
+    return int(cfg().get("cycle", {}).get("effort_budget", 10))
+
+
 def psi_key():
     """The PageSpeed key from the named env var, else the repo-relative file, else None."""
     s = cfg()["secrets"]

@@ -25,12 +25,12 @@ import json
 import re
 import sys
 import urllib.parse
-from datetime import datetime
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
+import config
 # Reuse the capture tools' logic so findings can't drift from the scorecard.
 from psi import DEFAULT_URLS, cache_path as psi_cache
 from seo import Page, head_ok, OG_REQUIRED
@@ -704,7 +704,7 @@ def main():
     }
 
     site = urllib.parse.urlparse(DEFAULT_URLS[0][1])
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    stamp = config.stamp()
     total = sum(len(v) for v in sections.values())
     L = [
         f"# Findings — {rd.name}",

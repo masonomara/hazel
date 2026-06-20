@@ -27,21 +27,25 @@ jobs:
           python-version: "3.12"
 
       - name: Install SiteOne crawler
-        # SiteOne is now a zero-dependency Rust binary. Confirm the exact asset
-        # name/version on https://github.com/janreges/siteone-crawler/releases
-        # and pin it here instead of `latest`.
+        # The release asset carries the version in its name (…-vX.Y.Z-linux-x64.tar.gz)
+        # and unpacks to siteone-crawler/siteone-crawler, so resolve the URL from the
+        # API and strip the top dir onto PATH. (glibc x64 — skip the musl/arm assets.)
         run: |
-          curl -fsSL -o /tmp/siteone.tar.gz \
-            https://github.com/janreges/siteone-crawler/releases/latest/download/siteone-crawler-linux-x64.tar.gz
-          sudo tar -xzf /tmp/siteone.tar.gz -C /usr/local/bin siteone-crawler
-          siteone-crawler --version
+          URL=$(curl -s https://api.github.com/repos/janreges/siteone-crawler/releases/latest \
+            | grep -o 'https://[^"]*-linux-x64\.tar\.gz' | grep -v musl | head -1)
+          echo "SiteOne asset: $URL"
+          curl -fsSL -o /tmp/siteone.tar.gz "$URL"
+          mkdir -p "$HOME/siteone"
+          tar -xzf /tmp/siteone.tar.gz -C "$HOME/siteone" --strip-components=1
+          echo "$HOME/siteone" >> "$GITHUB_PATH"
+          "$HOME/siteone/siteone-crawler" --version
 
       - name: Run cycle
         env:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: |
           python3 hobbes/cli.py cycle
-          DATE=$(date +%F)
+          DATE=$(python3 hobbes/cli.py today)   # pinned tz — must match the folder cli wrote
           echo "CYCLE_DATE=$DATE" >> "$GITHUB_ENV"
           SUMMARY=$(python3 hobbes/tools/diff.py --run-dir "hobbes/scorecards/$DATE" | tail -1)
           echo "DIFF_SUMMARY=$SUMMARY" >> "$GITHUB_ENV"

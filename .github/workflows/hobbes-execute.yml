@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
     inputs:
       budget:
-        description: "Effort budget (points) for batch selection"
-        default: "10"
+        description: "Effort budget for batch selection (blank = use [cycle].effort_budget from hobbes.toml)"
+        default: ""
 
 permissions:
   contents: write
@@ -20,6 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve effort budget (input override, else hobbes.toml)
+        run: |
+          EFFORT="${{ inputs.budget }}"
+          [ -z "$EFFORT" ] && EFFORT="$(python3 hobbes/cli.py budget)"
+          echo "EFFORT=$EFFORT" >> "$GITHUB_ENV"
+
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -28,7 +38,7 @@ jobs:
           prompt: |
             Run the Hobbes plan + execute stages on the latest cycle.
             Read hobbes/scorecards/PLAN-TEMPLATE.md and hobbes/scorecards/EXECUTE-TEMPLATE.md
-            and follow them exactly. Effort budget: ${{ inputs.budget }}.
+            and follow them exactly. Effort budget: ${{ env.EFFORT }}.
             Write plan.md and execution.md into the latest hobbes/scorecards/<date>/ folder,
             make the theme-code changes on a branch, and OPEN A PULL REQUEST for human review.
             Hard rules: write only to GitHub. Do NOT run the Shopify CLI. Do NOT publish.

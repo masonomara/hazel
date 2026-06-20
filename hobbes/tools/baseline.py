@@ -23,7 +23,6 @@ baseline and the generated findings.md sit beside the artifacts they came from.
 
 import subprocess
 import sys
-from datetime import datetime
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -31,6 +30,7 @@ HOBBES = TOOLS.parent
 TEMPLATE = HOBBES / "scorecards" / "TEMPLATE.md"
 
 sys.path.insert(0, str(TOOLS))
+import config
 from psi import DEFAULT_URLS  # single source of truth for the golden path
 from config import client_meta
 
@@ -64,7 +64,7 @@ def between(text, start, end):
 def main():
     no_crawl = "--no-crawl" in sys.argv[1:]
     full = "--full" in sys.argv[1:]
-    date = datetime.now().strftime("%Y-%m-%d")
+    date = config.today()
     rundir = HOBBES / "scorecards" / date          # one folder per cycle
     (rundir / "raw").mkdir(parents=True, exist_ok=True)
     # Thread the cycle folder through every tool so raw artifacts + digests land together.

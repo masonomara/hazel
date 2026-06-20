@@ -12,12 +12,13 @@ USAGE: python3 hobbes/cli.py <command> [args passed through to the tool]
 
 import subprocess
 import sys
-from datetime import date
 from pathlib import Path
 
 HOBBES = Path(__file__).resolve().parent
 TOOLS = HOBBES / "tools"
 SCORECARDS = HOBBES / "scorecards"
+sys.path.insert(0, str(TOOLS))
+import config
 
 
 def _run(tool, *args):
@@ -30,7 +31,7 @@ def _latest_cycle():
 
 
 def cmd_cycle(rest):
-    rd = str(SCORECARDS / date.today().isoformat())
+    rd = str(SCORECARDS / config.today())
     _run("baseline.py", "--fresh", "--run-dir", rd, *rest)
     _run("findings.py", "--run-dir", rd)
     _run("diff.py", "--run-dir", rd)
@@ -78,15 +79,24 @@ def cmd_execute(rest):
     _agent_stage("EXECUTE-TEMPLATE.md", rest)
 
 
+def cmd_budget(rest):
+    print(config.effort_budget())
+
+
+def cmd_today(rest):
+    print(config.today())
+
+
 COMMANDS = {
     "cycle": cmd_cycle, "baseline": cmd_baseline, "findings": cmd_findings,
     "diff": cmd_diff, "status": cmd_status, "plan": cmd_plan, "execute": cmd_execute,
+    "budget": cmd_budget, "today": cmd_today,
 }
 
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
-        sys.exit("usage: hobbes <cycle|baseline|findings|diff|status|plan|execute>")
+        sys.exit("usage: hobbes <cycle|baseline|findings|diff|status|plan|execute|budget|today>")
     COMMANDS[sys.argv[1]](sys.argv[2:])
 
 

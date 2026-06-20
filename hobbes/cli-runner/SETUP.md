@@ -29,7 +29,17 @@ A branch literally named `hobbes` blocks the `hobbes/` prefix the cycle workflow
 
 GitHub only runs `schedule` and `workflow_dispatch` workflows from the **default branch**. The workflow files must be on `main` before the patrol can fire.
 
-## 5. First run
+## 5. The review trigger — the `published` label
+
+The `review` phase (`hobbes-review.yml`) fires when you add a **`published`** label to a merged PR — your explicit "it's live now" signal, so the system never has to guess whether merge means live (it varies per client). Create the label once:
+
+```
+gh label create published --description "Theme is live — fire the Hobbes review" --color 0e8a16
+```
+
+Then the per-release flow is: merge the PR → publish the theme live in Shopify → **add `published` to the PR**. The review re-baselines the live site and comments the before/after. (Label it only *after* it's actually live, or you'll measure the old site.)
+
+## 6. First run
 
 - **Actions → "Hobbes cycle" → Run workflow** (`workflow_dispatch`). Confirm: a green run, a "Baseline …" cycle PR, and the GitHub email.
 - After that, the weekly cron keeps the patrol fresh. Run **"Hobbes execute"** (`workflow_dispatch`, with an effort budget) on demand for agent work — it opens a fix PR for review.
@@ -38,6 +48,7 @@ GitHub only runs `schedule` and `workflow_dispatch` workflows from the **default
 
 | Step | Cadence |
 |---|---|
-| 1–4 above | **once** per client |
+| 1–5 above | **once** per client |
+| Add the `published` label after each go-live | **every release** (fires the review) |
 | Review + publish PRs | **every cycle** (the human gate) |
 | Rotate a key | only on exposure |

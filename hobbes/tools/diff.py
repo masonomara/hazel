@@ -14,16 +14,18 @@ trustworthy (field) regression count. Reads only the system's own artifacts.
 USAGE:
   python3 hobbes/tools/diff.py                 # newest cycle vs the one before
   python3 hobbes/tools/diff.py --run-dir DIR   # treat DIR as the current cycle
+  python3 hobbes/tools/diff.py --prior DIR     # pin the baseline to compare against
   python3 hobbes/tools/diff.py --out PATH      # write diff elsewhere
 """
 
 import re
 import sys
-from datetime import datetime
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
+sys.path.insert(0, str(TOOLS))
+import config
 SCORECARDS = HOBBES / "scorecards"
 COVERAGE_OK = 0.8   # §F counts compared only if min/max crawl-page ratio ≥ this
 
@@ -117,9 +119,12 @@ def main():
     if cur is None or not (cur / "baseline.md").exists():
         sys.exit("✗ no cycle with baseline.md to diff")
     out = Path(args[args.index("--out") + 1]) if "--out" in args else cur / "diff.md"
-    earlier = [d for d in runs if d.name < cur.name]
-    prior = earlier[-1] if earlier else None
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    if "--prior" in args:
+        prior = Path(args[args.index("--prior") + 1]).resolve()
+    else:
+        earlier = [d for d in runs if d.name < cur.name]
+        prior = earlier[-1] if earlier else None
+    stamp = config.stamp()
 
     if prior is None:
         out.write_text(f"# Diff — {cur.name}\n\nGenerated {stamp}.\n\n"

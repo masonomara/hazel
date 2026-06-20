@@ -83,16 +83,20 @@ def cmd_budget(rest):
     print(config.effort_budget())
 
 
+def cmd_today(rest):
+    print(config.today())
+
+
 COMMANDS = {
     "cycle": cmd_cycle, "baseline": cmd_baseline, "findings": cmd_findings,
     "diff": cmd_diff, "status": cmd_status, "plan": cmd_plan, "execute": cmd_execute,
-    "budget": cmd_budget,
+    "budget": cmd_budget, "today": cmd_today,
 }
 
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
-        sys.exit("usage: hobbes <cycle|baseline|findings|diff|status|plan|execute|budget>")
+        sys.exit("usage: hobbes <cycle|baseline|findings|diff|status|plan|execute|budget|today>")
     COMMANDS[sys.argv[1]](sys.argv[2:])
 
 

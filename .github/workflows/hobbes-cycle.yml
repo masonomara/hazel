@@ -41,7 +41,7 @@ jobs:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: |
           python3 hobbes/cli.py cycle
-          DATE=$(date +%F)
+          DATE=$(python3 hobbes/cli.py today)   # pinned tz — must match the folder cli wrote
           echo "CYCLE_DATE=$DATE" >> "$GITHUB_ENV"
           SUMMARY=$(python3 hobbes/tools/diff.py --run-dir "hobbes/scorecards/$DATE" | tail -1)
           echo "DIFF_SUMMARY=$SUMMARY" >> "$GITHUB_ENV"

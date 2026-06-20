@@ -6,7 +6,7 @@ This is the **release** stage — the only stage that touches the live store. Ex
 
 ## Where this sits
 
-`baseline` → `findings` → `plan` → `execute` (branch + PR ready) → **`publish` (review → sign-off → merge → go live)** → loop back to `baseline` for the next cycle.
+`baseline` → `findings` → `plan` → `execute` (branch + PR ready) → **`publish` (PR review → sign-off → merge → go live)** → **`review` (automatic, post-publish: re-baseline the live site and comment the before/after on the PR)** → loop back to `baseline` for the next cycle.
 
 ## The hard line — read before anything
 
@@ -29,7 +29,7 @@ If you are unsure whether a step is over the line, it is. Stop and hand it back.
 
 5. **Go live — human only.** **Mason publishes the live theme.** Hobbes does not run this step. Immediately after, verify the live store on mobile + desktop.
 
-6. **Close the loop.** Draft the `CHANGELOG.md` entry — what shipped, why, the finding IDs closed, and the result. Update `MISSION.md` to mark the gaps that closed. Then the next cycle re-baselines and **diffs against this one**: the closed findings and any regressions are the proof the release actually worked. A finding isn't "done" because it was coded — it's done when the next baseline shows it gone.
+6. **Close the loop.** Draft the `CHANGELOG.md` entry — what shipped, why, the finding IDs closed, and the result. Update `MISSION.md` to mark the gaps that closed. The **`review` phase fires automatically** once the merged change is live (`.github/workflows/hobbes-review.yml`): it re-baselines the live site, diffs against the pre-publish baseline, and **comments the before/after on the PR**. Read it by latency — alt/heading/meta crawl counts and lab a11y/SEO scores move immediately; **field/CrUX is a 28-day average and won't show for weeks** (the next regular cycle confirms it). A finding isn't "done" because it was coded — it's done when the baseline shows it gone.
 
 ## Pointers
 

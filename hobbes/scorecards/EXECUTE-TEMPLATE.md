@@ -14,12 +14,12 @@ It is the most agent-driven stage, and the only one that writes to the repo — 
 
 The plan already ordered every system by leverage. Execution just draws a line on that list at the point the budget runs out.
 
-- **Set a budget** `B` — the effort points spent this cycle. It's the dial for how much to bite off: a small `B` ships one tight PR, a large `B` takes on more.
+- **Set a budget** `B` — the effort points spent this cycle. The default lives in `hobbes.toml` (`[cycle] effort_budget`, currently **20**) and is overridable per run via the execute workflow input. It's the dial for how much to bite off: a small `B` ships one tight PR, a large `B` takes on more. Bias toward more — a thin batch under-uses the run.
 - **Walk `plan.md`'s order top-down**, summing each system's effort. Draw the line where the next system won't fit in the remaining budget. The systems above the line are the batch.
 - **Stay greedy on leverage.** The plan ordered by it; respect that. Don't fragment a coupled block to squeeze in points. If a later system fits the remainder *and* stands cleanly on its own, you may pull it up — but don't shoehorn, and don't break a coherent batch.
 - **Record** the budget, the selected systems, effort spent, and what's deferred to a later cycle.
 
-> Worked example (`B = 10` against the 2026-06-18 plan): SYS-1 (2) + SYS-2 (2) + SYS-3 (3) + SYS-4 (2) = **9**; SYS-5 (3) won't fit the remaining 1. Batch = the four accessibility systems. The budget cleanly carves off the entire mission-priority-1 block — a coherent, shippable first PR.
+> Worked example (`B = 20` against the 2026-06-18 plan): SYS-1 (2) + SYS-2 (2) + SYS-3 (3) + SYS-4 (2) + SYS-5 (3) + SYS-6 (3) + SYS-7 (4) = **19**; SYS-8 (3) won't fit the remaining 1. Batch = the top **seven** systems — the whole a11y block *plus* page metadata, image delivery, and third-party JS. The code-side of every mission priority moves in one PR; the parts that need a human (content at scale, an app-removal call) are flagged for the human, not skipped silently.
 
 ## 2. Research & write the implementation plan
 
@@ -30,6 +30,8 @@ Write the plan to `execution.md` in the cycle folder. Each task names the system
 ## 3. Implement
 
 > When the plan is complete, implement it all. When you finish a task or phase, **mark it completed in `execution.md`**. Do not stop until every task and phase in the batch is done. Do not add unnecessary comments or doc-blocks. Honor the project's type discipline, and continuously run the project's checker so you don't introduce new issues.
+
+**Clear the whole batch — don't quietly ship a subset.** The budget already bounded the work; once selected, every system in the batch gets implemented this run. The *only* allowed deferral is a part that genuinely needs a human — content authored at scale, a paid-app removal decision, a sign-off — and each such deferral must be **named explicitly in `execution.md` and the PR with its reason**. A coherent code change you simply didn't get to is not a deferral; finish it. (Past runs under-delivered by stopping at two systems out of caution — don't.)
 
 ## Quality gates — from `DEVELOPMENT.md`, not hardcoded
 
@@ -43,9 +45,15 @@ The "done means" bar belongs to the stack, and it lives in `DEVELOPMENT.md` — 
 
 > The seed prompt's "no any/unknown types · run typecheck" is TypeScript language. This codebase has none — so it maps to: honor whatever type discipline the stack has (here, none) and run whatever checker it has (here, `shopify theme check`). Don't carry a gate the stack can't run; substitute the real one from `DEVELOPMENT.md`.
 
-## 4. Stop + hand off
+## 4. Stop + hand off — with the baseline before/after in the PR
 
-When the batch is implemented and the gates pass: **stop.** Do not merge, and do not publish the live theme — that's the `publish` stage, and a human owns it. Push the feature branch and open the PR for review with a short summary: what shipped, which finding IDs it closes, what was verified, and anything left for a human (content at scale, an app-removal decision, sign-off). That open PR **is** the handoff to `publish` — execution is done. The cycle closes only after publish takes it live.
+When the batch is implemented and the gates pass: **stop.** Do not merge, and do not publish the live theme — that's the `publish` stage, and a human owns it. Push the feature branch and open the PR. The PR body must carry the **baseline before/after**, not just a prose summary:
+
+- **Before** — for every finding the batch closes, its *current measured value* pulled from this cycle's `baseline.md` / `findings.md` (e.g. "a11y 88 mobile", "73 pages missing meta description"), plus the target it should hit. This is the pre-fix state, captured before the PR opens.
+- **After (measured) comes post-publish, by necessity.** PSI and the crawl only measure the **live** site, and the fix isn't live until a human publishes — so the true after is not knowable at PR time. It lands in the **next cycle's `diff.md`** once the change is live; link that diff back to this PR to close the loop. Do not fabricate an after from local guesses or unpublished previews.
+- **What shipped / verified / human-owned** — the systems implemented, what was browser-verified, and every explicit deferral (content at scale, an app-removal decision, sign-off).
+
+That open PR **is** the handoff to `publish` — execution is done. The cycle closes only after publish takes it live and the next baseline confirms the after.
 
 ## Pointers
 

@@ -29,10 +29,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
+import config
 from config import golden_path  # one source of the golden path (shared with psi.py)
 DEFAULT_URLS = golden_path()
 TOOLS = Path(__file__).resolve().parent
@@ -50,7 +50,7 @@ def resolve_run_dir(args):
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "scorecards" / datetime.now().strftime("%Y-%m-%d")
+        d = HOBBES / "scorecards" / config.today()
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 
@@ -269,7 +269,7 @@ def main():
         return r[check] if r else "— (fetch failed)"
 
     root = "{0.scheme}://{0.netloc}".format(urllib.parse.urlparse(urls[0][1]))
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    stamp = config.stamp()
     L = [
         f"# SEO results — {stamp}",
         "",

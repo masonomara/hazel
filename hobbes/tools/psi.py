@@ -28,10 +28,10 @@ import sys
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from pathlib import Path
 
 # Golden path + PSI key come from hobbes.toml via config.py (one source per client).
+import config
 from config import golden_path, psi_key
 DEFAULT_URLS = golden_path()
 ENDPOINT = "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed"
@@ -66,7 +66,7 @@ def resolve_run_dir(args):
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "scorecards" / datetime.now().strftime("%Y-%m-%d")
+        d = HOBBES / "scorecards" / config.today()
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 
@@ -301,7 +301,7 @@ def main():
     spread_note = ([f"> Perf-score spread across 3 runs (median kept): {' · '.join(spread_bits)}.", ""]
                    if spread_bits else [])
 
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    stamp = config.stamp()
     L = [
         f"# PSI results — {stamp}",
         "",

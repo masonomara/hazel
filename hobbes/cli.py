@@ -12,12 +12,13 @@ USAGE: python3 hobbes/cli.py <command> [args passed through to the tool]
 
 import subprocess
 import sys
-from datetime import date
 from pathlib import Path
 
 HOBBES = Path(__file__).resolve().parent
 TOOLS = HOBBES / "tools"
 SCORECARDS = HOBBES / "scorecards"
+sys.path.insert(0, str(TOOLS))
+import config
 
 
 def _run(tool, *args):
@@ -30,7 +31,7 @@ def _latest_cycle():
 
 
 def cmd_cycle(rest):
-    rd = str(SCORECARDS / date.today().isoformat())
+    rd = str(SCORECARDS / config.today())
     _run("baseline.py", "--fresh", "--run-dir", rd, *rest)
     _run("findings.py", "--run-dir", rd)
     _run("diff.py", "--run-dir", rd)

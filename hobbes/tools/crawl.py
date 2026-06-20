@@ -39,12 +39,12 @@ import sys
 import threading
 import urllib.parse
 import urllib.request
-from datetime import datetime
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
+import config
 from psi import DEFAULT_URLS  # single source of truth for the site
 
 BIN = "siteone-crawler"
@@ -99,7 +99,7 @@ def resolve_run_dir(args):
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "scorecards" / datetime.now().strftime("%Y-%m-%d")
+        d = HOBBES / "scorecards" / config.today()
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 
@@ -356,7 +356,7 @@ def main():
     cov, partial = coverage_line(data, n)
     if partial:
         print(f"  ⚠ coverage: {cov}", file=sys.stderr, flush=True)
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    stamp = config.stamp()
     L = [
         f"# Crawl results — {stamp}",
         "",

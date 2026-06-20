@@ -19,11 +19,12 @@ USAGE:
 
 import re
 import sys
-from datetime import datetime
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
+sys.path.insert(0, str(TOOLS))
+import config
 SCORECARDS = HOBBES / "scorecards"
 COVERAGE_OK = 0.8   # §F counts compared only if min/max crawl-page ratio ≥ this
 
@@ -119,7 +120,7 @@ def main():
     out = Path(args[args.index("--out") + 1]) if "--out" in args else cur / "diff.md"
     earlier = [d for d in runs if d.name < cur.name]
     prior = earlier[-1] if earlier else None
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    stamp = config.stamp()
 
     if prior is None:
         out.write_text(f"# Diff — {cur.name}\n\nGenerated {stamp}.\n\n"

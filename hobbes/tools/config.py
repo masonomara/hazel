@@ -8,13 +8,32 @@ toml — it names where to find them, and psi_key() resolves env var, then file.
 """
 
 import tomllib
+from datetime import datetime
 from functools import lru_cache
 from os import environ
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 HOBBES = Path(__file__).resolve().parent.parent   # .../<repo>/hobbes
 REPO = HOBBES.parent                                # .../<repo>
 _TOML = HOBBES / "hobbes.toml"
+_DEFAULT_TZ = "America/Chicago"
+
+
+def _tz():
+    """The cycle's pinned timezone — one source, so a local run (any machine TZ)
+    and CI (UTC) always land on the same calendar day. Set [cycle].timezone."""
+    return ZoneInfo(cfg().get("cycle", {}).get("timezone", _DEFAULT_TZ))
+
+
+def today():
+    """Cycle-folder date in the pinned timezone — never off-by-one between local and CI."""
+    return datetime.now(_tz()).strftime("%Y-%m-%d")
+
+
+def stamp():
+    """Human timestamp for digests — pinned timezone, labelled (e.g. 'CDT'), one source."""
+    return datetime.now(_tz()).strftime("%Y-%m-%d %H:%M %Z")
 
 
 @lru_cache(maxsize=1)

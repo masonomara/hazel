@@ -32,16 +32,24 @@ jobs:
           echo "EFFORT=$EFFORT" >> "$GITHUB_ENV"
 
       - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}        # authenticates the agent's `gh pr create`
         with:
           # Auth via the Claude Code subscription (Pro/Max), NOT a pay-per-token API key.
           # Generate once with `claude setup-token`, store as the CLAUDE_CODE_OAUTH_TOKEN secret.
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--model claude-opus-4-8"
+          # Automation mode needs an explicit tool allow-list, or every edit/git/gh call is
+          # denied (the agent ran 40 turns but committed nothing without this).
+          claude_args: |
+            --model claude-opus-4-8
+            --max-turns 80
+            --allowedTools Edit,Read,Write,Glob,Grep,Bash
           prompt: |
             Run the Hobbes plan + execute stages on the latest cycle.
             Read hobbes/scorecards/PLAN-TEMPLATE.md and hobbes/scorecards/EXECUTE-TEMPLATE.md
             and follow them exactly. Effort budget: ${{ env.EFFORT }}.
-            Write plan.md and execution.md into the latest hobbes/scorecards/<date>/ folder,
-            make the theme-code changes on a branch, and OPEN A PULL REQUEST for human review.
+            Write plan.md and execution.md into the latest hobbes/scorecards/<date>/ folder.
+            Make the theme-code changes, then: create a new branch (hobbes-fix-<date>),
+            commit, `git push -u origin` it, and run `gh pr create` to open a PR for review.
             Hard rules: write only to GitHub. Do NOT run the Shopify CLI. Do NOT publish.
             Verification (Theme Check, browser) and the live publish are the human's, at review.

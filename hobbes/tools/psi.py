@@ -23,6 +23,7 @@ The keyless PSI API is rate-capped to a shared pool
 that is usually exhausted (HTTP 429) — a key is required, not optional.
 """
 
+import http.client
 import json
 import sys
 import urllib.parse
@@ -129,8 +130,11 @@ def fetch(url, strategy, key, tries=8, timeout=75):
             if e.code in (401, 403, 429):  # bad key / quota — fatal for every call
                 sys.exit(f"PSI API fatal {e.code}: {msg}")
             last = f"HTTP {e.code}: {msg}"  # 5xx and the like are transient — retry
-        except (urllib.error.URLError, TimeoutError) as e:
-            last = str(e)
+        except (urllib.error.URLError, OSError, http.client.HTTPException, ValueError) as e:
+            # Transient transport/parse faults: timeouts, dropped sockets, and the big one —
+            # IncompleteRead (HTTPException) + the chunk-size ValueError from a truncated PSI
+            # response read inside json.load. Retry FRESH; one bad read must not kill the run.
+            last = str(e) or type(e).__name__
         print(f"  retry {attempt}/{tries} ({strategy} {url}): {last}", file=sys.stderr, flush=True)
     print(f"  ✗ GAVE UP {strategy} {url}: {last}", file=sys.stderr, flush=True)
     return None

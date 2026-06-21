@@ -56,7 +56,7 @@
       <a
         {% if block.settings.link %}
           href="{{ block.settings.link }}"
-          aria-label="Go to {{ block.settings.heading }}"
+          aria-label="{{ block.settings.heading | default: 'View slide' | escape }}"
           tabindex="0"
         {% else %}
           role="button" aria-disabled="true"
@@ -101,7 +101,7 @@
           >
         {%- endif -%}
         <div class="textyText" id="SlideDescription-{{ forloop.index }}">
-          <span class="rteMidge">0{{ '00' | append: forloop.index0 | plus: index_offset }}</span>
+          <span class="rteMidge" aria-hidden="true">0{{ '00' | append: forloop.index0 | plus: index_offset }}</span>
           {{ block.settings.heading }}
         </div>
       </a>

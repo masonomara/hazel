@@ -34,14 +34,15 @@
           {%- endif -%}
 
           {%- for part in paginate.parts -%}
+            {%- assign page_label = part.title | prepend: '0' | slice: -2, 2 -%}
             <li>
               {%- if part.is_link -%}
                 <a
                   href="{{ part.url }}{{ anchor }}"
                   class="pagination__item link"
-                  aria-label="{{ 'general.pagination.page' | t: number: part.title }}"
+                  aria-label="{{ 'general.pagination.page' | t: number: page_label }}"
                 >
-                  {{- part.title | prepend: '0' | slice: -2, 2 -}}
+                  {{- page_label -}}
                 </a>
               {%- else -%}
                 {%- if part.title == paginate.current_page -%}
@@ -50,9 +51,9 @@
                     aria-disabled="true"
                     class="pagination__item pagination__item--current"
                     aria-current="page"
-                    aria-label="{{ 'general.pagination.page' | t: number: part.title }}"
+                    aria-label="{{ 'general.pagination.page' | t: number: page_label }}"
                   >
-                    {{- part.title | prepend: '0' | slice: -2, 2 -}}
+                    {{- page_label -}}
                   </a>
                 {%- else -%}
                   <span class="pagination__item">{{ part.title }}</span>

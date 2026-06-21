@@ -62,13 +62,17 @@ def between(text, start, end):
 
 
 def main():
-    no_crawl = "--no-crawl" in sys.argv[1:]
-    full = "--full" in sys.argv[1:]
+    args = sys.argv[1:]
+    no_crawl = "--no-crawl" in args
+    full = "--full" in args
     date = config.today()
-    rundir = HOBBES / "scorecards" / date          # one folder per cycle
+    if "--run-dir" in args:                        # honor an explicit folder (e.g. the review's post-publish)
+        rundir = Path(args[args.index("--run-dir") + 1]).resolve()
+    else:
+        rundir = HOBBES / "scorecards" / date      # default: one dated folder per cycle
     (rundir / "raw").mkdir(parents=True, exist_ok=True)
     # Thread the cycle folder through every tool so raw artifacts + digests land together.
-    passthrough = ([] if "--resume" in sys.argv[1:] else ["--fresh"]) + ["--run-dir", str(rundir)]
+    passthrough = ([] if "--resume" in args else ["--fresh"]) + ["--run-dir", str(rundir)]
     run_tool("psi.py", passthrough)
     run_tool("seo.py", passthrough)
     if not no_crawl:

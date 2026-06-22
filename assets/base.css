@@ -3200,6 +3200,16 @@ details-disclosure > details {
     background-color: rgb(var(--color-background));
 }
 
+/* overflow:visible on replaced elements (img/video/canvas) is deprecated in
+   Chrome. global-media-settings lands directly on the product gallery <img>
+   (snippets/product-media.liquid); clip is a visual no-op on replaced elements
+   but silences the warning. Container <div>s keep overflow:visible above. */
+img.global-media-settings,
+video.global-media-settings,
+canvas.global-media-settings {
+    overflow: clip !important;
+}
+
 .global-media-settings:after {
     content: "";
     position: absolute;

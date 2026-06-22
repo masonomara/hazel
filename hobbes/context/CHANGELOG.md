@@ -1,5 +1,7 @@
 # Changelog
 
+<!-- Human-owned record. At the publish stage Hobbes drafts a new entry for the human to review and approve (see hobbes/templates/PUBLISH-TEMPLATE.md); past entries are history and are never rewritten. Per-cycle numbers live in the scorecard, not here. -->
+
 The running record of shipped work. One change per entry, numbered in order, newest at the bottom of **Entries**.
 
 **Format:** `YYYY-MM-DD — NNN type/name: what changed.`
@@ -24,10 +26,10 @@ Filled baseline scorecards live in `hobbes/scorecards/`.
 
 **2026-05-21 — 005 cleanup/email-address:** Removed and replaced every reference to any email other than shop@hazelboutique.com.
 
-**2026-05-21 — 006 feature/shop-pay:** Enabled Shop Pay express checkout on every page for one-tap checkout. RESULTS: After about 80,000 sessions the share of orders completed with Shop Pay declined from 9.5% to 6.7% and the reached checkout rate went down 15%. Small sample size but nothing suggest sthe SHop Pay buttons helped with checkout.
+**2026-05-21 — 006 feature/shop-pay:** Enabled Shop Pay express checkout on every page for one-tap checkout. RESULTS: After about 80,000 sessions the share of orders completed with Shop Pay declined from 9.5% to 6.7% and the reached checkout rate went down 15%. Small sample size, but nothing suggests the Shop Pay buttons helped with checkout.
 
 **2026-06-05 — 007 feature/custom-embroidery:** Built a custom-embroidery add-on that lets customers personalize products on the product page. An "add custom embroidery" button opens a modal with live preview and a thread-color picker, a configurable fee, and a customization that carries through the drawer, cart line items, and the order, editable and removable throughout. Pulls product and variant colors from metafields (`hex_color`, `display_color`), hides the thread-color variant from the standard picker and surfaces it in the modal, and is fully configurable from theme settings. RESULTS: 60 orders on the three mock necks, 3 customizations.
 
-**2026-06-11 — 008 baseline/web-baseline:** Captured the Step 0 web baseline across the golden path (home, collection, product) — category scores, lab metrics, and CrUX field data. All numbers live in the scorecard (`hobbes/scorecards/2026-06-11/baseline.md`) as the source of truth; gaps in the findings doc (`2026-06-11-findings.md`). Measurement only — no code shipped.
+**2026-06-11 — 008 baseline/web-baseline:** Captured the Step 0 web baseline across the golden path (home, collection, product) — category scores, lab metrics, and CrUX field data. Numbers and gaps were captured in the cycle scorecard as the source of truth (the 2026-06-11 cycle folder has since been removed from the repo). Measurement only — no code shipped.
 
 **2026-06-12 — 009 cleanup/shop-pay-removal:** Removed the Shop Pay express checkout / installment messaging from the product page (the "4 payments of … with Shop Pay" block in `sections/main-product.liquid`), sunsetting feature 006. RESULTS: removal driven by 006's measured outcome — over ~80,000 sessions the Shop Pay order share fell 9.5%→6.7% and the reached-checkout rate dropped 15% with the buttons enabled; no evidence they helped checkout, so they're gone.

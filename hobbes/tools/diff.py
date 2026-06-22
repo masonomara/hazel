@@ -112,6 +112,32 @@ def _delta_lines(d_cur, d_prior, worse):
     return regr, impr
 
 
+def axe(md):
+    """§D axe accessibility: {rule: total failing nodes across the golden path}. Lower is better.
+    A rule fixed to zero drops out of the §D table entirely, so _axe_delta works over the union."""
+    out = {}
+    for line in _section(md, "## D.").splitlines():
+        c = [x.strip() for x in line.strip().strip("|").split("|")]
+        if len(c) == 4:                                   # | page — device | n | pass | rule×nodes, … |
+            for item in c[3].split(","):
+                m = re.match(r"([a-z0-9-]+)\s*×\s*(\d+)", item.strip())
+                if m:
+                    out[m.group(1)] = out.get(m.group(1), 0) + int(m.group(2))
+    return out
+
+
+def _axe_delta(cur, prior):
+    """(regressions, improvements) over the UNION of rules — a rule fixed to 0 vanishes from
+    §D, so absent = 0. Fewer failing nodes is better."""
+    regr, impr = [], []
+    for k in sorted(cur.keys() | prior.keys()):
+        a, b = prior.get(k, 0), cur.get(k, 0)
+        if a == b:
+            continue
+        (regr if b > a else impr).append(f"{k}: {a} → {b}")
+    return regr, impr
+
+
 def main():
     args = sys.argv[1:]
     runs = cycle_dirs()
@@ -145,6 +171,7 @@ def main():
     field_regr, field_impr = _delta_lines(cf, pf, worse="gt")          # field: lower better
     score_regr, score_impr = _delta_lines(cs, ps, worse="lt")          # lab: higher better
     lab = [f"▼ {r}" for r in score_regr] + [f"▲ {i}" for i in score_impr]
+    axe_regr, axe_impr = _axe_delta(axe(cb), axe(pb))                   # §D axe nodes: lower better
 
     cpg, ppg = crawl_pages(cb), crawl_pages(pb)
     coverage_gap = cpg and ppg and min(cpg, ppg) / max(cpg, ppg) < COVERAGE_OK
@@ -156,6 +183,8 @@ def main():
             (count_regr if cft > pft else count_impr).append(f"findings: {pft} → {cft}")
 
     tldr = f"{len(field_regr)} field regression(s) vs {prior.name}"
+    if axe_impr:
+        tldr += f" · {len(axe_impr)} a11y rule(s) improved"
     if coverage_gap:
         tldr += f" · ⚠ crawl {ppg}→{cpg} pages, counts omitted"
     elif count_regr:
@@ -167,6 +196,9 @@ def main():
          "", "**Improvements:**", *([f"- {i}" for i in field_impr] or ["- (none)"]),
          "", "## Lab scores — §A, volatile (PSI lab swings ±~10 even at median-of-3; small moves are noise)", "",
          *(lab or ["- (no change)"]),
+         "", "## Accessibility — §D axe findings (failing nodes on the golden path, lower = better)", "",
+         "**Fixed / improved:**", *([f"- {i}" for i in axe_impr] or ["- (none)"]),
+         "", "**Regressions:**", *([f"- {r}" for r in axe_regr] or ["- (none)"]),
          "", "## Site-wide counts — §F (crawl-coverage dependent)", ""]
     if coverage_gap:
         L += [f"⚠ Crawl coverage changed **{ppg} → {cpg} pages** — site-wide counts are not "

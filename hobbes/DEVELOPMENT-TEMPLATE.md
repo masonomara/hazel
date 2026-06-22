@@ -13,7 +13,7 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 
 ## Build & run
 
-- **Install:** [exact command]. (The `hobbes/` baseline tools also need **Python ≥ 3.11** and, for the whole-site crawl, the `siteone-crawler` binary on `PATH`.)
+- **Install:** [exact command]. (Running the Hobbes baseline tools locally has its own prereqs — see `hobbes/SETUP.md`.)
 - **Run locally:** [exact command]
 - **Test:** [exact command, or "none — verify by hand + the Hobbes baseline cycle (`python3 hobbes/cli.py cycle`)"]
 - **Lint / format:** [exact command, or "none yet"]

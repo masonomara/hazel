@@ -13,7 +13,7 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 
 ## Build & run
 
-- **Install:** Nothing for the theme itself. You need the Shopify CLI — `npm i -g @shopify/cli @shopify/theme` (or `brew install shopify-cli`), then `shopify auth login`. The `hobbes/` baseline tools need **Python ≥ 3.11** (stdlib only) and, for the whole-site crawl, the `siteone-crawler` binary on `PATH`.
+- **Install:** Nothing for the theme itself. You need the Shopify CLI — `npm i -g @shopify/cli @shopify/theme` (or `brew install shopify-cli`), then `shopify auth login`. (Running the Hobbes baseline tools locally has its own prereqs — see `hobbes/SETUP.md`.)
 - **Run locally:** `shopify theme dev` — hot-reloading preview bound to the live store's data.
 - **Test:** None automated. Verify by hand in the browser (mobile + desktop) and via the Hobbes baseline cycle (`python3 hobbes/cli.py cycle`).
 - **Lint / format:** `shopify theme check` (Theme Check). No `.theme-check.yml` is committed, so it runs Shopify's defaults.

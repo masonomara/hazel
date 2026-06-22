@@ -2,7 +2,7 @@
 
 Hobbes is a **web-baseline + agentic-fix system**: it measures a live site, catalogs what's wrong, plans the highest-leverage fixes, writes them as a pull request, and — once a human publishes — re-measures to prove the impact. It runs in GitHub Actions on a Claude Code subscription, and it **writes only to GitHub** (branches, PRs, comments). Every Shopify action — preview, publish, go-live — stays human.
 
-This file is the map of the whole system. For *setup*, see [`cli-runner/SETUP.md`](cli-runner/SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../CLAUDE.md).
+This file is the map of the whole system. For *setup*, see [`SETUP.md`](SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../CLAUDE.md).
 
 ---
 
@@ -100,16 +100,13 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | [`../.github/workflows/hobbes-execute.yml`](../.github/workflows/hobbes-execute.yml) | 55 | dispatch (budget input) | The agent: `claude-code-action` (subscription auth) plans + writes fixes → opens a **fix PR**. |
 | [`../.github/workflows/hobbes-review.yml`](../.github/workflows/hobbes-review.yml) | 84 | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
 
-### Setup & design — `hobbes/cli-runner/`
-| File | Lines | Role |
-|---|---|---|
-| [`cli-runner/SETUP.md`](cli-runner/SETUP.md) | 83 | The **GitHub setup checklist** (once per client): two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch — each annotated with the error it prevents. |
-| [`cli-runner/plan.md`](cli-runner/plan.md) | 312 | The original CLI → cloud-runner design/build plan (historical reference; not a per-cycle artifact). |
+### Setup — `hobbes/SETUP.md`
+| File | Role |
+|---|---|
+| [`SETUP.md`](SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
 
 ### Cycle data — `hobbes/scorecards/<YYYY-MM-DD>/`
-Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `baseline.md` → `findings.md` → `plan.md` → `execution.md` → `diff.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures), `crawl.html`, and the per-tool digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`). Which files exist tells you which stage the cycle reached (`cli.py status`).
-
-> Two files named `plan.md`: the per-cycle `scorecards/<date>/plan.md` is the **agent's output** for that cycle; `cli-runner/plan.md` is the **system's historical design doc**. Different things.
+Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `baseline.md` → `findings.md` → `plan.md` → `execution.md` → `diff.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures, git-ignored), `crawl.html`, and the per-tool digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`). Which files exist tells you which stage the cycle reached (`cli.py status`).
 
 ---
 

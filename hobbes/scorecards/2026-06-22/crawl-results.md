@@ -1,4 +1,4 @@
-# Crawl results — 2026-06-22 12:45 CDT
+# Crawl results — 2026-06-22 18:15 CDT
 
 Captured by `hobbes/tools/crawl.py` (SiteOne, sitemap-driven whole-site crawl).
 The Section F block below feeds the scorecard; the detail feeds **findings**.
@@ -61,13 +61,13 @@ Site: https://hazelboutique.com/
 - (none)
 
 ### Duplicate titles
-- "New Arrivals
+- "Dresses
  – Hazel Boutique" ×2
-- "Tops
+- "New Arrivals
  – Hazel Boutique" ×2
 - "Under $50
  – Hazel Boutique" ×2
-- "Dresses
+- "Tops
  – Hazel Boutique" ×2
 
 ### Missing meta descriptions

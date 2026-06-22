@@ -5,8 +5,10 @@ __pycache__/
 # Generated crawl/tool outputs
 /tmp/
 
-# PSI median-of-3: keep the canonical median doc, drop the 3 raw per-run captures
-hobbes/scorecards/*/raw/*-r[0-9].psi.json
+# Cycle raw artifacts — the machine source findings/diff read at generation time.
+# Kept on disk for the active cycle; the digests (findings.md, *-results.md) are
+# the durable record, so raw/ stays out of git to keep the repo from ballooning.
+hobbes/scorecards/*/raw/
 
 # macOS
 .DS_Store

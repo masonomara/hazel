@@ -309,7 +309,7 @@ class CartItems extends HTMLElement {
           });
         //       document.getElementById('cart-icon-bubble').click();
       })
-      .catch((error) => console.log(error));
+      .catch(() => {});
   }
 
   enableLoading(line) {

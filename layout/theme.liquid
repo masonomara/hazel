@@ -394,10 +394,7 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         const follower = document.querySelector('#follower');
-        if (!follower) {
-          console.error('Follower element not found');
-          return;
-        }
+        if (!follower) return;
 
         let posX = 0;
         let posY = 0;

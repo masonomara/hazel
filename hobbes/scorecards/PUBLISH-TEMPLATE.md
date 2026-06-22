@@ -29,11 +29,11 @@ If you are unsure whether a step is over the line, it is. Stop and hand it back.
 
 5. **Go live — human only.** **Mason publishes the live theme.** Hobbes does not run this step. Immediately after, verify the live store on mobile + desktop, then **add the `published` label to the PR** — that label is the explicit "it's live now" signal that fires the `review` phase. (Adding it before the change is actually live would measure the old site.)
 
-6. **Close the loop.** Draft the `CHANGELOG.md` entry — what shipped, why, the finding IDs closed, and the result. Update `MISSION.md` to mark the gaps that closed. Adding the `published` label in step 5 fires the **`review` phase** (`.github/workflows/hobbes-review.yml`): it re-baselines the live site, diffs against the pre-publish baseline, and **comments the before/after on the PR**. Read it by latency — alt/heading/meta crawl counts and lab a11y/SEO scores move immediately; **field/CrUX is a 28-day average and won't show for weeks** (the next regular cycle confirms it). A finding isn't "done" because it was coded — it's done when the baseline shows it gone.
+6. **Close the loop.** Draft the `CHANGELOG.md` entry — what shipped, why, the finding IDs closed, and the result. (`MISSION.md` is human-owned — Hobbes never edits it; a closed gap is recorded by the scorecard and `diff.md`, not by rewriting the mission.) Adding the `published` label in step 5 fires the **`review` phase** (`.github/workflows/hobbes-review.yml`): it re-baselines the live site, diffs against the pre-publish baseline, and **comments the before/after on the PR**. Read it by latency — alt/heading/meta crawl counts and lab a11y/SEO scores move immediately; **field/CrUX is a 28-day average and won't show for weeks** (the next regular cycle confirms it). A finding isn't "done" because it was coded — it's done when the baseline shows it gone.
 
 ## Pointers
 
 - `execute.md` / the PR — what's being released.
 - `DEVELOPMENT.md` — the deploy mechanics (Shopify CLI, dev-theme-first, only Mason publishes, don't break the live store).
 - `CONTEXT.md` — who signs off (Mason on code, Jenna on brand-visible).
-- `CHANGELOG.md` · `MISSION.md` — what publish updates to close the loop and tee up the next cycle.
+- `CHANGELOG.md` — the entry publish drafts to close the loop. (`MISSION.md` is human-owned: Hobbes reads it, never writes it.)

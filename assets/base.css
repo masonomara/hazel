@@ -2226,8 +2226,8 @@ product-info .loading__spinner:not(.hidden) ~ *,
     max-width: fit-content !important;
     background: transparent !important;
     color: rgb(var(--color-foreground)) !important;
-    font-size: 16px !important;
-    line-height: 18px !important;
+    font-size: 19px !important;
+    line-height: 19px !important;
     margin-left: 0px;
     padding: 0px !important;
     text-transform: uppercase !important;
@@ -3882,10 +3882,10 @@ details-disclosure > details {
     .modal__toggle-open.icon.icon-search,
     .icon-hamburger,
     .header__icon--menu .icon {
-        width: 1.5rem;
-        min-width: 1.5rem;
-        height: 1.5rem;
-        min-height: 1.5rem;
+        width: 1.6rem;
+        min-width: 1.6rem;
+        height: 1.6rem;
+        min-height: 1.6rem;
         stroke: black;
         stroke-width: 0.9px;
         position: relative;
@@ -3918,8 +3918,8 @@ details-disclosure > details {
     max-width: fit-content !important;
     background: transparent !important;
     color: rgb(var(--color-foreground)) !important;
-    font-size: 16px !important;
-    line-height: 18px !important;
+    font-size: 19px !important;
+    line-height: 19px !important;
     margin-left: 6px;
     padding: 0px !important;
     text-transform: uppercase !important;
@@ -5307,8 +5307,8 @@ cart-remove-button {
     max-width: fit-content !important;
     background: transparent !important;
     color: rgb(var(--color-foreground)) !important;
-    font-size: 16px !important;
-    line-height: 18px !important;
+    font-size: 19px !important;
+    line-height: 19px !important;
     margin-left: 0px;
     padding: 0px !important;
     text-transform: uppercase !important;

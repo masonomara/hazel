@@ -5,13 +5,8 @@ __pycache__/
 # Generated crawl/tool outputs
 /tmp/
 
-# Cycle raw artifacts — the machine source findings/diff read at generation time.
-# Kept on disk for the active cycle; the digests (findings.md, *-results.md) are
-# the durable record, so raw/ stays out of git to keep the repo from ballooning.
-hobbes/scorecards/*/raw/
-
 # macOS
 .DS_Store
 
-# Secrets — never commit (PSI key was historically tracked; rotate it)
-hobbes/tools/.psi-key
+# Note: the Hobbes engine ignores its own secrets (tools/.psi-key) and cycle raw
+# artifacts via hobbes/.gitignore — self-contained, nothing to wire up here.

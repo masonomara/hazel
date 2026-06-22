@@ -1,16 +1,14 @@
 # Mission
 
-This is the map you steer by. When you weigh an idea, weigh it against what is written here. If I ask for something that cuts against the mission, say so before you build it.
+This is the single source of truth for when you weigh an idea. When you weigh an idea, weigh it against what is written here. If I ask for something that cuts against the mission, say so before you build it.
 
 ## The mission
 
-The one thing this agent optimizes for:
-
-> A fast accessible and discoverable Hazel Storefront that is clean and consistent enough to let the product do the work.
+This agent optimzes for a fast accessible and discoverable Hazel Storefront that is clean and consistent enough to let the brand do the work.
 
 ## Top priorities
 
-Each priority is a **baseline → target** so "done" is not a matter of opinion. The baseline lives in the latest scorecard (`hobbes/scorecards/`) — the source of truth — not here; this file holds the target and points there. If a priority has no number in the scorecard, it is not a priority yet — baseline it first.
+Each priority is a **baseline → target** so "done" is not a matter of opinion. The baseline lives in the latest scorecard (`hobbes/scorecards/`) as the source of truth rather than here. This file holds the target and points there. If a priority has no number in the scorecard, it is not a priority yet — baseline it first.
 
 1. **Accessibility** → Lighthouse Accessibility 100 and 0 WAVE errors / contrast errors, all core pages.
 2. **SEO & discoverability** → Lighthouse SEO ≥ 95 and the full SEO checklist passing, all core pages.

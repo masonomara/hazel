@@ -7243,6 +7243,7 @@ cart-remove-button .swym-button-bar {
 
 .shopify-pc__banner__btns {
     flex: 0;
+    min-width: 0px !important;
     gap: 20px !important;
     flex-basis: none !important;
     justify-content: center !important;
@@ -7283,4 +7284,10 @@ cart-remove-button .swym-button-bar {
     font-size: 16px;
     white-space: nowrap !important;
     text-transform: capitalize !important;
+}
+
+@media screen and (max-width: 715px) {
+    .shopify-pc__banner__wrapper {
+        flex-direction: column !important;
+    }
 }

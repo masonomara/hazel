@@ -11,18 +11,14 @@ This file is the map of the whole system. For *setup*, see [`SETUP.md`](SETUP.md
 Six stages, split across a hard **determinism boundary**: deterministic tools do the measuring and comparing; a Claude agent does the judgment (plan + fix); a human owns going live.
 
 ```
-   DETERMINISTIC  (Python tools, no LLM — same input → same output)
-   ┌─────────────────────────────────────────────┐
-   │  baseline ──► findings ──► diff              │   ← cycle workflow (weekly + on-demand)
-   └─────────────────────────────────────────────┘
-                       │ findings.md
-                       ▼
-   JUDGMENT  (Claude agent, via claude-code-action)
-   ┌─────────────────────────────────────────────┐
-   │  plan ──► execute  ──►  fix PR               │   ← execute workflow (on-demand)
-   └─────────────────────────────────────────────┘
-                       │ you review + merge
-                       ▼
+   ON-DEMAND — one trigger fires measure + fix together, into ONE PR
+   (Actions → "Hobbes cycle"; or `python3 hobbes/cli.py cycle` locally for the data alone)
+   ┌────────────────────────────────────────────────────────────────┐
+   │  DETERMINISTIC (Python, no LLM)   │   JUDGMENT (Claude agent)    │
+   │  baseline ─► findings ─► diff     │   plan ─► execute            │
+   └────────────────────────────────────────────────────────────────┘
+                       │ ONE PR: scorecard + findings + diff + the code fix
+                       ▼ you review + merge
    HUMAN
    ┌─────────────────────────────────────────────┐
    │  publish (Shopify go-live)  +  `published`   │   ← you, in Shopify, then a PR label
@@ -40,10 +36,12 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | **baseline** | tool | `baseline.md` (+ raw/) — the scorecard | cycle workflow |
 | **findings** | tool | `findings.md` — the problem catalog | cycle workflow |
 | **diff** | tool | `diff.md` — cycle-over-cycle change | cycle + review workflows |
-| **plan** | agent | `plan.md` — systems grouped, rated, ordered by leverage | execute workflow |
-| **execute** | agent | `execution.md` + theme-code changes → a **fix PR** | execute workflow |
+| **plan** | agent | `plan.md` — systems grouped, rated, ordered by leverage | cycle workflow |
+| **execute** | agent | `execution.md` + theme-code changes | cycle workflow |
 | **publish** | human | the change live on the store | you, in Shopify |
 | **review** | tool | a **before/after comment** on the PR | review workflow (on `published`) |
+
+> The first five stages run in **one** `Hobbes cycle` workflow and land in **one PR** — the scorecard/findings/diff (data) beside the theme-code fix. The determinism boundary still holds inside that run: the Python tools measure first (reproducibly, no LLM), then the agent judges and fixes.
 
 **Why the boundary matters:** measurement must be reproducible (same raw → same findings, IDs and all), so it's deterministic and rebuilt every cycle. Fixing is judgment (what to group, what it costs, what it's worth, what the root cause is), so it's the agent's. Going live is irreversible and outward-facing, so it's the human's.
 
@@ -93,11 +91,10 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | [`templates/PUBLISH-TEMPLATE.md`](templates/PUBLISH-TEMPLATE.md) | The publish contract — human-owned: PR review → sign-off → merge → go-live → `published` label → review. |
 
 ### The cloud runner — `.github/workflows/`
-| File | Lines | Trigger | Role |
-|---|---|---|---|
-| [`../.github/workflows/hobbes-cycle.yml`](../.github/workflows/hobbes-cycle.yml) | 60 | cron (Mon 13:00 UTC) + dispatch | The deterministic patrol: `cli.py cycle` → opens a baseline **cycle PR**. No Claude. |
-| [`../.github/workflows/hobbes-execute.yml`](../.github/workflows/hobbes-execute.yml) | 55 | dispatch (budget input) | The agent: `claude-code-action` (subscription auth) plans + writes fixes → opens a **fix PR**. |
-| [`../.github/workflows/hobbes-review.yml`](../.github/workflows/hobbes-review.yml) | 84 | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
+| File | Trigger | Role |
+|---|---|---|
+| [`../.github/workflows/hobbes-cycle.yml`](../.github/workflows/hobbes-cycle.yml) | dispatch (budget input) | The work cycle: `cli.py cycle` measures (deterministic, no LLM), then `claude-code-action` plans + writes the fix → **one PR** carrying the scorecard/findings/diff *and* the code. |
+| [`../.github/workflows/hobbes-review.yml`](../.github/workflows/hobbes-review.yml) | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
 
 ### Operator guides — `hobbes/`
 *(Engine-generic — same across clients; read by the agent and the human operator.)*
@@ -113,24 +110,24 @@ Each cycle is a folder — the **filesystem is the state machine**. A folder acc
 
 ## How it runs
 
-**Cloud (the default).** All three workflows run from the **default branch** in GitHub Actions:
-- **Measure:** Actions → *Hobbes cycle* → Run (or the Monday cron). → cycle PR.
-- **Fix:** Actions → *Hobbes execute* → Run (blank budget = `hobbes.toml` default). → fix PR.
-- **Verify:** add the **`published`** label to a merged fix PR (after you publish in Shopify). → before/after comment. Manual re-run: Actions → *Hobbes review* → Run → enter the PR number.
+**Cloud (the default).** Both workflows run from the **default branch** in GitHub Actions:
+- **Measure + fix:** Actions → *Hobbes cycle* → Run (blank budget = `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings/diff *and* the code change. Manual trigger only — there is no cron; a cycle fires when you ask for one.
+- **Verify:** add the **`published`** label to the merged PR (after you publish in Shopify). → before/after comment. Manual re-run: Actions → *Hobbes review* → Run → enter the PR number.
 
 GitHub emails you when a PR opens or a comment posts — that's the notification; you don't watch anything.
 
-**Local.** The deterministic half also runs on a laptop with Python 3.11+ and the SiteOne crawler: `python3 hobbes/cli.py cycle`. The agent half can run as local Claude Code instead of the cloud action (no secret needed — uses your login).
+**Local.** The deterministic half runs on a laptop with Python 3.11+ and the SiteOne crawler — `python3 hobbes/cli.py cycle` produces the data (scorecard/findings/diff) only. The agent half (plan + fix) runs as the cloud workflow, or as local Claude Code against the templates (no secret needed — uses your login).
 
-**The operator's weekly loop:** cycle runs Monday → baseline PR in your inbox · run execute when you want work → fix PR · review + merge → publish in Shopify → add `published` → the review posts the impact.
+**The operator's loop:** run *Hobbes cycle* when you want work → one PR (data + fix) in your inbox · review + merge → publish in Shopify → add `published` → the review posts the impact.
 
 ---
 
 ## Load-bearing design decisions
 
 - **GitHub-only.** Hobbes touches nothing but GitHub. No Shopify CLI, no Shopify credentials. Going live is always a human in Shopify.
-- **Claude Code, not the API.** The execute stage authenticates with a **Claude Code subscription token** (`claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`), never a pay-per-token API key. The deterministic stages use no Claude at all.
+- **Claude Code, not the API.** The agent stage (plan + fix) authenticates with a **Claude Code subscription token** (`claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`), never a pay-per-token API key. The deterministic stages use no Claude at all.
 - **The determinism boundary.** Tools measure and compare (reproducible); the agent judges and builds (creative); the human publishes (irreversible). Each thing lives where it belongs.
+- **Measure and fix fire together, into one PR.** A CI cycle always runs the deterministic measure *and* the agent fix on one trigger, landing the scorecard/findings/diff beside the code change in a single PR — so the fix is always planned against fresh measurements, never a stale cycle folder. There's no measure-only cron; a data-only run is the local `cli.py cycle`.
 - **The diff doesn't lie.** It separates the trustworthy field signal from volatile lab noise, gates site-wide counts on crawl coverage (a collapsed crawl can't read as "improvement"), and surfaces the §D a11y findings the agent actually targets — distinguishing a real win from noise from an *unfulfilled claim*.
 - **`published` is an explicit signal.** The review fires on a human-added label, not on merge — because "merged" doesn't mean "live," and every client's Shopify is wired differently.
 - **Pinned-timezone dates.** Cycle folders are stamped in `[cycle].timezone`, so a local run and a UTC CI runner always land on the same calendar day.

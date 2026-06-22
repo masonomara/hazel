@@ -8,7 +8,7 @@ Run it at the start of an engagement and at the start of each work cycle. It pro
 
 ## Tools
 
-- **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. The tool pulls lab and field **separately** and labels them, caps concurrency, retries, caches each call, flags incomplete runs, and writes a `hobbes/scorecards/<date>/psi-results.md` artifact. **Accessibility (Section D) rides the same run** — the Accessibility category *is* axe-core, so psi.py reports each failing rule with its node count (`color-contrast` = contrast errors, `image-alt` = alt gaps); no separate scan needed. The API key lives at `hobbes/tools/.psi-key`. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete" — itself a real signal about a slow page. When PSI can't reach a URL (an unpublished theme draft, a preview link, localhost, anything gated), fall back to **local Lighthouse** — lab data only, ~10–15 points off PSI; see **Non-public URLs** under The run.
+- **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. It writes a `hobbes/scorecards/<date>/psi-results.md` artifact; the reliability guarantees (lab/field split, median-of-3, incomplete-run handling) are under **The run**. **Accessibility (Section D) rides the same run** — the Accessibility category *is* axe-core, so psi.py reports each failing rule with its node count (`color-contrast` = contrast errors, `image-alt` = alt gaps); no separate scan needed. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete" — itself a real signal about a slow page. When PSI can't reach a URL (an unpublished theme draft, a preview link, localhost, anything gated), fall back to **local Lighthouse** — lab data only, ~10–15 points off PSI; see **Non-public URLs** under The run.
 - **SiteOne Crawler** — the whole-site crawler. Free, open-source (MIT). One crawl reports missing/duplicate titles and descriptions, missing H1s, broken links and redirects, plus accessibility checks (alt text, lang, form labels, ARIA, heading order) and slow URLs, as a sortable HTML report. `crawl.py` drives it **from the sitemap** (not link-discovery) so the page set is identical every cycle and the counts are comparable; it expands the sitemap index itself, since SiteOne does not recurse a nested index. macOS: `brew install janreges/tap/siteone-crawler`, or the desktop GUI app.
 
 ## Before your first baseline
@@ -26,20 +26,20 @@ The tools cover all 6 page×device combinations in one go; the manual pass is pe
 
 ### 1. Automated capture (Hobbes)
 
-**The operator runs two commands — everything else cascades:**
+**One command runs the whole cycle:**
 
 ```
-python3 hobbes/cli.py cycle          # 0. one-shot: baseline + findings + diff (the patrol)
-python3 hobbes/tools/baseline.py     # 1. capture: cascades psi → seo → crawl, stamps the scorecard
-python3 hobbes/tools/findings.py     # 2. catalog: builds findings.md from the cycle's raw/ artifacts
+python3 hobbes/cli.py cycle          # baseline → findings → diff (the patrol)
+```
 
-# baseline.py flags:
+It cascades the three capture tools (`psi.py` → `seo.py` → `crawl.py`) through `baseline.py`, builds `findings.md`, and writes the cycle-over-cycle `diff.md`. You rarely run the pieces by hand, but they're there to recover or refresh one section:
+
+```
 python3 hobbes/tools/baseline.py --resume   # reuse cache to recover a stalled run
-python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick A–E rerun)
+python3 hobbes/tools/baseline.py --no-crawl # quick A–E rerun, skip the site-wide crawl
 python3 hobbes/tools/baseline.py --full     # crawl the ENTIRE sitemap, not the sample (slow; occasional audit)
+python3 hobbes/tools/findings.py            # rebuild findings.md from raw/
 ```
-
-`psi.py`, `seo.py`, and `crawl.py` are **cascaded by `baseline.py`** — you do not run them by hand. Each is documented below so you know what feeds which section, and each can be run standalone to refresh one section in isolation, but the normal operator path is the two commands above.
 
 Per-client config — the golden path, client metadata, and the PSI-key *location* (never the key itself) — lives in `hobbes/hobbes.toml`, read by every tool through `hobbes/tools/config.py`. One source; no hardcoded URLs. `hobbes/cli.py` also exposes `diff` (cycle-over-cycle regressions) and `status` (which stage the newest cycle is at).
 
@@ -83,7 +83,7 @@ Optional per cycle — the automated baseline (A–F) stands on its own — but 
 
 ## The scorecard
 
-`baseline.py` stamps the scorecard for you: it copies `hobbes/templates/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD/baseline.md`, fills the header and golden path from the client metadata in `baseline.py`, and pastes sections **A–F** from the tool artifacts — leaving **G** blank for the human pass. That filled file **is** the baseline. **Layout: one dated folder per cycle** (`hobbes/scorecards/YYYY-MM-DD/`) holding `baseline.md`, the generated `findings.md`, the digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`), `crawl.html`, and the `raw/` artifacts — one cycle in one place, sorting chronologically by folder name. Before you trust the file, confirm the header carries no leftover placeholders.
+`baseline.py` stamps the scorecard for you: it copies `hobbes/templates/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD/baseline.md`, fills the header and golden path from the client metadata in `hobbes.toml`, and pastes sections **A–F** from the tool artifacts — leaving **G** blank for the human pass. That filled file **is** the baseline. **Layout: one dated folder per cycle** (`hobbes/scorecards/YYYY-MM-DD/`) holding `baseline.md`, the generated `findings.md`, the digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`), `crawl.html`, and the `raw/` artifacts — one cycle in one place, sorting chronologically by folder name. Before you trust the file, confirm the header carries no leftover placeholders.
 
 ## Targets — the pass bar (same for every client)
 
@@ -143,8 +143,9 @@ If a target genuinely cannot be met (e.g. ad-funded performance), document the e
 ## Optional tools
 
 Not part of the standard cycle — reach for one only when a specific check calls for it:
-- **Google Rich Results Test** - `search.google.com/test/rich-results`. Confirms the page's structured data is valid.
-- **Google Search Console** - Google's own search report. Free but needs client-granted access. Use it when you have it.
-- **Shopify admin → Online Store Speed report + `theme check`** Shopify clients only. Shopify's own performance score, plus a scan of the theme code for errors and warnings.
-- **WebPageTest** -`webpagetest.org`. Optional, advanced. A deeper test for working out *why* a page is slow. Skip it unless performance needs investigating.
-- **WAVE** - `wave.webaim.org` extension. The accessibility scan. It injects **Errors**, **Contrast Errors**, and **Alerts** straight into the rendered page
+
+- **Google Rich Results Test** (`search.google.com/test/rich-results`) — validate a page's structured data.
+- **Google Search Console** — Google's own search report; free, but needs client-granted access.
+- **Shopify admin → Online Store Speed report + `theme check`** — Shopify's performance score plus a theme-code scan (Shopify clients only).
+- **WebPageTest** (`webpagetest.org`) — a deeper dig into *why* a page is slow.
+- **WAVE** (`wave.webaim.org`) — an optional human a11y spot-check (axe via PSI is the automated scan).

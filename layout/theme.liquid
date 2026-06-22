@@ -371,7 +371,8 @@
     {%- endunless -%}
 
     {%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
-      {{ 'component-localization-form.css' | asset_url | stylesheet_tag: preload: true }}
+      <link rel="stylesheet" href="{{ 'component-localization-form.css' | asset_url }}" media="print" onload="this.media='all'">
+      <noscript>{{ 'component-localization-form.css' | asset_url | stylesheet_tag }}</noscript>
       <script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
 
@@ -394,43 +395,64 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         const follower = document.querySelector('#follower');
-        if (!follower) return;
+        // Bail if there's nothing to render (no image), no real cursor to follow,
+        // or the visitor prefers reduced motion. Avoids a 60fps loop doing nothing.
+        if (
+          !follower ||
+          !follower.firstElementChild ||
+          !window.matchMedia('(pointer: fine)').matches ||
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        )
+          return;
 
         let posX = 0;
         let posY = 0;
         let mouseX = 0;
         let mouseY = 0;
+        // Base (untransformed) position of the follower, measured off the DOM once.
+        // Cached so the animation loop never reads layout — that read-after-write
+        // each frame is what forced a reflow on every page.
+        let baseX = 0;
+        let baseY = 0;
         const ease = 0.2;
+        let running = false;
 
-        function easeTo() {
-          const followerBounds = follower.getBoundingClientRect();
-
-          const dX = mouseX - (followerBounds.left + 16);
-          const dY = mouseY - (followerBounds.top + 16);
-
-          posX += dX * ease;
-          posY += dY * ease;
-
-          {% comment %} // Ensure follower stays within the viewport
-          const maxX = window.innerWidth - follower.offsetWidth / 2;
-          const maxY = window.innerHeight - follower.offsetHeight / 2;
-          posX = Math.max(Math.min(posX, maxX), 0);
-          posY = Math.max(Math.min(posY, maxY), 0); {% endcomment %}
+        function measureBase() {
+          const bounds = follower.getBoundingClientRect();
+          baseX = bounds.left - posX;
+          baseY = bounds.top - posY;
         }
 
         function update() {
-          easeTo();
+          // Ease the follower's centre (+16 for a 32px element) toward the cursor
+          // using only cached values — no geometry reads, no reflow.
+          const dX = mouseX - baseX - 16 - posX;
+          const dY = mouseY - baseY - 16 - posY;
+          posX += dX * ease;
+          posY += dY * ease;
           follower.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+
+          // Stop the loop once we've effectively caught up; it restarts on the
+          // next mousemove. Keeps the page idle when the cursor is still.
+          if (Math.abs(dX) < 0.5 && Math.abs(dY) < 0.5) {
+            running = false;
+            return;
+          }
           requestAnimationFrame(update);
         }
 
         function setCoords(e) {
           mouseX = e.clientX;
           mouseY = e.clientY;
+          if (!running) {
+            running = true;
+            requestAnimationFrame(update);
+          }
         }
 
+        measureBase();
+        window.addEventListener('resize', measureBase);
         document.addEventListener('mousemove', setCoords);
-        update();
       });
     </script>
   </head>

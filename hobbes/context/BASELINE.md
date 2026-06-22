@@ -8,20 +8,12 @@ Run it at the start of an engagement and at the start of each work cycle. It pro
 
 ## Tools
 
-- **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. The tool pulls lab and field **separately** and labels them, caps concurrency, retries, caches each call, flags incomplete runs, and writes a `hobbes/scorecards/<date>/psi-results.md` artifact. The API key lives at `hobbes/tools/.psi-key`. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete" — itself a real signal about a slow page.
-- **Lighthouse (Chrome DevTools / `npx lighthouse`)** — the local fallback for when PSI cannot reach a URL: an unpublished theme draft, a preview link, localhost, or anything gated. Same four Lighthouse categories, but lab data only — no field data, no real INP, and scores run ~10–15 points off PSI.
-- **Accessibility audits (axe-core via PSI)** — the automated a11y scan is already in the PSI run. `psi.py` reads Lighthouse's accessibility audits — which *are* axe-core checks — and reports each failing rule with its node count (Section D): `color-contrast` is the contrast-error count, `image-alt` the alt gaps. No separate scan needed. (WAVE — `wave.webaim.org` — stays available as an optional human spot-check, but it is not part of the automated run.)
+- **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. The tool pulls lab and field **separately** and labels them, caps concurrency, retries, caches each call, flags incomplete runs, and writes a `hobbes/scorecards/<date>/psi-results.md` artifact. **Accessibility (Section D) rides the same run** — the Accessibility category *is* axe-core, so psi.py reports each failing rule with its node count (`color-contrast` = contrast errors, `image-alt` = alt gaps); no separate scan needed. The API key lives at `hobbes/tools/.psi-key`. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete" — itself a real signal about a slow page. When PSI can't reach a URL (an unpublished theme draft, a preview link, localhost, anything gated), fall back to **local Lighthouse** — lab data only, ~10–15 points off PSI; see **Non-public URLs** under The run.
 - **SiteOne Crawler** — the whole-site crawler. Free, open-source (MIT). One crawl reports missing/duplicate titles and descriptions, missing H1s, broken links and redirects, plus accessibility checks (alt text, lang, form labels, ARIA, heading order) and slow URLs, as a sortable HTML report. `crawl.py` drives it **from the sitemap** (not link-discovery) so the page set is identical every cycle and the counts are comparable; it expands the sitemap index itself, since SiteOne does not recurse a nested index. macOS: `brew install janreges/tap/siteone-crawler`, or the desktop GUI app.
-- **Google Rich Results Test** — `search.google.com/test/rich-results`. Confirms the page's structured data is valid.
-- **Google Search Console** — Google's own search report. Free but needs client-granted access. Use it when you have it.
-- **Shopify admin → Online Store Speed report + `theme check`** — Shopify clients only. Shopify's own performance score, plus a scan of the theme code for errors and warnings.
-- **WebPageTest** — `webpagetest.org`. Optional, advanced. A deeper test for working out *why* a page is slow. Skip it unless performance needs investigating.
 
-## Setup — once per client
+## Before your first baseline
 
-- [ ] **Identify the client.** Record name, site URL, platform, date, who set it up, and anything else worth documenting.
-- [ ] **Lock the golden path.** Pick 3–4 important pages with exact URLs — typically home, collection, product. Reuse these exact URLs every cycle so results stay comparable.
-- [ ] **Establish the measurement method.** Hobbes runs the PSI API via `hobbes/tools/psi.py` — Google's standardized server runs it the same way every cycle, so numbers stay comparable. One pass captures Mobile and Desktop. Only when a URL is not publicly reachable (theme draft, localhost, staging) fall back to local Lighthouse (Chrome Incognito, extensions off, median of 3) — and never mix PSI and local scores within one baseline.
+One-time setup — filling `hobbes.toml` (client + golden path), installing the tools, and (for the cloud runner) wiring GitHub — lives in `hobbes/SETUP.md`. This guide assumes that's done.
 
 ## The run
 
@@ -147,3 +139,12 @@ If a target genuinely cannot be met (e.g. ad-funded performance), document the e
 - Lighthouse cannot log into gated pages (portals, dashboards, quote flows). Script authenticated runs (Playwright/Puppeteer with a test login) or test manually, and flag them as human-only surfaces.
 - Marketing/CRM scripts (HubSpot, Marketo, Salesforce, chat widgets, analytics) are the usual TBT culprits. Inventory them.
 - SEO structured data is Organization / Product / FAQ; the checklist applies in full.
+
+## Optional tools
+
+Not part of the standard cycle — reach for one only when a specific check calls for it:
+- **Google Rich Results Test** - `search.google.com/test/rich-results`. Confirms the page's structured data is valid.
+- **Google Search Console** - Google's own search report. Free but needs client-granted access. Use it when you have it.
+- **Shopify admin → Online Store Speed report + `theme check`** Shopify clients only. Shopify's own performance score, plus a scan of the theme code for errors and warnings.
+- **WebPageTest** -`webpagetest.org`. Optional, advanced. A deeper test for working out *why* a page is slow. Skip it unless performance needs investigating.
+- **WAVE** - `wave.webaim.org` extension. The accessibility scan. It injects **Errors**, **Contrast Errors**, and **Alerts** straight into the rendered page

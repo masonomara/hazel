@@ -1,6 +1,14 @@
 # Setup — once per client
 
-How to stand Hobbes up. Two halves: **local** (run the deterministic cycle on a laptop) and **cloud** (the automated GitHub runner). Local alone is enough to capture a baseline by hand; the cloud runner adds the weekly patrol and the agent fix-PR. Hobbes writes only to GitHub (branches, PRs, comments); every Shopify action stays human.
+How to stand Hobbes up. First fill the per-client config (`hobbes.toml`, below); then set up **local** (run the deterministic cycle on a laptop) and/or **cloud** (the automated GitHub runner). Local alone is enough to capture a baseline by hand; the cloud runner adds the weekly patrol and the agent fix-PR. Hobbes writes only to GitHub (branches, PRs, comments); every Shopify action stays human.
+
+## Configure the client (`hobbes.toml`)
+
+The per-client config every tool reads. Fill it once:
+
+- **Identify the client.** Set the `[client]` block — name, site, platform, who runs it. (The fuller picture — goals, people, constraints — lives in `hobbes/context/CONTEXT.md`.)
+- **Lock the golden path.** Pick 3–4 important pages with exact URLs — typically home, collection, product — and set them in `[golden_path]`. Reuse the same URLs every cycle so results stay comparable.
+- **Method is PSI.** The cycle runs the PageSpeed Insights API the same way every cycle, so numbers stay comparable. Local Lighthouse is the fallback only for URLs PSI can't reach (theme draft, localhost, staging) — never mix PSI and local scores in one baseline. (Full method in `hobbes/context/BASELINE.md`.)
 
 ## Local setup — the engine on your machine
 
@@ -88,7 +96,7 @@ The engine handles these; they're listed so you know they're covered:
 
 | Step | Cadence |
 |---|---|
-| Local + GitHub setup above | **once** per client |
+| Client config + local + GitHub setup above | **once** per client |
 | Add the `published` label after each go-live | **every release** (fires the review) |
 | Review + publish PRs | **every cycle** (the human gate) |
 | Rotate a key | only on exposure |

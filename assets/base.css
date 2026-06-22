@@ -6938,7 +6938,6 @@ cart-remove-button .swym-button-bar {
     font-weight: 400 !important;
     font-size: 16px !important;
     line-height: 21px !important;
-    text-transform: uppercase;
     margin: 0px !important;
 }
 .shopify-pc__banner__btns {
@@ -7227,4 +7226,61 @@ cart-remove-button .swym-button-bar {
 
 #shopify-pc__banner__body-title {
     display: none;
+}
+
+.shopify-pc__banner__wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 20px !important;
+    justify-content: center !important;
+}
+.shopify-pc__banner__btns,
+.shopify-pc__banner__body {
+    padding: 0px !important;
+    margin: 0px !important;
+    width: auto !important;
+}
+
+.shopify-pc__banner__btns {
+    flex: 0;
+    gap: 20px !important;
+    flex-basis: none !important;
+    justify-content: center !important;
+    flex-direction: row-reverse !important;
+}
+
+.shopify-pc__banner__dialog {
+    padding: 16px 20px !important;
+    box-shadow: none !important;
+}
+.shopify-pc__banner__dialog p {
+    font-family: "PragmaticaCondensed";
+    font-weight: 400;
+
+    font-size: 16px;
+}
+
+.shopify-pc__banner__dialog button.shopify-pc__banner__btn-accept {
+    background: none !important;
+    border: none !important;
+    color: black !important;
+    width: fit-content !important;
+    padding: 0px !important;
+    text-decoration: underline !important;
+    text-transform: uppercase !important;
+}
+.shopify-pc__banner__dialog button {
+    flex-basis: 0% !important;
+}
+.shopify-pc__banner__dialog button.shopify-pc__banner__btn-decline {
+    display: none !important;
+}
+.shopify-pc__banner__btn-manage-prefs {
+    text-decoration: none !important;
+    font-family: "PragmaticaCondensed";
+    font-weight: 400;
+
+    font-size: 16px;
+    white-space: nowrap !important;
+    text-transform: capitalize !important;
 }

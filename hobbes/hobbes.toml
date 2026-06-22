@@ -18,5 +18,5 @@ psi_key_file = "hobbes/tools/.psi-key"  # repo-relative fallback; git-ignored
 
 [cycle]
 branch_prefix = "hobbes-"   # flat, never collides with a branch literally named "hobbes"
-effort_budget = 20          # effort points spent per execute batch; ~rank-1..7 of the plan
+effort_budget = 100         # effort points per execute batch; 100 ≫ a full plan (~25 pts) = "do everything"
 timezone = "America/Chicago"   # pins cycle dates so local + CI land on the same calendar day

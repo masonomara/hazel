@@ -42,7 +42,7 @@ jobs:
           # denied (the agent ran 40 turns but committed nothing without this).
           claude_args: |
             --model claude-opus-4-8
-            --max-turns 80
+            --max-turns 150
             --allowedTools Edit,Read,Write,Glob,Grep,Bash
           prompt: |
             Run the Hobbes plan + execute stages on the latest cycle.

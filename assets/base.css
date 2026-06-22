@@ -7224,3 +7224,7 @@ cart-remove-button .swym-button-bar {
     border-radius: 16px !important;
     overflow: hidden !important;
 }
+
+#shopify-pc__banner__body-title {
+    display: none;
+}

@@ -32,8 +32,8 @@
   function setRecentlyViewedPdp() {
     const pdpData = {
       productTitle: '{{ product.title }}',
-      productImg: "{{ product.featured_image | image_url }}",
-      productImgTwo: {% if product.images.size > 1 %}"{{ product.images[1] | image_url }}"{% else %}null{% endif %},
+      productImg: "{{ product.featured_image | image_url: width: 600 }}",
+      productImgTwo: {% if product.images.size > 1 %}"{{ product.images[1] | image_url: width: 600 }}"{% else %}null{% endif %},
       productPrice: "{{ product.price | money | remove_first: '' }}",
       productUrl: '{{ product.url }}',
     };
@@ -137,8 +137,8 @@
                 <div class="card__inner color-scheme-2 gradient ratio" style="--ratio-percent: 133%;">
                   <div class="card__media">
                     <div class="media media--transparent media--hover-effect">
-                      <img src='${item.productImg}' alt="${item.productTitle}" loading="lazy" width="1200"/>
-                      ${item.productImgTwo && item.productImgTwo !== item.productImg ? `<img src='${item.productImgTwo}' alt="${item.productTitle}" loading="lazy" width="1200"/>` : ''}
+                      <img src='${item.productImg}' alt="${item.productTitle}" loading="lazy" width="600"/>
+                      ${item.productImgTwo && item.productImgTwo !== item.productImg ? `<img src='${item.productImgTwo}' alt="${item.productTitle}" loading="lazy" width="600"/>` : ''}
                     </div>
                     <div class="recentlyViewedPopup">
                       <span>View Item</span>
@@ -214,7 +214,7 @@
             class="footerLogo--desktop"
           >
           <img
-            src="https://cdn.shopify.com/s/files/1/0051/3264/8566/files/hazel-mobile-logo.png?v=1713641093"
+            src="https://cdn.shopify.com/s/files/1/0051/3264/8566/files/hazel-mobile-logo.png?v=1713641093&width=760"
             alt="Hazel Boutique"
             loading="lazy"
             width="100%"

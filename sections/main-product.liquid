@@ -462,7 +462,11 @@
                 </div>
 
                 <script>
-                  (function () {
+                  // pubsub.js / constants.js load with `defer`, so subscribe and
+                  // PUB_SUB_EVENTS are not defined at inline parse time. Wait for
+                  // DOMContentLoaded — deferred scripts have run by then.
+                  document.addEventListener('DOMContentLoaded', function () {
+                    if (typeof subscribe !== 'function' || typeof PUB_SUB_EVENTS === 'undefined') return;
                     subscribe(PUB_SUB_EVENTS.variantChange, function (event) {
                       if (event.data.sectionId !== '{{ section.id }}') return;
                       var el = document.getElementById('installment-price-{{ section.id }}');
@@ -470,7 +474,7 @@
                       var installment = Math.round(event.data.variant.price / 4);
                       el.textContent = '$' + (installment / 100).toFixed(2);
                     });
-                  })();
+                  });
                 </script>
               {%- when 'rating' -%}
                 {%- if product.metafields.reviews.rating.value != blank -%}

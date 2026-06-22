@@ -363,12 +363,28 @@
 
     {{ 'base.css' | asset_url | stylesheet_tag }}
 
+    {%- comment -%}
+      Slider/slideshow CSS is needed above the fold on every page (announcement bar)
+      and on the home hero. Load it here, in parallel with base.css, so it stops
+      queuing behind base.css in the body and off the critical render path.
+    {%- endcomment -%}
+    {{ 'component-slider.css' | asset_url | stylesheet_tag: preload: true }}
+    {{ 'component-slideshow.css' | asset_url | stylesheet_tag: preload: true }}
+
     {%- unless settings.type_body_font.system? -%}
       {{ settings.type_body_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
     {%- endunless -%}
     {%- unless settings.type_header_font.system? -%}
       {{ settings.type_header_font | font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
     {%- endunless -%}
+
+    {%- comment -%}
+      The visible body + heading font is Pragmatica (overridden in the @font-face
+      block below, not the system settings font). Preload its primary weight so it
+      starts downloading immediately instead of being discovered only after the
+      inline {% style %} block parses — shortens the LCP/swap critical chain.
+    {%- endcomment -%}
+    {{ 'https://cdn.shopify.com/s/files/1/0051/3264/8566/files/Pragmatica-Book.woff2?v=1713569840' | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
 
     {%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
       <link rel="stylesheet" href="{{ 'component-localization-form.css' | asset_url }}" media="print" onload="this.media='all'">

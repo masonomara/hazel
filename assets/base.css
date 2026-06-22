@@ -7243,9 +7243,9 @@ cart-remove-button .swym-button-bar {
 
 .shopify-pc__banner__btns {
     flex: 0;
-    min-width: 0px !important;
     gap: 20px !important;
-    flex-basis: none !important;
+    min-width: auto !important;
+    flex-basis: fit-content !important;
     justify-content: center !important;
     flex-direction: row-reverse !important;
 }

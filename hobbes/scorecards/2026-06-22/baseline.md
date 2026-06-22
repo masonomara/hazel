@@ -10,25 +10,25 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile | 63 ✗cut | 97 | 88 | 92 |
-| Home — desktop | 84 | 97 | 96 | 100 |
-| Collection — mobile | 74 | 97 | 96 | 100 |
-| Collection — desktop | 55 | 97 | 96 | 100 |
-| Product — mobile | 73 | 92 | 92 | 92 |
-| Product — desktop | 85 | 97 | 73 | 100 |
+| Home — mobile | 54 | 97 | 92 | 100 |
+| Home — desktop | 56 | 97 | 92 | 100 |
+| Collection — mobile | 51 | 97 | 96 | 100 |
+| Collection — desktop | 65 | 97 | 96 | 100 |
+| Product — mobile | 50 | 97 | 96 | 100 |
+| Product — desktop | 70 | 97 | 96 | 100 |
 
-> Perf-score spread across 3 runs (median kept): Home — mobile 49/63/68 · Home — desktop 67/84/84 · Collection — mobile 53/74/78 · Collection — desktop 55/55/73 · Product — mobile 70/73/73 · Product — desktop 68/85/87.
+> Perf-score spread across 3 runs (median kept): Home — mobile 54/54/54 · Home — desktop 56/56/56 · Collection — mobile 51/51/51 · Collection — desktop 62/65/66 · Product — mobile 50/50/69 · Product — desktop 70/70/70.
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile | 10.6 ✗cut | 0.117 | 2.33 | 0.01 | 161 | 4.93 |
-| Home — desktop | 2.38 | 0.014 | 0.5 | 0.01 | 140 | 1.13 |
-| Collection — mobile | 4.43 | 0.0 | 2.56 | 0.01 | 300 | 3.61 |
-| Collection — desktop | 1.64 | 0.042 | 0.64 | 0.01 | 4035 | 3.55 |
-| Product — mobile | 5.78 | 0.0 | 2.56 | 0.01 | 112 | 3.89 |
-| Product — desktop | 1.83 | 0.014 | 0.61 | 0.01 | 207 | 1.21 |
+| Home — mobile | 23.48 | 0 | 6.25 | 0.01 | 192 | 9.3 |
+| Home — desktop | 2.34 | 1.01 | 0.56 | 0.01 | 193 | 1.45 |
+| Collection — mobile | 5.55 | 0.984 | 1.89 | 0.01 | 164 | 3.12 |
+| Collection — desktop | 1.51 | 0.203 | 0.52 | 0.01 | 443 | 1.33 |
+| Product — mobile | 19.78 | 0 | 6.2 | 0.01 | 323 | 8.01 |
+| Product — desktop | 1.67 | 0.205 | 0.52 | 0.02 | 300 | 1.45 |
 
 ## C. Field data (CrUX 28-day)
 
@@ -46,7 +46,7 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | Home — desktop | 1 | ✗ | frame-title×1 |
 | Collection — mobile | 1 | ✗ | frame-title×1 |
 | Collection — desktop | 1 | ✗ | frame-title×1 |
-| Product — mobile | 2 | ✗ | image-alt×2, frame-title×1 |
+| Product — mobile | 1 | ✗ | frame-title×1 |
 | Product — desktop | 1 | ✗ | frame-title×1 |
 
 ## E. SEO checklist (golden path)

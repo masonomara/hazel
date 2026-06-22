@@ -56,7 +56,7 @@
       <a
         {% if block.settings.link %}
           href="{{ block.settings.link }}"
-          aria-label="{{ block.settings.heading | default: 'View slide' | escape }}"
+          aria-label="{{ block.settings.heading | strip_html | default: 'View slide' | escape }}"
           tabindex="0"
         {% else %}
           role="button" aria-disabled="true"

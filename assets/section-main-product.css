@@ -946,7 +946,7 @@ a.product__text {
     }
 
     .product-media-modal__dialog .global-media-settings--no-shadow {
-        overflow: visible !important;
+        overflow: clip !important;
     }
 }
 

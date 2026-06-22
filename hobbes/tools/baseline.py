@@ -27,7 +27,7 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
-TEMPLATE = HOBBES / "scorecards" / "TEMPLATE.md"
+TEMPLATE = HOBBES / "templates" / "TEMPLATE.md"
 
 sys.path.insert(0, str(TOOLS))
 import config

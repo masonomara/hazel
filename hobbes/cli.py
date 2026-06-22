@@ -64,7 +64,7 @@ def cmd_status(rest):
 def _agent_stage(template, rest):
     c = _latest_cycle()
     findings = (c / "findings.md") if c else None
-    print(f"Stage prompt → hobbes/scorecards/{template}")
+    print(f"Stage prompt → hobbes/templates/{template}")
     print(f"Cycle        → {c.name if c else '(none)'}")
     print(f"Findings     → {findings if findings and findings.exists() else '(run findings first)'}")
     print("Drive this stage with Claude Code (claude-code-action in CI, or `claude` locally): "

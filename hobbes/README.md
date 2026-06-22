@@ -54,14 +54,14 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 ### Standing context — who Hobbes is and what it's steering by
 *(Read by the agent; prose, not code.)*
 
-| File | Lines | Role |
-|---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 90 | Hobbes's identity, stance, and **the hard line** (never publish/merge/spend without sign-off). Identical across all clients. |
-| [`MISSION.md`](MISSION.md) | 43 | What this client optimizes for, as **baseline → target** priorities (a11y, SEO, performance). Points at the scorecard for the numbers. |
-| [`DEVELOPMENT.md`](DEVELOPMENT.md) | 26 | The stack and the build rules — the "done means" gates. |
-| [`CONTEXT.md`](CONTEXT.md) | 41 | The client: goals, users, the people who sign off, where access lives. |
-| [`CHANGELOG.md`](CHANGELOG.md) | 33 | What has shipped, why, and to what result. |
-| [`BASELINE.md`](BASELINE.md) | 148 | The operator's runbook for driving a baseline cycle by hand. |
+| File | Role |
+|---|---|
+| [`../CLAUDE.md`](../CLAUDE.md) | Hobbes's identity, stance, and **the hard line** (never publish/merge/spend without sign-off). Identical across all clients. |
+| [`context/MISSION.md`](context/MISSION.md) | What this client optimizes for, as **baseline → target** priorities (a11y, SEO, performance). Points at the scorecard for the numbers. |
+| [`context/DEVELOPMENT.md`](context/DEVELOPMENT.md) | The stack and the build rules — the "done means" gates. |
+| [`context/CONTEXT.md`](context/CONTEXT.md) | The client: goals, users, the people who sign off, where access lives. |
+| [`context/CHANGELOG.md`](context/CHANGELOG.md) | What has shipped, why, and to what result. |
+| [`context/BASELINE.md`](context/BASELINE.md) | The operator's runbook for driving a baseline cycle by hand. |
 
 ### Config — the one source of per-client truth
 | File | Lines | Role |
@@ -84,14 +84,14 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 |---|---|---|
 | [`cli.py`](cli.py) | 104 | `cycle` (baseline→findings→diff), the individual steps, `status`, `plan`/`execute` (print the stage prompt), `budget`, `today`. Run as `python3 hobbes/cli.py <cmd>`. |
 
-### Stage contracts — `hobbes/scorecards/*.md` (templates)
-| File | Lines | Role |
-|---|---|---|
-| [`scorecards/TEMPLATE.md`](scorecards/TEMPLATE.md) | 124 | The baseline scorecard shape — §A–G (A–F tool-filled, G manual a11y for the human). |
-| [`scorecards/FINDINGS-TEMPLATE.md`](scorecards/FINDINGS-TEMPLATE.md) | 58 | The findings contract — dense, evidence-based, deterministic. |
-| [`scorecards/PLAN-TEMPLATE.md`](scorecards/PLAN-TEMPLATE.md) | 75 | The plan contract — group findings into systems → estimate effort → estimate impact → **order by leverage (impact ÷ effort)**. |
-| [`scorecards/EXECUTE-TEMPLATE.md`](scorecards/EXECUTE-TEMPLATE.md) | 63 | The execute contract — select a batch by effort budget, research, implement the **whole** batch, gates ("no *new* Theme Check offenses"), and the PR's before/after. Never publishes. |
-| [`scorecards/PUBLISH-TEMPLATE.md`](scorecards/PUBLISH-TEMPLATE.md) | 39 | The publish contract — human-owned: PR review → sign-off → merge → go-live → `published` label → review. |
+### Stage contracts — `hobbes/templates/*.md`
+| File | Role |
+|---|---|
+| [`templates/TEMPLATE.md`](templates/TEMPLATE.md) | The baseline scorecard shape — §A–G (A–F tool-filled, G manual a11y for the human). |
+| [`templates/FINDINGS-TEMPLATE.md`](templates/FINDINGS-TEMPLATE.md) | The findings contract — dense, evidence-based, deterministic. |
+| [`templates/PLAN-TEMPLATE.md`](templates/PLAN-TEMPLATE.md) | The plan contract — group findings into systems → estimate effort → estimate impact → **order by leverage (impact ÷ effort)**. |
+| [`templates/EXECUTE-TEMPLATE.md`](templates/EXECUTE-TEMPLATE.md) | The execute contract — select a batch by effort budget, research, implement the **whole** batch, gates ("no *new* Theme Check offenses"), and the PR's before/after. Never publishes. |
+| [`templates/PUBLISH-TEMPLATE.md`](templates/PUBLISH-TEMPLATE.md) | The publish contract — human-owned: PR review → sign-off → merge → go-live → `published` label → review. |
 
 ### The cloud runner — `.github/workflows/`
 | File | Lines | Trigger | Role |

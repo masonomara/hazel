@@ -25,4 +25,4 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 - [Code style, file layout, naming — match the surrounding file.]
 - [What must never be edited directly — generated files, vendored code, locked theme sections.]
 - [How secrets and env vars are handled. Never hard-code them.]
-- **Done means:** [what counts as done — checker clean (no *new* offenses), verified by hand, no regression against the baseline targets in `hobbes/BASELINE.md`].
+- **Done means:** [what counts as done — checker clean (no *new* offenses), verified by hand, no regression against the baseline targets in `hobbes/context/BASELINE.md`].

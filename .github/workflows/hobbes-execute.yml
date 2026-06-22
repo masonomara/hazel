@@ -46,7 +46,7 @@ jobs:
             --allowedTools Edit,Read,Write,Glob,Grep,Bash
           prompt: |
             Run the Hobbes plan + execute stages on the latest cycle.
-            Read hobbes/scorecards/PLAN-TEMPLATE.md and hobbes/scorecards/EXECUTE-TEMPLATE.md
+            Read hobbes/templates/PLAN-TEMPLATE.md and hobbes/templates/EXECUTE-TEMPLATE.md
             and follow them exactly. Effort budget: ${{ env.EFFORT }}.
             Write plan.md and execution.md into the latest hobbes/scorecards/<date>/ folder.
             Make the theme-code changes, then: create a new branch (hobbes-fix-<date>),

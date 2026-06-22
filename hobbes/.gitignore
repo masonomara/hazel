@@ -1,0 +1,14 @@
+# The Hobbes engine ignores its own secrets and artifacts, so the drop-in is
+# self-contained — no per-client root .gitignore editing, nothing to forget.
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+
+# The PSI key — never commit (it was historically tracked; rotate if exposed)
+tools/.psi-key
+
+# Cycle raw artifacts — the machine source findings/diff read at generation time.
+# Kept on disk for the active cycle; the digests (findings.md, *-results.md) are
+# the durable record, so raw/ stays out of git to keep the repo from ballooning.
+scorecards/*/raw/

@@ -1,61 +1,54 @@
 # Baseline — operator guide
 
-This is the operating procedure to capture a web baseline. You run the cycle with Hobbes assistance. Hobbes does most of the write-up and then a human makes the judgment calls that no tool can make and a human signs off the manual rows.
+<!-- Human-owned. The operator's runbook for capturing a web baseline — the tools, the run, the targets, the deliverables — maintained by a human and kept true to the tooling. Hobbes reads and follows it to run the cycle and does the write-up (scorecard, findings), but never edits the runbook itself. -->
 
-Run it at the start of an engagement and at the start of each work cycle. It will produce a dated scorecard and a findings doc.Run it every cycle against the previous baseline. Any metric that slipped below its target since last cycle is a regression. 
+This is the operating procedure to capture a web baseline. You run the cycle with Hobbes' assistance: Hobbes does most of the write-up, then a human makes the judgment calls no tool can make and signs off the manual rows.
+
+Run it at the start of an engagement and at the start of each work cycle. It produces a dated scorecard and a findings doc, measured against the previous baseline — any metric that slipped below its target since last cycle is a regression.
 
 ## Tools
 
-- **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. The tool pulls lab and field **separately** and labels them, caps concurrency, retries, caches each call, flags incomplete runs, and writes a `hobbes/scorecards/<date>/psi-results.md` artifact. The API key lives at `hobbes/tools/.psi-key`. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete." That is real signal about a slow page, not a tool fault.
-- **Lighthouse (Chrome DevTools / `npx lighthouse`)** — the local fallback for when PSI cannot reach a URL: an unpublished theme draft, a preview link, localhost, or anything gated. Same four Lighthouse categories, but lab data only — no field data, no real INP, and scores run ~10–15 points off PSI.
-- **Accessibility audits (axe-core via PSI)** — the automated a11y scan is already in the PSI run. `psi.py` reads Lighthouse's accessibility audits — which *are* axe-core checks — and reports each failing rule with its node count (Section D): `color-contrast` is the contrast-error count, `image-alt` the alt gaps. No separate scan needed. (WAVE — `wave.webaim.org` — stays available as an optional human spot-check, but it is not part of the automated run.)
+- **PageSpeed Insights (PSI)** — the primary measurement tool, run by Hobbes through the API: `python3 hobbes/tools/psi.py`. PSI runs Lighthouse on Google's servers and returns all four category scores (Performance, Accessibility, Best Practices, SEO) for mobile and desktop, the lab metrics, *and* CrUX field data — real-user measurements over the last 28 days, the only trustworthy source for INP. It writes a `hobbes/scorecards/<date>/psi-results.md` artifact; the reliability guarantees (lab/field split, median-of-3, incomplete-run handling) are under **The run**. **Accessibility (Section D) rides the same run** — the Accessibility category *is* axe-core, so psi.py reports each failing rule with its node count (`color-contrast` = contrast errors, `image-alt` = alt gaps); no separate scan needed. The human cross-check is the same engine in the browser at `pagespeed.web.dev` (no key needed) — read the field panel first. One hard limit: PSI exposes **no throttle control**; mobile is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so a genuinely heavy page can take ~60s and may return "incomplete" — itself a real signal about a slow page. When PSI can't reach a URL (an unpublished theme draft, a preview link, localhost, anything gated), fall back to **local Lighthouse** — lab data only, ~10–15 points off PSI; see **Non-public URLs** under The run.
 - **SiteOne Crawler** — the whole-site crawler. Free, open-source (MIT). One crawl reports missing/duplicate titles and descriptions, missing H1s, broken links and redirects, plus accessibility checks (alt text, lang, form labels, ARIA, heading order) and slow URLs, as a sortable HTML report. `crawl.py` drives it **from the sitemap** (not link-discovery) so the page set is identical every cycle and the counts are comparable; it expands the sitemap index itself, since SiteOne does not recurse a nested index. macOS: `brew install janreges/tap/siteone-crawler`, or the desktop GUI app.
-- **Google Rich Results Test** — `search.google.com/test/rich-results`. Confirms the page's structured data is valid.
-- **Google Search Console** — Google's own search report. Free but needs client-granted access. Use it when you have it.
-- **Shopify admin → Online Store Speed report + `theme check`** — Shopify clients only. Shopify's own performance score, plus a scan of the theme code for errors and warnings.
-- **WebPageTest** — `webpagetest.org`. Optional, advanced. A deeper test for working out *why* a page is slow. Skip it unless performance needs investigating.
 
-## Setup — once per client
+## Before your first baseline
 
-- [ ] **Identify the client.** Record name, site URL, platform, date, who set it up, and anything else worth documenting.
-- [ ] **Lock the golden path.** Pick 3–4 important pages with exact URLs — typically home, collection, product. Reuse these exact URLs every cycle so results stay comparable.
-- [ ] **Establish the measurement method.** Hobbes runs the PSI API via `hobbes/tools/psi.py` — Google's standardized server runs it the same way every cycle, so numbers stay comparable. One pass captures Mobile and Desktop. Only when a URL is not publicly reachable (theme draft, localhost, staging) fall back to local Lighthouse (Chrome Incognito, extensions off, median of 3) — and never mix PSI and local scores within one baseline.
+One-time setup — filling `hobbes.toml` (client + golden path), installing the tools, and (for the cloud runner) wiring GitHub — lives in `hobbes/SETUP.md`. This guide assumes that's done.
 
 ## The run
 
-The baseline comes in two tiers, and naming them keeps a partial run honest:
+The baseline comes in two tiers. Naming them keeps a partial run honest:
 
-- **MVP baseline (A–F) — fully automated.** Hobbes runs the three tools and fills every cell in sections A–F. This is a *complete* baseline on its own — a real, comparable, trustworthy snapshot. An A–F run is finished work, not a fraction of one.
+- **MVP baseline (A–F) — fully automated.** Hobbes runs the three tools and fills every cell in sections A–F — a complete, comparable baseline on its own.
 - **Above-and-beyond (G) — human.** The manual accessibility pass. Optional per cycle; the MVP baseline stands without it, but a page is not certified *fully* pass until G is signed.
 
 The tools cover all 6 page×device combinations in one go; the manual pass is per page.
 
 ### 1. Automated capture (Hobbes)
 
-**The operator runs two commands — everything else cascades:**
+**One command runs the whole cycle:**
 
 ```
-python3 hobbes/cli.py cycle          # 0. one-shot: baseline + findings + diff (the patrol)
-python3 hobbes/tools/baseline.py     # 1. capture: cascades psi → seo → crawl, stamps the scorecard
-python3 hobbes/tools/findings.py     # 2. catalog: builds findings.md from the cycle's raw/ artifacts
+python3 hobbes/cli.py cycle          # baseline → findings → diff (the patrol)
+```
 
-# baseline.py flags:
+It cascades the three capture tools (`psi.py` → `seo.py` → `crawl.py`) through `baseline.py`, builds `findings.md`, and writes the cycle-over-cycle `diff.md`. You rarely run the pieces by hand, but they're there to recover or refresh one section:
+
+```
 python3 hobbes/tools/baseline.py --resume   # reuse cache to recover a stalled run
-python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick A–E rerun)
+python3 hobbes/tools/baseline.py --no-crawl # quick A–E rerun, skip the site-wide crawl
 python3 hobbes/tools/baseline.py --full     # crawl the ENTIRE sitemap, not the sample (slow; occasional audit)
+python3 hobbes/tools/findings.py            # rebuild findings.md from raw/
 ```
-
-`psi.py`, `seo.py`, and `crawl.py` are **cascaded by `baseline.py`** — you do not run them by hand. Each is documented below so you know what feeds which section, and each can be run standalone to refresh one section in isolation, but the normal operator path is the two commands above.
 
 Per-client config — the golden path, client metadata, and the PSI-key *location* (never the key itself) — lives in `hobbes/hobbes.toml`, read by every tool through `hobbes/tools/config.py`. One source; no hardcoded URLs. `hobbes/cli.py` also exposes `diff` (cycle-over-cycle regressions) and `status` (which stage the newest cycle is at).
 
-`baseline.py` runs **all three tools together — `psi.py` then `seo.py` then `crawl.py`** — and stamps a dated `hobbes/scorecards/YYYY-MM-DD/baseline.md` from `TEMPLATE.md` (the
-cycle folder also holds the raw artifacts in `raw/`, the digests, and `crawl.html`): header and golden path filled, sections **A–F** pasted in (A–D from PSI, E from SEO, F from the crawl), section **G** left blank for the human pass. It fetches fresh by default (a baseline must reflect the current site); if a run stalls partway the successful calls are cached, so `--resume` picks up the rest. `--full` cascades to the crawl only. If any tool errors it aborts rather than write a half-scorecard. The three cascaded tools:
+`baseline.py` runs **all three tools together — `psi.py` then `seo.py` then `crawl.py`** — and stamps a dated `hobbes/scorecards/YYYY-MM-DD/baseline.md` from `hobbes/templates/TEMPLATE.md` (the cycle folder also holds the raw artifacts in `raw/`, the digests, and `crawl.html`): header and golden path filled, sections **A–F** pasted in (A–D from PSI, E from SEO, F from the crawl), section **G** left blank for the human pass. It fetches fresh by default (a baseline must reflect the current site); if a run stalls partway the successful calls are cached, so `--resume` picks up the rest. `--full` cascades to the crawl only. If any tool errors it aborts rather than write a half-scorecard. The three cascaded tools:
 
-**`python3 hobbes/tools/psi.py`** — calls the PSI API for each golden-path page × mobile/desktop and fills **A** (category scores), **B** (lab metrics), **C** (field/CrUX), and **D** (accessibility — the failing axe audits, since PSI's a11y category *is* axe-core), writing `hobbes/scorecards/<date>/psi-results.md`. Run it standalone only to refresh A–D alone. What it guarantees, so the run-1 mistakes can't recur:
+**`python3 hobbes/tools/psi.py`** — calls the PSI API for each golden-path page × mobile/desktop and fills **A** (category scores), **B** (lab metrics), **C** (field/CrUX), and **D** (accessibility — the failing axe audits, since PSI's a11y category *is* axe-core), writing `hobbes/scorecards/<date>/psi-results.md`. Run it standalone only to refresh A–D alone. What it guarantees:
 
-1. **Field and lab are pulled separately and labelled** — a CrUX field number can never land in a lab row (the failure behind run-1's "Home LCP 1.6 vs 7.5"). **B** is lab only; **C** is field only.
-2. **Field is per page** (CrUX, 28 days — the only trustworthy INP). A page without page-level data is marked `origin agg.` (the whole-site average), never passed off as the page's own; no data at all → INP **unverified**.
+1. **Field and lab are pulled separately and labelled** — a field number never lands in a lab row. **B** is lab only; **C** is field only.
+2. **Field is per page** (CrUX, 28 days — the only trustworthy INP). A page without page-level data is marked `origin agg.` (the whole-site average); no data at all → INP **unverified**.
 3. **Incomplete runs are classified, not lumped.** A ⚠ row never reached network-idle — its early metrics (FCP, CLS, TBT, Speed Index, and the category scores) still stand; only a `✗cut` LCP / Performance score is the cutoff artifact, to be treated as unknown. Re-measuring won't help (local Lighthouse hits the same wall) — investigate why the page never idles.
 4. **Accessibility (D)** rides the same run — failing axe rules with node counts (`color-contrast` = contrast errors, `image-alt` = alt gaps). No separate WAVE/axe scan.
 5. **Agent-reliable** — concurrency capped, calls retried, each success cached (a re-run resumes), one failed call can't kill the run.
@@ -90,7 +83,7 @@ Optional per cycle — the automated baseline (A–F) stands on its own — but 
 
 ## The scorecard
 
-`baseline.py` stamps the scorecard for you: it copies `TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD/baseline.md`, fills the header and golden path from the client metadata in `baseline.py`, and pastes sections **A–F** from the tool artifacts — leaving **G** blank for the human pass. That filled file **is** the baseline. **Layout: one dated folder per cycle** (`hobbes/scorecards/YYYY-MM-DD/`) holding `baseline.md`, the generated `findings.md`, the digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`), `crawl.html`, and the `raw/` artifacts — one cycle in one place, sorting chronologically by folder name. Before you trust the file, confirm the header carries no leftover placeholders.
+`baseline.py` stamps the scorecard for you: it copies `hobbes/templates/TEMPLATE.md` to `hobbes/scorecards/YYYY-MM-DD/baseline.md`, fills the header and golden path from the client metadata in `hobbes.toml`, and pastes sections **A–F** from the tool artifacts — leaving **G** blank for the human pass. That filled file **is** the baseline. **Layout: one dated folder per cycle** (`hobbes/scorecards/YYYY-MM-DD/`) holding `baseline.md`, the generated `findings.md`, the digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`), `crawl.html`, and the `raw/` artifacts — one cycle in one place, sorting chronologically by folder name. Before you trust the file, confirm the header carries no leftover placeholders.
 
 ## Targets — the pass bar (same for every client)
 
@@ -116,9 +109,9 @@ Optional per cycle — the automated baseline (A–F) stands on its own — but 
 ## Deliverables
 
 - `hobbes/scorecards/YYYY-MM-DD/baseline.md` — the scorecard (the numbers). Stamped by `baseline.py`.
-- `hobbes/scorecards/YYYY-MM-DD/findings.md` — the **problem catalog**: *every* failing check with verbatim evidence, dense and deterministic, for an agent. No shortlist, no mission weighting — it enumerates straight from `raw/`, so the same raw always yields the same findings. Generated by `python3 hobbes/tools/findings.py` from `raw/` (contract in `scorecards/FINDINGS-TEMPLATE.md`). It carries the *what / where / how* — not the fix. The fix, effort, and impact (rated against `MISSION.md`) are the plan's job.
+- `hobbes/scorecards/YYYY-MM-DD/findings.md` — the **problem catalog**: *every* failing check with verbatim evidence, dense and deterministic, for an agent. No shortlist, no mission weighting — it enumerates straight from `raw/`, so the same raw always yields the same findings. Generated by `python3 hobbes/tools/findings.py` from `raw/` (contract in `hobbes/templates/FINDINGS-TEMPLATE.md`). It carries the *what / where / how* — not the fix. The fix, effort, and impact (rated against `MISSION.md`) are the plan's job.
 - `hobbes/scorecards/YYYY-MM-DD/plan.md` — the next stage: groups the findings into systems, proposes the coupled fix per system, and rates **effort** and **impact** (against `MISSION.md`). The fix/effort/impact that findings deliberately omits live here.
-- `hobbes/MISSION.md` — priorities updated with each gap, written `baseline → target` so it is testable.
+- `hobbes/context/MISSION.md` — **human-owned, not a cycle deliverable.** It holds the stable `baseline → target` priorities the plan rates impact against; Hobbes reads it, a human edits it when strategy shifts. Closed gaps surface in the scorecard and `diff.md`, never by Hobbes rewriting the mission.
 
 ## Site-type adaptations
 
@@ -146,3 +139,13 @@ If a target genuinely cannot be met (e.g. ad-funded performance), document the e
 - Lighthouse cannot log into gated pages (portals, dashboards, quote flows). Script authenticated runs (Playwright/Puppeteer with a test login) or test manually, and flag them as human-only surfaces.
 - Marketing/CRM scripts (HubSpot, Marketo, Salesforce, chat widgets, analytics) are the usual TBT culprits. Inventory them.
 - SEO structured data is Organization / Product / FAQ; the checklist applies in full.
+
+## Optional tools
+
+Not part of the standard cycle — reach for one only when a specific check calls for it:
+
+- **Google Rich Results Test** (`search.google.com/test/rich-results`) — validate a page's structured data.
+- **Google Search Console** — Google's own search report; free, but needs client-granted access.
+- **Shopify admin → Online Store Speed report + `theme check`** — Shopify's performance score plus a theme-code scan (Shopify clients only).
+- **WebPageTest** (`webpagetest.org`) — a deeper dig into *why* a page is slow.
+- **WAVE** (`wave.webaim.org`) — an optional human a11y spot-check (axe via PSI is the automated scan).

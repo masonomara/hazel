@@ -6,7 +6,7 @@ Golden path: [page 1 url] · [page 2 url] · [page 3 url]
 
 `✓` = pass / present · `✗` = fail / missing · `✗cut` = PSI run truncated before network-idle (value is the cutoff) · blank = human sign-off pending.
 
-Filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E, `crawl.py` → F. Section G (manual a11y) is the human's to sign. The filled file **is** the baseline; compare each cycle to the previous and to the Targets in `hobbes/context/BASELINE.md`.
+Filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E, `crawl.py` → F. Section G (manual a11y) is the human's to sign. The filled file **is** the baseline; compare each cycle to the previous and to the Targets in `hobbes/BASELINE.md`.
 
 ## A. Lighthouse scores
 

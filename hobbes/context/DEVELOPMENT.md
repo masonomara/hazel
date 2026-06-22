@@ -26,4 +26,4 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 - **Don't hand-edit** `config/settings_data.json` (admin-generated), anything under `.shopify/` (gitignored), or Dawn base styles in place — override in the appended Hazel section instead.
 - **Keep the fork upgrade-safe.** Minimize core-theme edits: prefer a self-contained snippet rendered from one insertion point (the embroidery build holds to a single render line) over scattered changes.
 - **Secrets:** none in the repo. App and store credentials live in the Shopify admin and the CLI's own auth — never hard-code tokens, API keys, or app secrets. (The store id in CDN URLs is public and fine.)
-- **Done means:** verified in the browser on mobile + desktop · no new console errors · Theme Check shows no *new* offenses · no regression against the baseline targets (`hobbes/context/BASELINE.md`).
+- **Done means:** verified in the browser on mobile + desktop · no new console errors · Theme Check shows no *new* offenses · no regression against the baseline targets (`hobbes/BASELINE.md`).

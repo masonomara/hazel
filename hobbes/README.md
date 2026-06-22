@@ -61,7 +61,6 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | [`context/DEVELOPMENT.md`](context/DEVELOPMENT.md) | The stack and the build rules — the "done means" gates. |
 | [`context/CONTEXT.md`](context/CONTEXT.md) | The client: goals, users, the people who sign off, where access lives. |
 | [`context/CHANGELOG.md`](context/CHANGELOG.md) | What has shipped, why, and to what result. |
-| [`context/BASELINE.md`](context/BASELINE.md) | The operator's runbook for driving a baseline cycle by hand. |
 
 ### Config — the one source of per-client truth
 | File | Lines | Role |
@@ -100,10 +99,12 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | [`../.github/workflows/hobbes-execute.yml`](../.github/workflows/hobbes-execute.yml) | 55 | dispatch (budget input) | The agent: `claude-code-action` (subscription auth) plans + writes fixes → opens a **fix PR**. |
 | [`../.github/workflows/hobbes-review.yml`](../.github/workflows/hobbes-review.yml) | 84 | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
 
-### Setup — `hobbes/SETUP.md`
+### Operator guides — `hobbes/`
+*(Engine-generic — same across clients; read by the agent and the human operator.)*
 | File | Role |
 |---|---|
 | [`SETUP.md`](SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
+| [`BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 
 ### Cycle data — `hobbes/scorecards/<YYYY-MM-DD>/`
 Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `baseline.md` → `findings.md` → `plan.md` → `execution.md` → `diff.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures, git-ignored), `crawl.html`, and the per-tool digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`). Which files exist tells you which stage the cycle reached (`cli.py status`).

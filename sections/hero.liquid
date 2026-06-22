@@ -95,6 +95,7 @@
             src="{{ block.settings.image | image_url: width: 3840 }}"
             alt="{{ block.settings.heading | default: 'Image description not available' }}"
             aria-labelledby="SlideDescription-{{ forloop.index }}"
+            {% if forloop.first %}fetchpriority="high"{% endif %}
             width="{{ block.settings.image.width }}"
             height="{{ block.settings.image.height }}"
             style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, 0%); width: calc(100%); height: calc(100% - 34px); min-width: calc(100%); min-height: calc(100% - 34px); object-fit: cover;"
@@ -178,6 +179,7 @@
         <img
           src="{{ block.settings.image | image_url: width: 3840 }}"
           alt="{{ block.settings.heading | default: 'Image description not available' }}"
+          {% if forloop.first %}fetchpriority="high"{% endif %}
           width="{{ block.settings.image.width }}"
           height="{{ block.settings.image.height }}"
           style="position: absolute; top: 0%; left: 50%; transform: translate(-50%, 0%); width: calc(100% - 4px); height: calc(100% - 34px); min-width: calc(100% - 4px); min-height: calc(100% - 34px); object-fit: cover;"
@@ -195,16 +197,16 @@
     src="https://cdn.shopify.com/s/files/1/0051/3264/8566/files/script-logo.png?v=1713629.5093"
     alt="Hazel Boutique Logo"
     loading="lazy"
-    width="100%"
-    height="auto"
+    width="4335"
+    height="531"
     class="footerLogo--desktop"
   >
   <img
     src="https://cdn.shopify.com/s/files/1/0051/3264/8566/files/hazel-mobile-logo.png?v=1713629.5093"
     alt="Hazel Boutique Mobile Logo"
     loading="lazy"
-    width="100%"
-    height="auto"
+    width="1053"
+    height="438"
     class="footerLogo--mobile"
   >
 </div>

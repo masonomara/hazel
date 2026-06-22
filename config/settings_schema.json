@@ -1312,6 +1312,16 @@
     "settings": [
       {
         "type": "header",
+        "content": "Social sharing image"
+      },
+      {
+        "type": "image_picker",
+        "id": "share_image",
+        "label": "Default share image",
+        "info": "Used for social link previews (Open Graph / Twitter) on pages without their own image. Falls back to your logo."
+      },
+      {
+        "type": "header",
         "content": "t:settings_schema.social-media.settings.header.content"
       },
       {

@@ -1,6 +1,6 @@
 # Diff — 2026-06-22 vs 2026-06-21
 
-Generated 2026-06-22 18:15 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y rule(s) improved.**
+Generated 2026-06-22 19:17 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y rule(s) improved.**
 
 ## Field data — CrUX, the trustworthy signal (lower = better)
 
@@ -12,21 +12,22 @@ Generated 2026-06-22 18:15 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y 
 
 ## Lab scores — §A, volatile (PSI lab swings ±~10 even at median-of-3; small moves are noise)
 
-▼ Collection — desktop perf: 83 → 65
-▼ Collection — mobile perf: 75 → 51
-▼ Home — desktop perf: 86 → 56
-▼ Home — mobile perf: 65 → 54
-▼ Product — desktop perf: 87 → 70
-▼ Product — mobile perf: 66 → 50
+▼ Collection — desktop perf: 83 → 58
+▼ Collection — mobile perf: 75 → 52
+▼ Home — desktop perf: 86 → 57
+▼ Home — mobile perf: 65 → 41
+▼ Product — desktop perf: 87 → 77
+▼ Product — mobile perf: 66 → 48
 ▲ Collection — desktop bp: 92 → 96
 ▲ Collection — desktop seo: 92 → 100
 ▲ Collection — mobile a11y: 96 → 97
 ▲ Collection — mobile bp: 92 → 96
 ▲ Collection — mobile seo: 92 → 100
+▲ Home — desktop bp: 92 → 96
 ▲ Home — desktop seo: 92 → 100
 ▲ Home — mobile seo: 92 → 100
 ▲ Product — desktop a11y: 92 → 97
-▲ Product — desktop bp: 77 → 96
+▲ Product — desktop bp: 77 → 92
 ▲ Product — desktop seo: 92 → 100
 ▲ Product — mobile a11y: 92 → 97
 ▲ Product — mobile bp: 92 → 96
@@ -49,4 +50,4 @@ Generated 2026-06-22 18:15 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y 
 **Improvements:**
 - Missing meta descriptions: 76 → 0
 - Pages with multiple H1: 2 → 1
-- findings: 39 → 36
+- findings: 39 → 35

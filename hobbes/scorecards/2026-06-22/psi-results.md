@@ -1,4 +1,4 @@
-# PSI results — 2026-06-22 19:14 CDT
+# PSI results — 2026-06-22 22:46 CDT
 
 Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field
 are pulled and labelled SEPARATELY so they can't be mixed. Each page×device
@@ -12,25 +12,25 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile | 41 | 97 | 92 | 100 |
-| Home — desktop | 57 | 97 | 96 | 100 |
-| Collection — mobile | 52 | 97 | 96 | 100 |
-| Collection — desktop | 58 | 97 | 96 | 100 |
-| Product — mobile | 48 | 97 | 96 | 100 |
-| Product — desktop | 77 | 97 | 92 | 100 |
+| Home — mobile | 63 | 97 | 92 | 100 |
+| Home — desktop | 48 | 97 | 96 | 100 |
+| Collection — mobile | 62 | 97 | 96 | 100 |
+| Collection — desktop | 51 | 97 | 92 | 100 |
+| Product — mobile | 70 | 97 | 92 | 100 |
+| Product — desktop | 60 | 97 | 92 | 100 |
 
-> Perf-score spread across 3 runs (median kept): Home — mobile 41/41/60 · Home — desktop 57/57/57 · Collection — mobile 52/52/52 · Collection — desktop 51/58/64 · Product — mobile 45/48/59 · Product — desktop 55/77/77.
+> Perf-score spread across 3 runs (median kept): Home — mobile 63/63/63 · Home — desktop 48/48/48 · Collection — mobile 62/62/62 · Collection — desktop 51/51/51 · Product — mobile 52/70/70 · Product — desktop 60/60/60.
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile | 12.3 | 1.027 | 1.83 | 0.02 | 288 | 4.51 |
-| Home — desktop | 2.38 | 1.008 | 0.51 | 0.01 | 180 | 1.39 |
-| Collection — mobile | 19.92 | 0 | 3.26 | 0.01 | 459 | 6.22 |
-| Collection — desktop | 1.8 | 1.01 | 0.51 | 0.01 | 257 | 1.1 |
-| Product — mobile | 10.35 | 0 | 2.88 | 0.01 | 751 | 5.28 |
-| Product — desktop | 2.13 | 0.205 | 0.5 | 0.01 | 104 | 1.53 |
+| Home — mobile | 12.6 | 0.138 | 1.89 | 0.01 | 150 | 5.11 |
+| Home — desktop | 2.38 | 1.01 | 0.52 | 0.01 | 302 | 1.61 |
+| Collection — mobile | 13.95 | 0.06 | 2.94 | 0.01 | 182 | 5.53 |
+| Collection — desktop | 1.7 | 1.008 | 0.52 | 0.01 | 384 | 1.25 |
+| Product — mobile | 5.55 | 0.123 | 1.83 | 0.01 | 158 | 4.49 |
+| Product — desktop | 1.56 | 1.01 | 0.52 | 0.01 | 247 | 1.29 |
 
 ## C. Field data (CrUX 28-day)
 

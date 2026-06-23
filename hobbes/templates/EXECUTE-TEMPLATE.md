@@ -31,14 +31,22 @@ Write the plan to `execution.md` in the cycle folder. Each task names the system
 
 > When the plan is complete, implement it all. When you finish a task or phase, **mark it completed in `execution.md`**. Do not stop until every task and phase in the batch is done. Do not add unnecessary comments or doc-blocks. Honor the project's type discipline, and continuously run the project's checker so you don't introduce new issues.
 
-**Clear the whole batch — don't quietly ship a subset.** The budget already bounded the work; once selected, every system in the batch gets implemented this run. The *only* allowed deferral is a part that genuinely needs a human — content authored at scale, a paid-app removal decision, a sign-off — and each such deferral must be **named explicitly in `execution.md` and the PR with its reason**. A coherent code change you simply didn't get to is not a deferral; finish it. (Past runs under-delivered by stopping at two systems out of caution — don't.)
+**Clear the whole batch — don't quietly ship a subset.** The budget already bounded the work; once selected, every system in the batch gets implemented this run. A coherent code change you simply didn't get to is not a deferral; finish it. (Past runs under-delivered by stopping at two systems out of caution — don't.)
+
+**Author what you can; defer only what you genuinely can't — three buckets, not two:**
+
+1. **Ship it.** Self-contained code you can both write *and* reason about from the source — write it.
+2. **Author it, flag it for review.** Code you can write from the source but **can't verify without a browser** (a layout/CSS tweak, a DOM-affecting change, an a11y attribute whose effect needs axe). Do **not** defer these — the review gate *is* where browser verification happens. Author the best-effort fix and flag it in `execution.md` and the PR as **"needs browser confirmation at review,"** naming exactly what to check (e.g. "confirm 0 `label-content-name-mismatch` on Home mobile; confirm the hero doesn't shift"). Lean toward authoring — a flagged best-effort fix a human verifies beats a finding that sits untouched for cycles.
+3. **Hand to a human.** Genuinely not authorable in a GitHub-only, no-browser run: content at scale (copy, image re-exports, per-product alt), app-config / paid-app decisions, platform-bound items with no theme mechanism, sign-offs, and code that needs the **rendered DOM to even know what to change** (not just to verify it) or carries real regression risk authored blind (e.g. pulling `base.css` off the critical path). Name each in `execution.md` and the PR with its reason **and its owner**.
+
+The test between bucket 2 and bucket 3: *can you write a correct, self-contained change from the source alone?* If yes → author it and flag for verification (2). If you'd be guessing at what to change without seeing the rendered page → hand it off (3). When in doubt, prefer 2 over 3.
 
 ## Quality gates — from `DEVELOPMENT.md`, not hardcoded
 
 The "done means" bar belongs to the stack, and it lives in `DEVELOPMENT.md` — read it. The gate is **"no *new* offenses from this change,"** not "zero offenses" — a real repo carries pre-existing ones (this theme already has a Theme Check error in `icon-shop-pay.liquid`), so a zero-offense gate would block every PR forever. Diff the checker output against the base, not against zero. For this theme (Liquid + vanilla JS, Dawn fork, **no build toolchain, no TypeScript**):
 
 - **Run `shopify theme check` continuously** — the theme's checker (the role "typecheck" plays elsewhere). The bar is **no new offenses in the files you touched**; pre-existing ones elsewhere are out of scope.
-- **Browser-verify every change on mobile + desktop.** No new console errors.
+- **Browser verification is the human's, at review** — the agent can't run a browser in CI. It authors against the source; the mobile + desktop check and "no new console errors" happen at review, and every bucket-2 change is flagged for exactly that.
 - **Keep the fork upgrade-safe** — self-contained snippets, Hazel overrides in the appended `base.css` section, minimal Dawn-core edits. Do not hand-edit `settings_data.json`.
 - **No regression** against the `baseline.md` targets.
 - **No unnecessary comments**; match the surrounding file's style.
@@ -51,7 +59,12 @@ When the batch is implemented and the gates pass: **stop.** Do not merge, and do
 
 - **Before** — for every finding the batch closes, its *current measured value* pulled from this cycle's `baseline.md` / `findings.md` (e.g. "a11y 88 mobile", "73 pages missing meta description"), plus the target it should hit. This is the pre-fix state, captured before the PR opens.
 - **After (measured) comes post-publish, by necessity.** PSI and the crawl only measure the **live** site, and the fix isn't live until a human publishes — so the true after is not knowable at PR time. It lands in the **next cycle's `diff.md`** once the change is live; link that diff back to this PR to close the loop. Do not fabricate an after from local guesses or unpublished previews.
-- **What shipped / verified / human-owned** — the systems implemented, what was browser-verified, and every explicit deferral (content at scale, an app-removal decision, sign-off).
+- **What shipped** — the systems implemented this run, each naming the finding/system IDs it closes.
+- **Human to-do — the actions only a person can take, as a checkbox list grouped by owner.** Execution writes only code; everything else the cycle surfaced lands here so the PR is a complete handoff, not a code drop with the rest lost. Write each as `- [ ]` so it can be ticked off, and give each item *the action · the owner · the finding/system it closes*. Always cover:
+  - **Publish** (every PR, owner: Mason) — merge → push to a dev theme → verify mobile + desktop → publish live → add the `published` label. (Steps in `PUBLISH-TEMPLATE.md`.)
+  - **Browser-confirm** (Mason, at review) — every **bucket-2** change authored-but-unverified, with exactly what to check.
+  - **Content** (Jenna / Britni) — the specific copy to write, images to re-export, alt to author, admin settings to change.
+  - **App / platform** (Brenda / Jenna / Mason) — app-config changes, paid-app decisions, and platform-bound items (e.g. a Shopify-support request).
 
 That open PR **is** the handoff to `publish` — execution is done. The cycle closes only after publish takes it live and the next baseline confirms the after.
 

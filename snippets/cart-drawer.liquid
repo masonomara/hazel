@@ -106,7 +106,8 @@
                 {% render 'card-collection',
                   card_collection: settings.cart_drawer_collection,
                   placeholder_image: settings.cart_drawer_collection_image,
-                  columns: 1
+                  columns: 1,
+                  card_heading_tag: 'div'
                 %}
               </div>
               {%- if settings.cart_drawer_collection_two != blank -%}
@@ -114,7 +115,8 @@
                   {% render 'card-collection',
                     card_collection: settings.cart_drawer_collection_two,
                     placeholder_image: settings.cart_drawer_collection_image_two,
-                    columns: 1
+                    columns: 1,
+                    card_heading_tag: 'div'
                   %}
                 </div>
               {% endif %}

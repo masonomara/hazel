@@ -25,6 +25,7 @@
   endif
   assign card_color_scheme = settings.card_color_scheme
   assign card_style = settings.card_style
+  assign card_heading_tag = card_heading_tag | default: 'h3'
   if wrapper_class == null or wrapper_class == 'none'
     assign card_color_scheme = settings.collection_card_color_scheme
     assign card_style = settings.collection_card_style
@@ -108,7 +109,7 @@
 
       <div class="card__content">
         <div class="card__information">
-          <h3 class="card__heading">
+          <{{ card_heading_tag }} class="card__heading">
             {%- if card_collection.title != blank -%}
               {{- card_collection.title | escape -}}
             {%- else -%}
@@ -117,7 +118,7 @@
             {%- if card_collection.description == blank -%}
               <span class="icon-wrap">{% render 'icon-arrow' %}</span>
             {%- endif %}
-          </h3>
+          </{{ card_heading_tag }}>
 
           {%- if card_collection.description != blank -%}
             <p class="card__caption">
@@ -131,7 +132,7 @@
     {%- if card_collection != blank and card_style == 'card' or card_collection.featured_image -%}
       <div class="card__content">
         <div class="card__information">
-          <h3 class="card__heading">
+          <{{ card_heading_tag }} class="card__heading">
             <div
               class="full-unstyled-link"
             >
@@ -144,7 +145,7 @@
                 <span class="icon-wrap">{% render 'icon-arrow' %}</span>
               {%- endif %}
             </div>
-          </h3>
+          </{{ card_heading_tag }}>
           <div
             class="banner__buttons{% if block.settings.button_label_1 != blank and block.settings.button_label_2 != blank %} banner__buttons--multiple{% endif %}"
             {{ block.shopify_attributes }}
@@ -186,12 +187,12 @@
     {%- if card_collection == blank -%}
       <div class="card__content">
         <div class="card__information">
-          <h3 class="card__heading card__heading--placeholder">
+          <{{ card_heading_tag }} class="card__heading card__heading--placeholder">
             <a role="link" aria-disabled="true" class="full-unstyled-link">
               {{ 'onboarding.collection_title' | t }}
               <span class="icon-wrap">{% render 'icon-arrow' %}</span>
             </a>
-          </h3>
+          </{{ card_heading_tag }}>
         </div>
       </div>
     {%- endif -%}

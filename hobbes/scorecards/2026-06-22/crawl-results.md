@@ -1,4 +1,4 @@
-# Crawl results — 2026-06-22 19:17 CDT
+# Crawl results — 2026-06-22 22:49 CDT
 
 Captured by `hobbes/tools/crawl.py` (SiteOne, sitemap-driven whole-site crawl).
 The Section F block below feeds the scorecard; the detail feeds **findings**.
@@ -13,7 +13,7 @@ Site: https://hazelboutique.com/
 | Performance | 10.0 |
 | SEO | 9.8 |
 | Security | 6.5 |
-| Accessibility | 5.0 |
+| Accessibility | 6.0 |
 | Best practices | 4.6 |
 
 | SEO / structure | Count | Pass |
@@ -24,7 +24,7 @@ Site: https://hazelboutique.com/
 | Duplicate titles | 4 | ✗ |
 | Missing meta descriptions | 0 | ✓ |
 | Pages with multiple H1 | 1 | ✗ |
-| Pages with skipped heading levels | 185 | ✗ |
+| Pages with skipped heading levels | 2 | ✗ |
 
 | Accessibility | Count | Pass |
 |---|---|---|
@@ -61,13 +61,13 @@ Site: https://hazelboutique.com/
 - (none)
 
 ### Duplicate titles
-- "New Arrivals
+- "Under $50
  – Hazel Boutique" ×2
 - "Tops
  – Hazel Boutique" ×2
-- "Dresses
+- "New Arrivals
  – Hazel Boutique" ×2
-- "Under $50
+- "Dresses
  – Hazel Boutique" ×2
 
 ### Missing meta descriptions

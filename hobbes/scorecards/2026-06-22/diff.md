@@ -1,6 +1,6 @@
 # Diff — 2026-06-22 vs 2026-06-21
 
-Generated 2026-06-22 19:17 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y rule(s) improved.**
+Generated 2026-06-22 22:49 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y rule(s) improved.**
 
 ## Field data — CrUX, the trustworthy signal (lower = better)
 
@@ -12,13 +12,11 @@ Generated 2026-06-22 19:17 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y 
 
 ## Lab scores — §A, volatile (PSI lab swings ±~10 even at median-of-3; small moves are noise)
 
-▼ Collection — desktop perf: 83 → 58
-▼ Collection — mobile perf: 75 → 52
-▼ Home — desktop perf: 86 → 57
-▼ Home — mobile perf: 65 → 41
-▼ Product — desktop perf: 87 → 77
-▼ Product — mobile perf: 66 → 48
-▲ Collection — desktop bp: 92 → 96
+▼ Collection — desktop perf: 83 → 51
+▼ Collection — mobile perf: 75 → 62
+▼ Home — desktop perf: 86 → 48
+▼ Home — mobile perf: 65 → 63
+▼ Product — desktop perf: 87 → 60
 ▲ Collection — desktop seo: 92 → 100
 ▲ Collection — mobile a11y: 96 → 97
 ▲ Collection — mobile bp: 92 → 96
@@ -30,7 +28,7 @@ Generated 2026-06-22 19:17 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y 
 ▲ Product — desktop bp: 77 → 92
 ▲ Product — desktop seo: 92 → 100
 ▲ Product — mobile a11y: 92 → 97
-▲ Product — mobile bp: 92 → 96
+▲ Product — mobile perf: 66 → 70
 ▲ Product — mobile seo: 92 → 100
 
 ## Accessibility — §D axe findings (failing nodes on the golden path, lower = better)
@@ -50,4 +48,5 @@ Generated 2026-06-22 19:17 CDT. **0 field regression(s) vs 2026-06-21 · 2 a11y 
 **Improvements:**
 - Missing meta descriptions: 76 → 0
 - Pages with multiple H1: 2 → 1
+- Pages with skipped heading levels: 185 → 2
 - findings: 39 → 35

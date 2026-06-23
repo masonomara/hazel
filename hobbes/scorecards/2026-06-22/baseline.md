@@ -10,25 +10,25 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile | 41 | 97 | 92 | 100 |
-| Home — desktop | 57 | 97 | 96 | 100 |
-| Collection — mobile | 52 | 97 | 96 | 100 |
-| Collection — desktop | 58 | 97 | 96 | 100 |
-| Product — mobile | 48 | 97 | 96 | 100 |
-| Product — desktop | 77 | 97 | 92 | 100 |
+| Home — mobile | 52 | 97 | 96 | 100 |
+| Home — desktop | 49 | 97 | 96 | 100 |
+| Collection — mobile | 43 | 97 | 96 | 100 |
+| Collection — desktop | 61 | 97 | 96 | 100 |
+| Product — mobile | 48 | 97 | 92 | 100 |
+| Product — desktop | 67 | 97 | 96 | 100 |
 
-> Perf-score spread across 3 runs (median kept): Home — mobile 41/41/60 · Home — desktop 57/57/57 · Collection — mobile 52/52/52 · Collection — desktop 51/58/64 · Product — mobile 45/48/59 · Product — desktop 55/77/77.
+> Perf-score spread across 3 runs (median kept): Home — mobile 52/52/52 · Home — desktop 49/49/49 · Collection — mobile 43/43/43 · Collection — desktop 55/61/65 · Product — mobile 42/48/48 · Product — desktop 65/67/67.
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile | 12.3 | 1.027 | 1.83 | 0.02 | 288 | 4.51 |
-| Home — desktop | 2.38 | 1.008 | 0.51 | 0.01 | 180 | 1.39 |
-| Collection — mobile | 19.92 | 0 | 3.26 | 0.01 | 459 | 6.22 |
-| Collection — desktop | 1.8 | 1.01 | 0.51 | 0.01 | 257 | 1.1 |
-| Product — mobile | 10.35 | 0 | 2.88 | 0.01 | 751 | 5.28 |
-| Product — desktop | 2.13 | 0.205 | 0.5 | 0.01 | 104 | 1.53 |
+| Home — mobile | 23.17 | 0 | 5.94 | 0.01 | 269 | 8.93 |
+| Home — desktop | 2.07 | 1.008 | 0.52 | 0.01 | 352 | 1.39 |
+| Collection — mobile | 5.48 | 0.988 | 1.91 | 0.01 | 408 | 3.74 |
+| Collection — desktop | 1.22 | 0.206 | 0.52 | 0.01 | 671 | 1.44 |
+| Product — mobile | 19.05 | 0 | 5.64 | 0.01 | 419 | 7.63 |
+| Product — desktop | 1.46 | 1.01 | 0.52 | 0.01 | 148 | 1.29 |
 
 ## C. Field data (CrUX 28-day)
 
@@ -74,7 +74,7 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | Performance | 10.0 |
 | SEO | 9.8 |
 | Security | 6.5 |
-| Accessibility | 5.0 |
+| Accessibility | 5.8 |
 | Best practices | 4.6 |
 
 | SEO / structure | Count | Pass |
@@ -85,7 +85,7 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | Duplicate titles | 4 | ✗ |
 | Missing meta descriptions | 0 | ✓ |
 | Pages with multiple H1 | 1 | ✗ |
-| Pages with skipped heading levels | 185 | ✗ |
+| Pages with skipped heading levels | 4 | ✗ |
 
 | Accessibility | Count | Pass |
 |---|---|---|

@@ -1,8 +1,8 @@
 # Findings — 2026-06-22
 
-Site: https://hazelboutique.com/ · Generated 2026-06-22 18:15 CDT by `hobbes/tools/findings.py` from `raw/`.
+Site: https://hazelboutique.com/ · Generated 2026-06-22 19:17 CDT by `hobbes/tools/findings.py` from `raw/`.
 
-The problem catalog — dense, deterministic, agent-facing. 36 findings. Every failing check is enumerated straight from `raw/` — no shortlist, no mission weighting, no hand-picking; same raw always yields the same findings. Where a list is long it is capped with an explicit `+N more`, never silently trimmed. Numbers and scorecard in `baseline.md`; the fix, effort, and impact are the **plan's** job, not this file's. See `hobbes/templates/FINDINGS-TEMPLATE.md`.
+The problem catalog — dense, deterministic, agent-facing. 35 findings. Every failing check is enumerated straight from `raw/` — no shortlist, no mission weighting, no hand-picking; same raw always yields the same findings. Where a list is long it is capped with an explicit `+N more`, never silently trimmed. Numbers and scorecard in `baseline.md`; the fix, effort, and impact are the **plan's** job, not this file's. See `hobbes/templates/FINDINGS-TEMPLATE.md`.
 
 ## A11Y — Accessibility
 
@@ -28,7 +28,7 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
   - `div#PopupSignupForm_0 > div.mc-banner > div.mc-layout__bannerContent > iframe`
   -   ↳ <iframe src="about:blank" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="width: 100%; height: 1…
   - `div#PopupSignupForm_0 > div.mc-modal > div.mc-layout__modalContent > iframe`
-  -   ↳ <iframe src="about:blank" frameborder="0" marginwidth="0" marginheight="0" style="width: 100%; height: 379px;" data-doj…
+  -   ↳ <iframe src="about:blank" frameborder="0" marginwidth="0" marginheight="0" style="width: 100%; height: 355px;" data-doj…
 
 ### A11Y-3 · Sitewide a11y prevalence
 - **What / why:** How widespread the a11y gaps are across the whole site — element-level counts. SiteOne's per-analysis totals over every crawled page: real element counts, not the blunt one-flag-per-page rollup. The PSI rules above are authoritative for the golden path; this shows the scale beyond it.
@@ -38,8 +38,8 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Evidence:**
   - HTML structural issues: 0 critical, 1756 warning
   - Missing image alt attributes: 0 critical, 3 warning
-  - Unnamed links/buttons: 0 critical, 1 warning
   - Missing form labels: 0 critical, 1 warning
+  - Unnamed links/buttons: 0 critical, 1 warning
 
 ## SEO — SEO & discoverability
 
@@ -86,10 +86,10 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Source:** SiteOne crawl · non-unique-titles
 - **Target → measured:** 0 duplicate titles (BASELINE §F) → 4 duplicated title(s)
 - **Evidence:**
-  - "Dresses – Hazel Boutique" ×2
   - "New Arrivals – Hazel Boutique" ×2
-  - "Under $50 – Hazel Boutique" ×2
   - "Tops – Hazel Boutique" ×2
+  - "Dresses – Hazel Boutique" ×2
+  - "Under $50 – Hazel Boutique" ×2
 
 ### SEO-4 · Duplicate meta descriptions
 - **What / why:** Two or more pages share an identical meta description. Duplicate descriptions blur how pages differ in search and weaken each snippet; templated descriptions repeated across products/collections are the usual cause. (Empty descriptions are counted in the missing-description finding above, not here.)
@@ -97,45 +97,45 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Target → measured:** 0 duplicate descriptions (BASELINE §F) → 9 duplicated description(s)
 - **Evidence:**
   - "Hazel Boutique" ×5
-  - "Fill (oz): 18 Fill (g/ml): 510 Natural Wick(s): 1 Vegan Imperial Dime…" ×4
   - "Evi11 Twin Vintage One of A Kind Pre- Loved ( may have minor rips / s…" ×4
-  - "EVI11 TWIN VINTAGE ONE OF A KIND PRE- LOVED ( MAY HAVE MINOR RIPS / S…" ×2
+  - "Fill (oz): 18 Fill (g/ml): 510 Natural Wick(s): 1 Vegan Imperial Dime…" ×4
+  - "Shop Dresses at Hazel Boutique." ×2
+  - "14k Gold Bracelet Hazel Bracelet Each Bracelet Sold Separately" ×2
   - "Shop Under $50 at Hazel Boutique." ×2
   - "Shop New Arrivals at Hazel Boutique." ×2
   - "Shop Tops at Hazel Boutique." ×2
-  - "14k Gold Bracelet Hazel Bracelet Each Bracelet Sold Separately" ×2
-  - "Shop Dresses at Hazel Boutique." ×2
+  - "EVI11 TWIN VINTAGE ONE OF A KIND PRE- LOVED ( MAY HAVE MINOR RIPS / S…" ×2
 
 ## PERF — Performance
 
 ### PERF-1 · Lab performance below target
 - **What / why:** Lighthouse Performance score and the lab metrics behind it, per page × device. PSI's mobile run is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so mobile scores run far below desktop and a heavy page can be cut before network-idle (LCP marked ✗cut — treat that LCP as unknown, not as the failure). Cross-check the real-user verdict in baseline.md §C: CrUX may already pass even where lab fails. The pass bar is still lab ≥ 90.
 - **Source:** PSI Lighthouse · performance
-- **Target → measured:** Performance ≥ 90, mobile + desktop (BASELINE Targets) → score range 50–70 across runs (see §A)
+- **Target → measured:** Performance ≥ 90, mobile + desktop (BASELINE Targets) → score range 41–77 across runs (see §A)
 - **Scope:** golden path: all golden pages × device
 - **Evidence:**
-  - Home — mobile: perf 54 · LCP 23.48s · TBT 192.0ms · SI 9.3s · CLS 0.0
-  - Home — desktop: perf 56 · LCP 2.34s · TBT 193.0ms · SI 1.45s · CLS 1.01
-  - Collection — mobile: perf 51 · LCP 5.55s · TBT 164.0ms · SI 3.12s · CLS 0.984
-  - Collection — desktop: perf 65 · LCP 1.51s · TBT 443.0ms · SI 1.33s · CLS 0.203
-  - Product — mobile: perf 50 · LCP 19.78s · TBT 323.0ms · SI 8.01s · CLS 0.0
-  - Product — desktop: perf 70 · LCP 1.67s · TBT 300.0ms · SI 1.45s · CLS 0.205
+  - Home — mobile: perf 41 · LCP 12.3s · TBT 288.0ms · SI 4.51s · CLS 1.027
+  - Home — desktop: perf 57 · LCP 2.38s · TBT 180.0ms · SI 1.39s · CLS 1.008
+  - Collection — mobile: perf 52 · LCP 19.92s · TBT 459.0ms · SI 6.22s · CLS 0.0
+  - Collection — desktop: perf 58 · LCP 1.8s · TBT 257.0ms · SI 1.1s · CLS 1.01
+  - Product — mobile: perf 48 · LCP 10.35s · TBT 751.0ms · SI 5.28s · CLS 0.0
+  - Product — desktop: perf 77 · LCP 2.13s · TBT 104.0ms · SI 1.53s · CLS 0.205
 
 ### PERF-2 · Improve image delivery
 - **What / why:** Reducing the download time of images can improve the perceived load time of the page and LCP. Learn more about optimizing image size
 - **Source:** PSI Lighthouse · performance · `image-delivery-insight` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 2285 KB across 48 resource(s)
+- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 2363 KB across 47 resource(s)
 - **Scope:** golden path: golden pages, mobile
 - **Evidence:**
-  - A5F28067-4796-4A74-B37E-B7A62E82074C.jpg?v=1780627508&width… · 375 KB
-  - DEDBDABF-D6B8-4640-86AD-813F871F8085.jpg?v=1780627416&width… · 275 KB
-  - 0C044970-DB33-4536-AA9C-D5B7E2C56231.jpg?v=1780627508&width… · 251 KB
-  - image_87259bf7-e93b-44ef-a04c-888aa23b10da.heic?v=171164249… · 141 KB
-  - image_e23ddca7-2070-4190-a17b-75160e36c99e.heic?v=171164249… · 114 KB
+  - A5F28067-4796-4A74-B37E-B7A62E82074C.jpg?v=1780627508&width… · 350 KB
+  - DEDBDABF-D6B8-4640-86AD-813F871F8085.jpg?v=1780627416&width… · 257 KB
+  - 0C044970-DB33-4536-AA9C-D5B7E2C56231.jpg?v=1780627508&width… · 234 KB
+  - script-logo.png?v=1713629.5093 · 82 KB
+  - image_87259bf7-e93b-44ef-a04c-888aa23b10da.heic?v=171164249… · 78 KB
+  - 8E51D4A2-B7CC-49AF-8275-DB0CA3823575.jpg?v=1780627667&width… · 65 KB
   - B63E7E4D-8A47-4FF8-A0EB-50A2E2099CA7.jpg?v=1781808485&width… · 58 KB
   - A0A8C32C-CEAC-4D84-B603-3C7749016C49.jpg?v=1781235184&width… · 56 KB
-  - 639CDF20-2DC2-4050-984B-8D3C37151A52.jpg?v=1781808485&width… · 52 KB
-  - (+40 more — see raw/*.psi.json)
+  - (+39 more — see raw/*.psi.json)
 
 ### PERF-3 · Use efficient cache lifetimes
 - **What / why:** A long cache lifetime can speed up repeat visits to your page. Learn more about caching.
@@ -153,7 +153,23 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
   - da-restock.js?shop=hazelboutiquenj.myshopify.com · 23 KB
   - (+15 more — see raw/*.psi.json)
 
-### PERF-4 · Avoid enormous network payloads
+### PERF-4 · Reduce JavaScript execution time
+- **What / why:** Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. Learn how to reduce Javascript execution time.
+- **Source:** PSI Lighthouse · performance · `bootup-time` (mobile runs)
+- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 6835 ms across 22 resource(s)
+- **Scope:** golden path: golden pages, mobile
+- **Evidence:**
+  - the-capri-collection-baby-pink · 913 ms
+  - all-hazel-brand · 900 ms
+  - Unattributable · 782 ms
+  - / · 703 ms
+  - shopify.widget.js?shop=hazelboutiquenj.myshopify.com · 699 ms
+  - embed.js · 446 ms
+  - loader.js · 351 ms
+  - b48f264e1w8fb36573pab670d30m380d3b3cm.js · 304 ms
+  - (+14 more — see raw/*.psi.json)
+
+### PERF-5 · Avoid enormous network payloads
 - **What / why:** Large network payloads cost users real money and are highly correlated with long load times. Learn how to reduce payload sizes.
 - **Source:** PSI Lighthouse · performance · `total-byte-weight` (mobile runs)
 - **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 3408 KB across 15 resource(s)
@@ -168,22 +184,6 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
   - image_87259bf7-e93b-44ef-a04c-888aa23b10da.heic?v=171164249… · 183 KB
   - image_e23ddca7-2070-4190-a17b-75160e36c99e.heic?v=171164249… · 156 KB
   - (+7 more — see raw/*.psi.json)
-
-### PERF-5 · Reduce JavaScript execution time
-- **What / why:** Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. Learn how to reduce Javascript execution time.
-- **Source:** PSI Lighthouse · performance · `bootup-time` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 2612 ms across 13 resource(s)
-- **Scope:** golden path: golden pages, mobile
-- **Evidence:**
-  - shopify.widget.js?shop=hazelboutiquenj.myshopify.com · 552 ms
-  - the-capri-collection-baby-pink · 419 ms
-  - Unattributable · 418 ms
-  - faro-web-sdk.iife.js · 198 ms
-  - loader.js · 186 ms
-  - da-restock.js?shop=hazelboutiquenj.myshopify.com · 151 ms
-  - embed.js · 148 ms
-  - b48f264e1w8fb36573pab670d30m380d3b3cm.js · 146 ms
-  - (+5 more — see raw/*.psi.json)
 
 ### PERF-6 · Reduce unused JavaScript
 - **What / why:** Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. Learn how to reduce unused JavaScript.
@@ -201,32 +201,34 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
   - popup.js · 29 KB
   - (+2 more — see raw/*.psi.json)
 
-### PERF-7 · Minimize main-thread work
+### PERF-7 · Forced reflow
+- **What / why:** A forced reflow occurs when JavaScript queries geometric properties (such as offsetWidth) after styles have been invalidated by a change to the DOM state. This can result in poor performance. Learn more about forced reflows and possible mitigations.
+- **Source:** PSI Lighthouse · performance · `forced-reflow-insight` (mobile runs)
+- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 427 ms across 8 resource(s)
+- **Scope:** golden path: golden pages, mobile
+- **Evidence:**
+  - all-hazel-brand · 104 ms
+  - b48f264e1w8fb36573pab670d30m380d3b3cm.js · 104 ms
+  - the-capri-collection-baby-pink · 94 ms
+  - shopify-perf-kit-3.5.2.min.js · 65 ms
+  - scripts.js?v=93736053516032179081771610579 · 45 ms
+  - embed.js · 7 ms
+  - global.js?v=11113922878925400371771610528 · 6 ms
+  - / · 1 ms
+
+### PERF-8 · Minimize main-thread work
 - **What / why:** Consider reducing the time spent parsing, compiling and executing JS. You may find delivering smaller JS payloads helps with this. Learn how to minimize main-thread work
 - **Source:** PSI Lighthouse · performance · `mainthread-work-breakdown` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 3216 ms across 7 resource(s)
+- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 5453 ms across 7 resource(s)
 - **Scope:** golden path: golden pages, mobile
 - **Evidence:**
-  - Script Evaluation · 1504 ms
-  - Script Parsing & Compilation · 522 ms
-  - Other · 507 ms
-  - Style & Layout · 362 ms
-  - Garbage Collection · 205 ms
-  - Parse HTML & CSS · 60 ms
-  - Rendering · 57 ms
-
-### PERF-8 · Layout shift culprits
-- **What / why:** Layout shifts occur when elements move absent any user interaction. Investigate the causes of layout shifts, such as elements being added, removed, or their fonts changing as the page loads.
-- **Source:** PSI Lighthouse · performance · `cls-culprits-insight` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → flagged on 2 page(s)
-- **Scope:** golden path: golden pages, mobile
-- **Evidence:**
-  - COLLECTION: COLLECTION: ALL HAZEL BRAND FILTER AND SORT THE HZL LEILANI CREWNEC…
-  - Country Code
-  - Get exclusive updates and offers!
-  - HAZEL POLICIES
-  - Intuit Mailchimp logo
-  - body
+  - Script Evaluation · 2568 ms
+  - Other · 867 ms
+  - Style & Layout · 775 ms
+  - Script Parsing & Compilation · 739 ms
+  - Garbage Collection · 274 ms
+  - Parse HTML & CSS · 123 ms
+  - Rendering · 106 ms
 
 ### PERF-9 · Reduce unused CSS
 - **What / why:** Reduce unused rules from stylesheets and defer CSS not used for above-the-fold content to decrease bytes consumed by network activity. Learn how to reduce unused CSS.
@@ -246,21 +248,21 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 28 KB across 4 resource(s)
 - **Scope:** golden path: golden pages, mobile
 - **Evidence:**
-  - base.css?v=38272640574550089181782154911 · 20 KB · 1473 ms
-  - accelerated-checkout-backwards-compat.css · 3 KB · 492 ms
-  - component-slider.css?v=76902739753078838911779286626 · 3 KB · 165 ms
-  - component-slideshow.css?v=128144104580933199301771610528 · 2 KB · 492 ms
+  - base.css?v=38272640574550089181782154911 · 20 KB · 1201 ms
+  - accelerated-checkout-backwards-compat.css · 3 KB · 451 ms
+  - component-slider.css?v=76902739753078838911779286626 · 3 KB · 151 ms
+  - component-slideshow.css?v=128144104580933199301771610528 · 2 KB · 451 ms
 
-### PERF-11 · LCP breakdown
-- **What / why:** Each subpart has specific improvement strategies. Ideally, most of the LCP time should be spent on loading the resources, not within delays.
-- **Source:** PSI Lighthouse · performance · `lcp-breakdown-insight` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 2505 ms across 4 resource(s)
+### PERF-11 · Layout shift culprits
+- **What / why:** Layout shifts occur when elements move absent any user interaction. Investigate the causes of layout shifts, such as elements being added, removed, or their fonts changing as the page loads.
+- **Source:** PSI Lighthouse · performance · `cls-culprits-insight` (mobile runs)
+- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → flagged on 1 page(s)
 - **Scope:** golden path: golden pages, mobile
 - **Evidence:**
-  - Element render delay · 2072 ms
-  - Resource load delay · 362 ms
-  - Resource load duration · 62 ms
-  - Time to first byte · 9 ms
+  - 01 SHOP HZL NEW 02 03 NEW ARRIVALS VIEW MORE THE HZL LEILANI CREWNECK REGULAR…
+  - Get exclusive updates and offers!
+  - HAZEL POLICIES
+  - Hazel Boutique Mobile Logo
 
 ### PERF-12 · Legacy JavaScript
 - **What / why:** Polyfills and transforms enable older browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile Baseline features, unless you know you must support older browsers. Learn why most sites can deploy ES6+ code without transpiling
@@ -272,14 +274,15 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
   - shopify.widget.js?shop=hazelboutiquenj.myshopify.com · 7 KB
   - portable-wallets.en.js · 6 KB
 
-### PERF-13 · Image elements do not have explicit `width` and `height`
-- **What / why:** Set an explicit width and height on image elements to reduce layout shifts and improve CLS. Learn how to set image dimensions
-- **Source:** PSI Lighthouse · performance · `unsized-images` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → flagged on 2 page(s)
+### PERF-13 · Avoid large layout shifts
+- **What / why:** These are the largest layout shifts observed on the page. Each table item represents a single layout shift, and shows the element that shifted the most. Below each item are possible root causes that led to the layout shift. Some of these layout shifts may not be included in the CLS metric value due to windowing. Learn how to improve CLS
+- **Source:** PSI Lighthouse · performance · `layout-shifts` (mobile runs)
+- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 4 layout shifts found
 - **Scope:** golden path: golden pages, mobile
 - **Evidence:**
-  - Hazel Boutique
-  - hazel-mobile-logo.png?v=1713641093&width=760
+  - 01 SHOP HZL NEW 02 03 NEW ARRIVALS VIEW MORE THE HZL LEILANI CREWNECK REGULAR…
+  - HAZEL POLICIES
+  - Hazel Boutique Mobile Logo
 
 ### PERF-14 · Duplicated JavaScript
 - **What / why:** Remove large, duplicate JavaScript modules from bundles to reduce unnecessary bytes consumed by network activity.
@@ -290,25 +293,7 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
   - /cdn/shop/t/51/assets/quick-add.js?v=131073536309624707681771610528 · 2 KB
   - /cdn/shop/t/51/assets/product-form.js?v=3603548357138963301771610529 · 2 KB
 
-### PERF-15 · Forced reflow
-- **What / why:** A forced reflow occurs when JavaScript queries geometric properties (such as offsetWidth) after styles have been invalidated by a change to the DOM state. This can result in poor performance. Learn more about forced reflows and possible mitigations.
-- **Source:** PSI Lighthouse · performance · `forced-reflow-insight` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 125 ms across 2 resource(s)
-- **Scope:** golden path: golden pages, mobile
-- **Evidence:**
-  - / · 63 ms
-  - b48f264e1w8fb36573pab670d30m380d3b3cm.js · 63 ms
-
-### PERF-16 · Avoid large layout shifts
-- **What / why:** These are the largest layout shifts observed on the page. Each table item represents a single layout shift, and shows the element that shifted the most. Below each item are possible root causes that led to the layout shift. Some of these layout shifts may not be included in the CLS metric value due to windowing. Learn how to improve CLS
-- **Source:** PSI Lighthouse · performance · `layout-shifts` (mobile runs)
-- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 6 layout shifts found
-- **Scope:** golden path: golden pages, mobile
-- **Evidence:**
-  - COLLECTION: COLLECTION: ALL HAZEL BRAND FILTER AND SORT THE HZL LEILANI CREWNEC…
-  - HAZEL POLICIES
-
-### PERF-17 · Minify CSS
+### PERF-15 · Minify CSS
 - **What / why:** Minifying CSS files can reduce network payload sizes. Learn how to minify CSS.
 - **Source:** PSI Lighthouse · performance · `unminified-css` (mobile runs)
 - **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 6 KB across 1 resource(s)
@@ -316,7 +301,7 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Evidence:**
   - @font-face{font-family:RM Neue; … } … · 6 KB
 
-### PERF-18 · Minify JavaScript
+### PERF-16 · Minify JavaScript
 - **What / why:** Minifying JavaScript files can reduce payload sizes and script parse time. Learn how to minify JavaScript.
 - **Source:** PSI Lighthouse · performance · `unminified-javascript` (mobile runs)
 - **Target → measured:** Performance ≥ 90 (BASELINE Targets) → 3 KB across 1 resource(s)
@@ -324,7 +309,7 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Evidence:**
   - d9aa649c0e2ad063e057bdd8c.js?shop=hazelboutiquenj.myshopify… · 3 KB
 
-### PERF-19 · LCP request discovery
+### PERF-17 · LCP request discovery
 - **What / why:** Optimize LCP by making the LCP image discoverable from the HTML immediately, and avoiding lazy-loading
 - **Source:** PSI Lighthouse · performance · `lcp-discovery-insight` (mobile runs)
 - **Target → measured:** Performance ≥ 90 (BASELINE Targets) → flagged on 1 page(s)
@@ -332,7 +317,15 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Evidence:**
   - fetchpriority=high should be applied
 
-### PERF-20 · Network dependency tree
+### PERF-18 · Image elements do not have explicit `width` and `height`
+- **What / why:** Set an explicit width and height on image elements to reduce layout shifts and improve CLS. Learn how to set image dimensions
+- **Source:** PSI Lighthouse · performance · `unsized-images` (mobile runs)
+- **Target → measured:** Performance ≥ 90 (BASELINE Targets) → flagged on 1 page(s)
+- **Scope:** golden path: golden pages, mobile
+- **Evidence:**
+  - hazel-mobile-logo.png?v=1713641093&width=760
+
+### PERF-19 · Network dependency tree
 - **What / why:** Avoid chaining critical requests by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load.
 - **Source:** PSI Lighthouse · performance · `network-dependency-tree-insight` (mobile runs)
 - **Target → measured:** Performance ≥ 90 (BASELINE Targets) → flagged on 3 page(s)
@@ -340,24 +333,24 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **Evidence:**
   - (see raw/*.psi.json)
 
-### PERF-21 · Slowest URLs (server response, sitewide)
+### PERF-20 · Slowest URLs (server response, sitewide)
 - **What / why:** The slowest pages to respond across the whole crawl — server response / TTFB-class timing. SiteOne's per-URL request timing, a broad complement to the golden-path lab metrics. Slow server response delays everything downstream; a consistently slow template or collection is worth a look even when the golden path looks fine.
 - **Source:** SiteOne crawl · slowest-urls
-- **Target → measured:** Fast server response, all pages (BASELINE Targets) → slowest 0.71s; top 20 listed
+- **Target → measured:** Fast server response, all pages (BASELINE Targets) → slowest 0.77s; top 20 listed
 - **Scope:** sitewide: 20 slowest of crawl
 - **Evidence:**
-  - best-selling-collection · 0.71s (200)
-  - under-50 · 0.68s (200)
-  - 14k-gold-filled · 0.66s (200)
-  - new-arrivals · 0.65s (200)
-  - earrings · 0.61s (200)
-  - all-accessories · 0.59s (200)
-  - over-100 · 0.57s (200)
-  - dresses-1 · 0.57s (200)
-  - all-home-decor · 0.56s (200)
-  - tops-1 · 0.53s (200)
-  - all-products · 0.53s (200)
-  - testestest · 0.52s (200)
+  - the-hzl-pilates-princess-long-sleeve-grey · 0.77s (200)
+  - necklaces-chokers · 0.73s (200)
+  - 50-100 · 0.69s (200)
+  - new-clothing · 0.64s (200)
+  - the-pilates-princess-yoga-pant-grey · 0.56s (200)
+  - evi11-twin-vintage-tee-harley · 0.56s (200)
+  - hazel-bracelets · 0.55s (200)
+  - new-accessories · 0.55s (200)
+  - vintage · 0.54s (200)
+  - 40-final-sale · 0.54s (200)
+  - all-sale · 0.53s (200)
+  - best-selling-collection · 0.52s (200)
   - (+8 more — see crawl.html)
 
 ## SEC — Security
@@ -397,7 +390,7 @@ The problem catalog — dense, deterministic, agent-facing. 36 findings. Every f
 - **What / why:** Issues Chrome's Issues panel flagged (cookies, mixed content, etc.). Browser-level warnings; open the raw audit for the specifics.
 - **Source:** PSI Lighthouse · best-practices · `inspector-issues`
 - **Target → measured:** Best Practices ≥ 95 (BASELINE Targets) → on 2 run(s)
-- **Scope:** golden path: Home — desktop, Home — mobile
+- **Scope:** golden path: Home — mobile, Product — desktop
 - **Evidence:**
   - (see raw/*.psi.json)
 

@@ -10,25 +10,25 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile | 54 | 97 | 92 | 100 |
-| Home — desktop | 56 | 97 | 92 | 100 |
-| Collection — mobile | 51 | 97 | 96 | 100 |
-| Collection — desktop | 65 | 97 | 96 | 100 |
-| Product — mobile | 50 | 97 | 96 | 100 |
-| Product — desktop | 70 | 97 | 96 | 100 |
+| Home — mobile | 41 | 97 | 92 | 100 |
+| Home — desktop | 57 | 97 | 96 | 100 |
+| Collection — mobile | 52 | 97 | 96 | 100 |
+| Collection — desktop | 58 | 97 | 96 | 100 |
+| Product — mobile | 48 | 97 | 96 | 100 |
+| Product — desktop | 77 | 97 | 92 | 100 |
 
-> Perf-score spread across 3 runs (median kept): Home — mobile 54/54/54 · Home — desktop 56/56/56 · Collection — mobile 51/51/51 · Collection — desktop 62/65/66 · Product — mobile 50/50/69 · Product — desktop 70/70/70.
+> Perf-score spread across 3 runs (median kept): Home — mobile 41/41/60 · Home — desktop 57/57/57 · Collection — mobile 52/52/52 · Collection — desktop 51/58/64 · Product — mobile 45/48/59 · Product — desktop 55/77/77.
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile | 23.48 | 0 | 6.25 | 0.01 | 192 | 9.3 |
-| Home — desktop | 2.34 | 1.01 | 0.56 | 0.01 | 193 | 1.45 |
-| Collection — mobile | 5.55 | 0.984 | 1.89 | 0.01 | 164 | 3.12 |
-| Collection — desktop | 1.51 | 0.203 | 0.52 | 0.01 | 443 | 1.33 |
-| Product — mobile | 19.78 | 0 | 6.2 | 0.01 | 323 | 8.01 |
-| Product — desktop | 1.67 | 0.205 | 0.52 | 0.02 | 300 | 1.45 |
+| Home — mobile | 12.3 | 1.027 | 1.83 | 0.02 | 288 | 4.51 |
+| Home — desktop | 2.38 | 1.008 | 0.51 | 0.01 | 180 | 1.39 |
+| Collection — mobile | 19.92 | 0 | 3.26 | 0.01 | 459 | 6.22 |
+| Collection — desktop | 1.8 | 1.01 | 0.51 | 0.01 | 257 | 1.1 |
+| Product — mobile | 10.35 | 0 | 2.88 | 0.01 | 751 | 5.28 |
+| Product — desktop | 2.13 | 0.205 | 0.5 | 0.01 | 104 | 1.53 |
 
 ## C. Field data (CrUX 28-day)
 

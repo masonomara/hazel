@@ -486,15 +486,15 @@
 
     <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
       <div id="follower">
-        {% comment %}
+        {%- if settings.mouse_image != blank -%}
           <img
             src="{{ settings.mouse_image | image_url: width: 32 }}"
-            alt="{{ settings.mouse_image.alt | escape }}"
+            alt=""
+            aria-hidden="true"
             width="32"
             height="32"
-            loading="priority"
           >
-        {% endcomment %}
+        {%- endif -%}
       </div>
       {{ content_for_layout }}
     </main>

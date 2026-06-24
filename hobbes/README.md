@@ -104,7 +104,7 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | [`BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 
 ### Cycle data — `hobbes/scorecards/<YYYY-MM-DD>/`
-Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `baseline.md` → `findings.md` → `plan.md` → `execution.md` → `diff.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures, git-ignored) and the per-tool digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`). Which files exist tells you which stage the cycle reached (`cli.py status`).
+Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `baseline.md` → `findings.md` → `plan.md` → `execution.md` → `diff.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures) and the per-tool digests (`psi-results.md`, `seo-results.md`, `crawl-results.md`) — both git-ignored build intermediates that `baseline.py` reads to stamp the scorecard, not durable deliverables. Which files exist tells you which stage the cycle reached (`cli.py status`).
 
 ---
 

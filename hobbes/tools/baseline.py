@@ -17,10 +17,10 @@ USAGE:
   python3 hobbes/tools/baseline.py --full     # crawl the entire sitemap, not the sample (slow)
 
 Each tool prints its rendered scorecard sections to stdout; baseline.py captures
-those and assembles the ONE combined digest — baseline.md — so there are no
+those and assembles the ONE combined digest — 01-baseline.md — so there are no
 per-tool *-results.md intermediates. Writes the whole cycle into one folder:
-hobbes/scorecards/YYYY-MM-DD/ — baseline.md beside the raw artifacts (raw/), so
-the baseline and the generated findings.md sit beside the data they came from.
+hobbes/cycle/YYYY-MM-DD/ — 01-baseline.md beside the raw artifacts (raw/), so
+the baseline and the generated 02-evaluation.md sit beside the data they came from.
 """
 
 import subprocess
@@ -73,7 +73,7 @@ def main():
     if "--run-dir" in args:                        # honor an explicit folder (e.g. the review's post-publish)
         rundir = Path(args[args.index("--run-dir") + 1]).resolve()
     else:
-        rundir = HOBBES / "scorecards" / date      # default: one dated folder per cycle
+        rundir = HOBBES / "cycle" / date           # default: one dated folder per cycle
     (rundir / "raw").mkdir(parents=True, exist_ok=True)
     # Thread the cycle folder through every tool so raw artifacts land together.
     # Each tool prints its rendered sections to stdout; we slice the ones the
@@ -121,13 +121,13 @@ def main():
         g,
     ]) + "\n"
 
-    out = rundir / "baseline.md"
+    out = rundir / "01-baseline.md"
     out.write_text(doc)
     print(f"\n✓ MVP baseline written → {out}", file=sys.stderr)
     print("  A–F filled from the tools; Section G (manual a11y) left for human sign-off.",
           file=sys.stderr)
-    print(f"  Cycle folder: {rundir} (raw/ alongside; baseline.md is the one digest).", file=sys.stderr)
-    print("  Next: python3 hobbes/tools/findings.py — builds findings.md (the problem catalog) from raw/.",
+    print(f"  Cycle folder: {rundir} (raw/ alongside; 01-baseline.md is the one digest).", file=sys.stderr)
+    print("  Next: python3 hobbes/tools/findings.py — builds 02-evaluation.md (the problem catalog) from raw/.",
           file=sys.stderr)
 
 

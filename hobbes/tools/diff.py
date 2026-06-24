@@ -26,13 +26,13 @@ TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
 import config
-SCORECARDS = HOBBES / "scorecards"
+CYCLES = HOBBES / "cycle"
 COVERAGE_OK = 0.8   # §F counts compared only if min/max crawl-page ratio ≥ this
 
 
 def cycle_dirs():
-    ds = [d for d in SCORECARDS.glob("[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]")
-          if (d / "baseline.md").exists()]
+    ds = [d for d in CYCLES.glob("[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]")
+          if (d / "01-baseline.md").exists()]
     return sorted(ds, key=lambda d: d.name)
 
 
@@ -93,13 +93,13 @@ def crawl_pages(md):
 
 
 def findings_total(run):
-    f = run / "findings.md"
+    f = run / "02-evaluation.md"
     m = re.search(r"(\d+)\s+findings", f.read_text()) if f.exists() else None
     return int(m.group(1)) if m else None
 
 
 # Short parse keys → the scorecard's own display labels, so the diff speaks the
-# same language baseline.md does (not "perf"/"bp"/"lcp").
+# same language 01-baseline.md does (not "perf"/"bp"/"lcp").
 SCORE_LABELS = {"perf": "Performance", "a11y": "Accessibility", "bp": "Best Practices", "seo": "SEO"}
 FIELD_LABELS = {"lcp": "LCP (s)", "inp": "INP (ms)", "cls": "CLS"}
 
@@ -166,8 +166,8 @@ def main():
     args = sys.argv[1:]
     runs = cycle_dirs()
     cur = Path(args[args.index("--run-dir") + 1]).resolve() if "--run-dir" in args else (runs[-1] if runs else None)
-    if cur is None or not (cur / "baseline.md").exists():
-        sys.exit("✗ no cycle with baseline.md to diff")
+    if cur is None or not (cur / "01-baseline.md").exists():
+        sys.exit("✗ no cycle with 01-baseline.md to diff")
     out = Path(args[args.index("--out") + 1]) if "--out" in args else cur / "diff.md"
     if "--prior" in args:
         prior = Path(args[args.index("--prior") + 1]).resolve()
@@ -182,7 +182,7 @@ def main():
         print(f"{cur.name}: baseline established (no prior)")
         return
 
-    cb, pb = (cur / "baseline.md").read_text(), (prior / "baseline.md").read_text()
+    cb, pb = (cur / "01-baseline.md").read_text(), (prior / "01-baseline.md").read_text()
     cs, ps = scores(cb), scores(pb)
     cf, pf = field(cb), field(pb)
     if not (cs.keys() & ps.keys()) and not (cf.keys() & pf.keys()):

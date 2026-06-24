@@ -18,7 +18,7 @@ USAGE:
   python3 hobbes/tools/psi.py --out PATH      # also write the digest to PATH
   python3 hobbes/tools/psi.py --run-dir DIR   # cycle folder (raw/); default today's
 Prints the scorecard tables to stdout — baseline.py captures that into the one
-combined digest (baseline.md). Raw *.psi.json caches go in raw/. No per-tool
+combined digest (01-baseline.md). Raw *.psi.json caches go in raw/. No per-tool
 file is written unless --out is given.
 The keyless PSI API is rate-capped to a shared pool
 that is usually exhausted (HTTP 429) — a key is required, not optional.
@@ -62,13 +62,13 @@ HOBBES = TOOLS.parent
 
 
 def resolve_run_dir(args):
-    """Per-cycle output folder: hobbes/scorecards/<date>/. Big raw JSON caches
-    live in raw/; the digest sits at the top. baseline.py passes --run-dir so
-    psi/seo/crawl share one cycle folder; a standalone run defaults to today's."""
+    """Per-cycle output folder: hobbes/cycle/<date>/. Big raw JSON caches
+    live in raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle
+    folder; a standalone run defaults to today's."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "scorecards" / config.today()
+        d = HOBBES / "cycle" / config.today()
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 

@@ -10,7 +10,7 @@ The running record of shipped work. One change per entry, numbered in order, new
 
 **Rule:** every `feature` carries a `RESULTS:` line with a measured outcome. Define the metric first. If you cannot measure it, it is not shipped.
 
-Filled baseline scorecards live in `hobbes/scorecards/`.
+Filled baseline scorecards live in `hobbes/cycle/<date>/01-baseline.md`.
 
 ---
 

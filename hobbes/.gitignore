@@ -10,8 +10,8 @@ tools/.psi-key
 
 # Cycle build intermediate — raw/ is the machine source the tools write and
 # findings.py parses; the capture tools print their sections to stdout for
-# baseline.py to assemble into baseline.md, so there's no *-results.md digest to
-# ignore anymore. raw/ isn't a durable deliverable, so it stays out of git to
-# keep the repo from ballooning. The durable record is baseline.md, findings.md,
-# plan.md, diff.md.
-scorecards/*/raw/
+# baseline.py to assemble into 01-baseline.md, so there's no *-results.md digest
+# to ignore anymore. raw/ isn't a durable deliverable, so it stays out of git to
+# keep the repo from ballooning. The durable record is 01-baseline.md,
+# 02-evaluation.md, plan.md, execution.md.
+cycle/*/raw/

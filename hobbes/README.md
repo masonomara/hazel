@@ -33,8 +33,8 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 
 | Stage | Kind | Produces | Runs in |
 |---|---|---|---|
-| **baseline** | tool | `baseline.md` (+ raw/) — the scorecard | cycle workflow |
-| **findings** | tool | `findings.md` — the problem catalog | cycle workflow |
+| **baseline** | tool | `01-baseline.md` (+ raw/) — the scorecard | cycle workflow |
+| **findings** | tool | `02-evaluation.md` — the problem catalog | cycle workflow |
 | **plan** | agent | `plan.md` — systems grouped, rated, ordered by leverage | cycle workflow |
 | **execute** | agent | `execution.md` + theme-code changes | cycle workflow |
 | **publish** | human | the change live on the store | you, in Shopify |
@@ -58,14 +58,14 @@ The stage table above says *what each stage produces*. This is the other axis �
      ├─ seo.py    ─►  raw/*.seo.json     (prints §E)
      └─ crawl.py  ─►  raw/crawl.json     (prints §F + per-URL detail)
                           │                         │
-                          │   baseline.py CAPTURES the three tools' stdout ──►  baseline.md
+                          │   baseline.py CAPTURES the three tools' stdout ──►  01-baseline.md
                           │   (§A–F sliced from their printed sections + §G from TEMPLATE.md — the ONE digest)
                           │                                                       │
-   the RAW artifacts ─────┴──────────────────────►  findings.py  ──►  findings.md   (the problem catalog)
+   the RAW artifacts ─────┴──────────────────────►  findings.py  ──►  02-evaluation.md   (the problem catalog)
                                                                                   │   (no diff in a cycle)
      │  ── JUDGMENT: the agent reads the catalog (never the raw) and works against the real code ──
-                            findings.md + MISSION.md ─────────────────►  [agent · PLAN-TEMPLATE]  ──►  plan.md
-            plan.md + findings.md + baseline.md + the theme source ───►  [agent · EXECUTE-TEMPLATE] ─►  execution.md + theme-code changes + the PR body
+                            02-evaluation.md + MISSION.md ─────────────►  [agent · PLAN-TEMPLATE]  ──►  plan.md
+            plan.md + 02-evaluation.md + 01-baseline.md + the theme source ───►  [agent · EXECUTE-TEMPLATE] ─►  execution.md + theme code + PR body
                                                                                   │
                                               ONE PR  ──►  human review + merge  ──►  publish in Shopify  ──►  add `published` label
                                                                                   │
@@ -75,10 +75,10 @@ The stage table above says *what each stage produces*. This is the other axis �
 
 **Five handoffs worth understanding — this is the "what each file does along the way":**
 
-1. **Two readers, two different diets — one source, no middle file.** Each tool *prints* its rendered sections to stdout and writes its raw JSON to `raw/`. `baseline.py` runs the three as subprocesses and **captures their stdout**, slicing §A–F straight from the printed sections — there is no per-tool `*-results.md` on disk. `findings.py` eats the **raw** artifacts (`raw/*.psi.json`, `raw/crawl.json`) *directly*. `raw/` is git-ignored. This is why `findings.md` can't be rebuilt from `baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
+1. **Two readers, two different diets — one source, no middle file.** Each tool *prints* its rendered sections to stdout and writes its raw JSON to `raw/`. `baseline.py` runs the three as subprocesses and **captures their stdout**, slicing §A–F straight from the printed sections — there is no per-tool `*-results.md` on disk. `findings.py` eats the **raw** artifacts (`raw/*.psi.json`, `raw/crawl.json`) *directly*. `raw/` is git-ignored. This is why `02-evaluation.md` can't be rebuilt from `01-baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
 2. **The catalog can't drift from the scorecard.** `findings.py` doesn't re-implement parsing — it *imports* the same extractors from `psi.py` / `seo.py` / `crawl.py` that produced the numbers. One parser, two outputs, so a finding and its scorecard row can never disagree.
-3. **`diff.py` runs only in the review phase — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the diff lives entirely in the post-publish **review**: it reads two `baseline.md` files — the pre-publish baseline and the re-baselined live site — re-parses their tables back into numbers, and compares them tier by tier (field / lab / axe / counts). It touches no raw and only a findings *count*. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
-4. **The agent reads `findings.md`, never `raw/`.** Judgment works off the catalog — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
+3. **`diff.py` runs only in the review phase — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the diff lives entirely in the post-publish **review**: it reads two `01-baseline.md` files — the pre-publish baseline and the re-baselined live site — re-parses their tables back into numbers, and compares them tier by tier (field / lab / axe / counts). It touches no raw and only a findings *count*. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
+4. **The agent reads `02-evaluation.md`, never `raw/`.** Judgment works off the catalog — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
 5. **The capture tools run in both phases; the diff doesn't.** `baseline.py` + `findings.py` (driving psi/seo/crawl) run in the cycle (pre-fix) **and** in the review (post-publish, on the now-live site). `diff.py` is the one piece that's review-only — the review re-baselines the live site, rebuilds findings, then diffs against the pre-publish baseline, and that diff *is* the PR comment.
 
 **The determinism boundary, restated as authorship:** every **number** and every **comparison** in this flow is emitted by Python (`baseline.py`, `findings.py`, `diff.py`) — reproducible, unspinnable. Only the **fix narrative and the PR prose** are the agent's, and even those ride a fixed template skeleton. The PR comment (`diff.md`) is 100% Python; the PR body is agent prose constrained by `EXECUTE-TEMPLATE.md`.
@@ -90,11 +90,11 @@ The stage table above says *what each stage produces*. This is the other axis �
 | `psi.py` | live site (PSI API) | `raw/*.psi.json` + prints §A–D | `baseline.py` (stdout), `findings.py` (raw) |
 | `seo.py` | live site (HTML) | `raw/*.seo.json` + prints §E | `baseline.py` (stdout), `findings.py` (raw) |
 | `crawl.py` | live site (sitemap crawl) | `raw/crawl.json` + prints §F | `baseline.py` (stdout), `findings.py` (raw) |
-| `baseline.py` | the three tools' stdout + `TEMPLATE.md` | `baseline.md` (the one digest) | the agent, the human, `diff.py` (review only) |
-| `findings.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `findings.md` | the agent (plan + execute), `diff.py` (count, review only) |
-| `diff.py` | two `baseline.md` (pre-publish + live re-baseline) | `diff.md` | the **post-publish PR comment** — **review phase only, not a cycle** |
-| agent · `PLAN` | `findings.md`, `MISSION.md` | `plan.md` | the execute stage |
-| agent · `EXECUTE` | `plan.md`, `findings.md`, `baseline.md`, theme source | `execution.md`, theme code, **PR body** | the human (review → publish) |
+| `baseline.py` | the three tools' stdout + `TEMPLATE.md` | `01-baseline.md` (the one digest) | the agent, the human, `diff.py` (review only) |
+| `findings.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `02-evaluation.md` | the agent (plan + execute), `diff.py` (count, review only) |
+| `diff.py` | two `01-baseline.md` (pre-publish + live re-baseline) | `diff.md` | the **post-publish PR comment** — **review phase only, not a cycle** |
+| agent · `PLAN` | `02-evaluation.md`, `MISSION.md` | `plan.md` | the execute stage |
+| agent · `EXECUTE` | `plan.md`, `02-evaluation.md`, `01-baseline.md`, theme source | `execution.md`, theme code, **PR body** | the human (review → publish) |
 
 ---
 
@@ -120,17 +120,17 @@ The stage table above says *what each stage produces*. This is the other axis �
 | File | Lines | Role |
 |---|---|---|
 | [`tools/config.py`](tools/config.py) | 70 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` (env→file), `effort_budget()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
-| [`tools/psi.py`](tools/psi.py) | 356 | PageSpeed Insights / Lighthouse capture → scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field). Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
-| [`tools/seo.py`](tools/seo.py) | 315 | Per-page HTML SEO checklist → **§E** (titles, meta, canonical, OG, structured data). |
-| [`tools/crawl.py`](tools/crawl.py) | 436 | SiteOne sitemap crawl (stratified sample) → **§F** site-wide SEO/a11y/security counts. |
-| [`tools/baseline.py`](tools/baseline.py) | 131 | Orchestrates psi + seo + crawl into one dated cycle folder, then assembles `baseline.md` from `TEMPLATE.md`. Honors `--run-dir`. |
-| [`tools/findings.py`](tools/findings.py) | 737 | The **problem catalog**: reads raw/ → `findings.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
-| [`tools/diff.py`](tools/diff.py) | 215 | Cycle-over-cycle diff, **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated). `--prior` pins the comparison. |
+| [`tools/psi.py`](tools/psi.py) | 358 | PageSpeed Insights / Lighthouse capture → prints scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) to stdout. Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
+| [`tools/seo.py`](tools/seo.py) | 316 | Per-page HTML SEO checklist → prints **§E** (titles, meta, canonical, OG, structured data). |
+| [`tools/crawl.py`](tools/crawl.py) | 437 | SiteOne sitemap crawl (stratified sample) → prints **§F** site-wide SEO/a11y/security counts. |
+| [`tools/baseline.py`](tools/baseline.py) | 135 | Runs psi + seo + crawl into one dated cycle folder and **captures their stdout** into the one digest, `01-baseline.md` (stamped from `TEMPLATE.md`). Honors `--run-dir`. |
+| [`tools/findings.py`](tools/findings.py) | 737 | The **problem catalog**: reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
+| [`tools/diff.py`](tools/diff.py) | 241 | The **review phase's** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated), rendered as before→after tables. `--prior` pins the comparison. |
 
 ### The CLI
 | File | Lines | Role |
 |---|---|---|
-| [`cli.py`](cli.py) | 104 | `cycle` (baseline→findings), the individual steps (incl. `diff` as a manual drift check), `status`, `plan`/`execute` (print the stage prompt), `budget`, `today`. Run as `python3 hobbes/cli.py <cmd>`. |
+| [`cli.py`](cli.py) | 111 | `cycle` (baseline→findings), the individual steps (incl. `diff` as a manual drift check), `status`, `plan`/`execute` (print the stage prompt), `budget`, `today`. Run as `python3 hobbes/cli.py <cmd>`. |
 
 ### Stage contracts — `hobbes/templates/*.md`
 | File | Role |
@@ -154,8 +154,8 @@ The stage table above says *what each stage produces*. This is the other axis �
 | [`SETUP.md`](SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
 | [`BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 
-### Cycle data — `hobbes/scorecards/<YYYY-MM-DD>/`
-Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `baseline.md` → `findings.md` → `plan.md` → `execution.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediate). The three capture tools print their sections to stdout for `baseline.py` to assemble into the one `baseline.md`; they write no per-tool digest of their own. **No `diff.md` lands in a cycle folder** — the diff is the review phase's, written post-publish and posted as a PR comment. Which files exist tells you which stage the cycle reached (`cli.py status`).
+### Cycle data — `hobbes/cycle/<YYYY-MM-DD>/`
+Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `01-baseline.md` → `02-evaluation.md` → `plan.md` → `execution.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediate). The three capture tools print their sections to stdout for `baseline.py` to assemble into the one `01-baseline.md`; they write no per-tool digest of their own. **No `diff.md` lands in a cycle folder** — the diff is the review phase's, written post-publish and posted as a PR comment. Which files exist tells you which stage the cycle reached (`cli.py status`).
 
 ---
 

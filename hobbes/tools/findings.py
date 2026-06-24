@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 findings.py — the problem catalog. Reads a cycle's raw artifacts and emits a
-dense, deterministic findings.md: every problem, with verbatim evidence, for an
+dense, deterministic 02-evaluation.md: every problem, with verbatim evidence, for an
 agent. Step after baseline.py (which captures) and before the plan (which groups,
 fixes, and rates effort/impact). See hobbes/templates/FINDINGS-TEMPLATE.md.
 
@@ -70,7 +70,7 @@ BP_KNOW = {
 
 
 def latest_run_dir():
-    base = HOBBES / "scorecards"
+    base = HOBBES / "cycle"
     cands = sorted((d for d in base.glob("[0-9]" * 4 + "-*")
                     if (d / "raw").is_dir()), reverse=True)
     if not cands:
@@ -464,7 +464,7 @@ def perf_findings(psi, crawl):
     out.append(F(
         "Lab performance below target",
         "Lighthouse Performance score and the lab metrics behind it, per page × device.",
-        "PSI's mobile run is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so mobile scores run far below desktop and a heavy page can be cut before network-idle (LCP marked ✗cut — treat that LCP as unknown, not as the failure). Cross-check the real-user verdict in baseline.md §C: CrUX may already pass even where lab fails. The pass bar is still lab ≥ 90.",
+        "PSI's mobile run is a fixed heavy throttle (Moto G4 / slow-4G / 4× CPU), so mobile scores run far below desktop and a heavy page can be cut before network-idle (LCP marked ✗cut — treat that LCP as unknown, not as the failure). Cross-check the real-user verdict in 01-baseline.md §C: CrUX may already pass even where lab fails. The pass bar is still lab ≥ 90.",
         "PSI Lighthouse · performance",
         "Performance ≥ 90, mobile + desktop (BASELINE Targets)", f"score range {rng} across runs (see §A)",
         "all golden pages × device", "", ev))
@@ -684,7 +684,7 @@ DOMAINS = [
 def main():
     args = sys.argv[1:]
     rd = Path(args[args.index("--run-dir") + 1]) if "--run-dir" in args else latest_run_dir()
-    out = Path(args[args.index("--out") + 1]) if "--out" in args else rd / "findings.md"
+    out = Path(args[args.index("--out") + 1]) if "--out" in args else rd / "02-evaluation.md"
     raw = rd / "raw"
     if not raw.is_dir():
         sys.exit(f"✗ no raw/ in {rd}")
@@ -715,7 +715,7 @@ def main():
         "Every failing check is enumerated straight from `raw/` — no shortlist, no mission "
         "weighting, no hand-picking; same raw always yields the same findings. Where a list "
         "is long it is capped with an explicit `+N more`, never silently trimmed. "
-        "Numbers and scorecard in `baseline.md`; the fix, effort, and impact are the **plan's** job, not this file's. "
+        "Numbers and scorecard in `01-baseline.md`; the fix, effort, and impact are the **plan's** job, not this file's. "
         "See `hobbes/templates/FINDINGS-TEMPLATE.md`.",
     ]
     for key, name, note in DOMAINS:

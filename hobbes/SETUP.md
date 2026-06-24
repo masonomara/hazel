@@ -17,7 +17,7 @@ To run `python3 hobbes/cli.py cycle` (baseline → findings) on a laptop:
 - **Python ≥ 3.11** — stdlib only (`tomllib`); nothing to pip-install.
 - **SiteOne crawler** on `PATH` — the whole-site crawl. macOS: `brew install janreges/tap/siteone-crawler` (or the desktop GUI app).
 - **PSI key** — at `hobbes/tools/.psi-key` (git-ignored), or the `$PSI_API_KEY` env var. Get one: Google Cloud Console → enable *PageSpeed Insights API* → Credentials → API key.
-- **First run:** `python3 hobbes/cli.py cycle` → a dated `hobbes/scorecards/<date>/` folder. `python3 hobbes/cli.py status` shows which stage it reached.
+- **First run:** `python3 hobbes/cli.py cycle` → a dated `hobbes/cycle/<date>/` folder. `python3 hobbes/cli.py status` shows which stage it reached.
 
 The agent stages (plan / execute) can run as local Claude Code instead of the cloud action — no secret needed; it uses your login.
 

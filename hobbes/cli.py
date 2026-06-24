@@ -22,7 +22,7 @@ from pathlib import Path
 
 HOBBES = Path(__file__).resolve().parent
 TOOLS = HOBBES / "tools"
-SCORECARDS = HOBBES / "scorecards"
+CYCLES = HOBBES / "cycle"
 sys.path.insert(0, str(TOOLS))
 import config
 
@@ -32,12 +32,12 @@ def _run(tool, *args):
 
 
 def _latest_cycle():
-    ds = sorted(d for d in SCORECARDS.glob("[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]") if d.is_dir())
+    ds = sorted(d for d in CYCLES.glob("[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]") if d.is_dir())
     return ds[-1] if ds else None
 
 
 def cmd_cycle(rest):
-    rd = str(SCORECARDS / config.today())
+    rd = str(CYCLES / config.today())
     _run("baseline.py", "--fresh", "--run-dir", rd, *rest)
     _run("findings.py", "--run-dir", rd)
     # No diff here — the cycle only measures the current site. The before/after is
@@ -61,7 +61,7 @@ def cmd_status(rest):
     if not c:
         print("no cycle yet — run `hobbes cycle`")
         return
-    stages = [("baseline.md", "baseline"), ("findings.md", "findings"),
+    stages = [("01-baseline.md", "baseline"), ("02-evaluation.md", "findings"),
               ("plan.md", "plan"), ("execution.md", "execute")]
     have = [name for f, name in stages if (c / f).exists()]
     nxt = next((name for f, name in stages if not (c / f).exists()), "publish (human)")
@@ -70,7 +70,7 @@ def cmd_status(rest):
 
 def _agent_stage(template, rest):
     c = _latest_cycle()
-    findings = (c / "findings.md") if c else None
+    findings = (c / "02-evaluation.md") if c else None
     print(f"Stage prompt → hobbes/templates/{template}")
     print(f"Cycle        → {c.name if c else '(none)'}")
     print(f"Findings     → {findings if findings and findings.exists() else '(run findings first)'}")

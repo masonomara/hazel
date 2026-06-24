@@ -17,7 +17,7 @@ USAGE:
   python3 hobbes/tools/baseline.py --full     # crawl the entire sitemap, not the sample (slow)
 
 Writes the whole cycle into one folder: hobbes/scorecards/YYYY-MM-DD/ —
-baseline.md plus the raw artifacts (raw/), the digests, and crawl.html, so the
+baseline.md plus the raw artifacts (raw/) and the digests, so the
 baseline and the generated findings.md sit beside the artifacts they came from.
 """
 
@@ -122,7 +122,7 @@ def main():
     print(f"\n✓ MVP baseline written → {out}", file=sys.stderr)
     print("  A–F filled from the tools; Section G (manual a11y) left for human sign-off.",
           file=sys.stderr)
-    print(f"  Cycle folder: {rundir} (raw/ + digests + crawl.html alongside).", file=sys.stderr)
+    print(f"  Cycle folder: {rundir} (raw/ + digests alongside).", file=sys.stderr)
     print("  Next: python3 hobbes/tools/findings.py — builds findings.md (the problem catalog) from raw/.",
           file=sys.stderr)
 

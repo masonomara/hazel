@@ -539,7 +539,7 @@ def perf_findings(psi, crawl):
         ev = [f"{short_url(r.get('url'))} · {float(r.get('requestTime') or 0):.2f}s ({r.get('statusCode')})"
               for r in rows[:12]]
         if len(rows) > 12:
-            ev.append(f"(+{len(rows) - 12} more — see crawl.html)")
+            ev.append(f"(+{len(rows) - 12} more — see raw/crawl.json)")
         out.append(F(
             "Slowest URLs (server response, sitewide)",
             "The slowest pages to respond across the whole crawl — server response / TTFB-class timing.",
@@ -645,12 +645,12 @@ def bp_findings(psi, crawl):
     for r in bp_rows:
         name = r.get("analysisName") or "best-practice issue"
         crit, warn = int(r.get("critical") or 0), int(r.get("warning") or 0)
-        why = BP_CRAWL_WHY.get(name, "Structural/best-practice issue SiteOne flagged across the site. Open crawl.html for the per-URL list.")
+        why = BP_CRAWL_WHY.get(name, "Structural/best-practice issue SiteOne flagged across the site. Open raw/crawl.json for the per-URL list.")
         out.append(F(
             name, f"{name} — flagged sitewide by the crawl.", why,
             "SiteOne crawl · best-practices table",
             "0 issues (BASELINE §F)", f"{crit} critical, {warn} warning",
-            "", f"of {n} pages", [f"{crit} critical, {warn} warning — see crawl.html"]))
+            "", f"of {n} pages", [f"{crit} critical, {warn} warning — see raw/crawl.json"]))
     return out
 
 

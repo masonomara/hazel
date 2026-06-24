@@ -25,7 +25,7 @@ USAGE:
   python3 hobbes/tools/crawl.py --fresh    # re-crawl (stratified sitemap sample)
   python3 hobbes/tools/crawl.py --full     # crawl the entire sitemap (slow — occasional audit)
   python3 hobbes/tools/crawl.py --out PATH # write digest elsewhere
-  python3 hobbes/tools/crawl.py --run-dir DIR # cycle folder (raw/crawl.json + crawl.html + digest)
+  python3 hobbes/tools/crawl.py --run-dir DIR # cycle folder (raw/crawl.json + digest)
 """
 
 import html
@@ -93,9 +93,8 @@ def select_pages(pages, full):
 
 def resolve_run_dir(args):
     """Per-cycle output folder: hobbes/scorecards/<date>/. crawl.json lives in
-    raw/, the human-readable crawl.html and digest sit at the top. baseline.py
-    passes --run-dir so psi/seo/crawl share one cycle folder; standalone defaults
-    to today's."""
+    raw/, the digest sits at the top. baseline.py passes --run-dir so psi/seo/crawl
+    share one cycle folder; standalone defaults to today's."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
@@ -180,7 +179,7 @@ def pin_regex(pages):
     return "^(" + "|".join(re.escape(u) for u in pages) + ")/?$"
 
 
-def run_crawl(fresh, cache, html_out, full=False):
+def run_crawl(fresh, cache, full=False):
     if not fresh and cache.exists():
         print(f"  ⤿ cached crawl ({cache.name})", file=sys.stderr, flush=True)
         return json.loads(cache.read_text())
@@ -206,17 +205,19 @@ def run_crawl(fresh, cache, html_out, full=False):
     httpd, seed = serve_flat_sitemap(pages)
     print(f"… crawling {len(pages)} pages (1 req/s, 1 worker, images off) — be patient",
           file=sys.stderr, flush=True)
-    # JSON → raw/ (the machine source); the full SiteOne HTML report → crawl.html
-    # (the robust human view, kept in the cycle folder). The default tmp/ text dump
-    # is disabled. Seed from the localhost flat sitemap; pin pages to the chosen
-    # set; allow crawling/asset-loading on the real domain.
+    # JSON → raw/ is the only output: it's the machine source findings.py and
+    # baseline.py read, and crawl-results.md is the durable human digest. The
+    # SiteOne HTML report (~1 MB/cycle, regenerable, read by nobody in the
+    # pipeline) is deliberately NOT emitted; the default tmp/ text dump is off
+    # too. Seed from the localhost flat sitemap; pin pages to the chosen set;
+    # allow crawling/asset-loading on the real domain.
     cmd = [BIN, f"--url={seed}",
            f"--allowed-domain-for-crawling={host}",
            "--allowed-domain-for-external-files=*",
            f"--include-regex={pin_regex(pages)}",
            f"--max-visited-urls={len(pages) * 2 + 1000}",
            "--output=json", f"--output-json-file={cache}",
-           f"--output-html-report={html_out}", "--output-text-file=",
+           "--output-text-file=",
            "--hide-progress-bar", "--no-color"] + LIMITS
     try:
         r = subprocess.run(cmd, stdout=subprocess.DEVNULL)
@@ -229,7 +230,7 @@ def run_crawl(fresh, cache, html_out, full=False):
     data["_sampledPages"] = len(pages)
     data["_sampleNote"] = sample_note
     cache.write_text(json.dumps(data))
-    print(f"  ✓ crawl complete · report → {html_out.name}", file=sys.stderr, flush=True)
+    print(f"  ✓ crawl complete · {cache.name}", file=sys.stderr, flush=True)
     return data
 
 
@@ -308,12 +309,11 @@ def main():
     full = "--full" in args
     rd = resolve_run_dir(args)
     cache = rd / "raw" / "crawl.json"
-    html_out = rd / "crawl.html"
     out = rd / "crawl-results.md"
     if "--out" in args:
         out = Path(args[args.index("--out") + 1])
 
-    data = run_crawl(fresh, cache, html_out, full)
+    data = run_crawl(fresh, cache, full)
     tables = data.get("tables", {})
     qs = quality_scores(data)
     texts = rollup_texts(data)

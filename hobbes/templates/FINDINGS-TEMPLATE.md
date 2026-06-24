@@ -38,7 +38,7 @@ Every finding is one block with the same shape:
 - **Domains** run in a fixed reading order — `A11Y`, `SEO`, `PERF`, `SEC`, `BP` — **not** a priority ranking. Findings does not weigh impact; that is the plan's job, rated against `MISSION.md`. The order here is just stable and predictable so IDs don't move between cycles.
 - **IDs are stable** within a cycle (`A11Y-1`, `SEO-3` …) — quote them in the plan.
 - **Scope** separates the **golden path** (the 3 locked pages, measured deep by PSI/seo) from **sitewide** (every page, measured broad by the crawl). A problem on both is worse than one on either.
-- **Evidence is raw.** A selector is the real DOM selector; a snippet is the real HTML; bytes/ms are the real numbers. Trust them, and open `raw/` or `crawl.html` to go deeper.
+- **Evidence is raw.** A selector is the real DOM selector; a snippet is the real HTML; bytes/ms are the real numbers. Trust them, and open `raw/` (e.g. `raw/crawl.json`) to go deeper.
 
 ## Sections
 
@@ -53,6 +53,5 @@ A domain with no failing checks prints a one-line `— all checks pass` and no b
 ## Pointers
 
 - `baseline.md` — the scorecard for this cycle (the numbers these findings detail).
-- `raw/` — the machine source every finding is extracted from.
-- `crawl.html` — SiteOne's full sortable whole-site report (the human view of the crawl).
+- `raw/` — the machine source every finding is extracted from (`raw/crawl.json` is SiteOne's full whole-site crawl output).
 - `MISSION.md` — the priorities the plan rates impact against.

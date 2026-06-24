@@ -1,0 +1,26 @@
+{%- comment -%}
+  Names the third-party search app's injected, unlabeled controls so they don't
+  trip the crawl's accessibility checks. The search app (isp_* elements on
+  /pages/search-results) adds its markup at runtime, not in the theme, so the
+  accessible names are set here. Purely additive: only sets attributes that are
+  missing — the search box gets an aria-label, the decorative watermark gets an
+  empty alt. No visual change. The cleaner long-term fix is the search app's own
+  config; this shim can be removed once that supplies the names.
+{%- endcomment -%}
+<script>
+  (function () {
+    function nameSearchApp() {
+      var box = document.querySelector(
+        '#isp_main_search_box:not([aria-label]):not([aria-labelledby]):not([title])'
+      );
+      if (box) box.setAttribute('aria-label', 'Search products');
+
+      var watermark = document.querySelector('#isp_watermark_img:not([alt])');
+      if (watermark) watermark.setAttribute('alt', '');
+    }
+    nameSearchApp();
+    var observer = new MutationObserver(nameSearchApp);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () { observer.disconnect(); }, 20000);
+  })();
+</script>

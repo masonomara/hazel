@@ -348,7 +348,9 @@
         height: 32px;
         border-radius: 50%;
         background: url({{ settings.mouse_image | image_url: width: 32, height: 32 }});
-        position: absolute;
+        position: fixed;
+        top: 0;
+        left: 0;
         margin: -16px 0 0 -16px;
         z-index: 99000000000!important;
         pointer-events: none;

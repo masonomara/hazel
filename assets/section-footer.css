@@ -526,9 +526,13 @@
 
 .footerLogo--desktop {
   display: none;
+  width: 100%;
+  height: auto;
 }
 .footerLogo--mobile {
   display: block;
+  width: 100%;
+  height: auto;
   margin-bottom: 32px;
 }
 @media screen and (min-width: 750px) {

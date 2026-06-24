@@ -1,0 +1,23 @@
+{%- comment -%}
+  Names the Mailchimp signup popup's injected <iframe>s so they don't trip axe's
+  frame-title rule. The popup markup (#PopupSignupForm_0, banner + modal) is added
+  by the Mailchimp embed at runtime, not by the theme, so the title is set here.
+  Purely additive: only sets a title on frames that lack one — no visual change.
+  The cleaner long-term fix is the Mailchimp embed config; this shim can be removed
+  once that carries a frame title.
+{%- endcomment -%}
+<script>
+  (function () {
+    var SELECTOR = '[id^="PopupSignupForm"] iframe:not([title])';
+    function nameFrames() {
+      var frames = document.querySelectorAll(SELECTOR);
+      for (var i = 0; i < frames.length; i++) {
+        frames[i].setAttribute('title', 'Newsletter sign-up');
+      }
+    }
+    nameFrames();
+    var observer = new MutationObserver(nameFrames);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () { observer.disconnect(); }, 20000);
+  })();
+</script>

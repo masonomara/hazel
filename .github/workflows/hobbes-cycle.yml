@@ -1,6 +1,7 @@
 # Hobbes work cycle: measure (deterministic) -> plan + fix (Claude agent) -> ONE PR.
-# Manual trigger only. Firing it always produces BOTH the scorecard/findings/diff AND
-# the reviewable code fix, in a single PR. The deterministic half is pure Python (stdlib)
+# Manual trigger only. Firing it always produces BOTH the scorecard/findings AND
+# the reviewable code fix, in a single PR. (The before/after diff is NOT here — it's
+# the review phase's job, after a publish.) The deterministic half is pure Python (stdlib)
 # + the SiteOne crawler (no LLM); the agent half is Claude Code (subscription auth). It
 # writes only to GitHub — no Shopify CLI, no publish. Review + publish are human.
 #
@@ -54,16 +55,15 @@ jobs:
           [ -z "$EFFORT" ] && EFFORT="$(python3 hobbes/cli.py budget)"
           echo "EFFORT=$EFFORT" >> "$GITHUB_ENV"
 
-      - name: Measure — baseline + findings + diff (deterministic, no LLM)
+      - name: Measure — baseline + findings (deterministic, no LLM)
         env:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: |
-          python3 hobbes/cli.py cycle
+          python3 hobbes/cli.py cycle          # baseline + findings only — no diff in a cycle
           DATE=$(python3 hobbes/cli.py today)   # pinned tz — must match the folder cli wrote
           echo "CYCLE_DATE=$DATE" >> "$GITHUB_ENV"
-          SUMMARY=$(python3 hobbes/tools/diff.py --run-dir "hobbes/scorecards/$DATE" | tail -1)
-          echo "DIFF_SUMMARY=$SUMMARY" >> "$GITHUB_ENV"
-          cat "hobbes/scorecards/$DATE/diff.md" >> "$GITHUB_STEP_SUMMARY"
+          # The before/after is the review phase's job (post-publish), not the cycle's.
+          echo "Cycle $DATE — baseline.md + findings.md written; the fix and data ship in one PR below." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Plan + fix — Claude agent, then ONE PR (data + code)
         uses: anthropics/claude-code-action@v1
@@ -80,19 +80,20 @@ jobs:
             --allowedTools Edit,Read,Write,Glob,Grep,Bash
           prompt: |
             This cycle's deterministic measurements are already in the working tree at
-            hobbes/scorecards/${{ env.CYCLE_DATE }}/ (baseline.md, findings.md, diff.md, digests),
-            uncommitted. Run the Hobbes plan + execute stages against them.
+            hobbes/scorecards/${{ env.CYCLE_DATE }}/ (baseline.md, findings.md), uncommitted.
+            Run the Hobbes plan + execute stages against them.
             Read hobbes/templates/PLAN-TEMPLATE.md and hobbes/templates/EXECUTE-TEMPLATE.md and
             follow them exactly. Effort budget: ${{ env.EFFORT }}.
             Write plan.md and execution.md into hobbes/scorecards/${{ env.CYCLE_DATE }}/, then make
             the theme-code changes.
             Open ONE pull request carrying BOTH the cycle data and the fix:
               - create a branch `hobbes-cycle-${{ env.CYCLE_DATE }}`
-              - `git add -A` (stages the scorecard/findings/diff, your plan.md/execution.md, and the
+              - `git add -A` (stages the scorecard/findings, your plan.md/execution.md, and the
                 code changes; raw/ is git-ignored, so it's excluded)
               - commit, `git push -u origin`
-              - `gh pr create` with title "Hobbes ${{ env.CYCLE_DATE }} — ${{ env.DIFF_SUMMARY }}" and a
-                body carrying the baseline before/after (from findings.md / diff.md), what shipped, and
-                any human-owned deferrals (content at scale, app-config, sign-off).
+              - `gh pr create` with title "Hobbes ${{ env.CYCLE_DATE }} — <a short summary of what you
+                shipped this batch>" and a body carrying the current baseline + findings summary, what
+                shipped, and any human-owned deferrals (content at scale, app-config, sign-off). There
+                is no before/after here — the measured impact lands in the review comment after publish.
             Hard rules: write only to GitHub. Do NOT run the Shopify CLI. Do NOT publish. Verification
             (Theme Check, browser) and the live publish are the human's, at review.

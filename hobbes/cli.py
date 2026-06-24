@@ -2,10 +2,16 @@
 """
 hobbes CLI — runs the cycle stages and reads the filesystem state machine.
 
-  cycle      baseline (--fresh) -> findings -> diff   (the deterministic patrol)
+  cycle      baseline (--fresh) -> findings            (the deterministic patrol)
   baseline / findings / diff                          (individual steps)
   status     report which stage the newest cycle is at
   plan / execute   print the stage prompt + inputs for an agent (Claude Code)
+
+  diff is NOT part of the cycle — a cycle measures the current site; it has no
+  "after" to compare (this cycle's fix isn't live yet). The before/after lives in
+  the REVIEW phase (hobbes-review.yml), which re-baselines the live site after a
+  publish and diffs against the pre-publish baseline. `cli.py diff` stays as a
+  manual escape hatch for an ad-hoc cross-cycle drift check.
 
 USAGE: python3 hobbes/cli.py <command> [args passed through to the tool]
 """
@@ -34,7 +40,8 @@ def cmd_cycle(rest):
     rd = str(SCORECARDS / config.today())
     _run("baseline.py", "--fresh", "--run-dir", rd, *rest)
     _run("findings.py", "--run-dir", rd)
-    _run("diff.py", "--run-dir", rd)
+    # No diff here — the cycle only measures the current site. The before/after is
+    # the review phase's job (re-baseline live post-publish, diff vs pre-publish).
 
 
 def cmd_baseline(rest):

@@ -12,7 +12,7 @@ The per-client config every tool reads. Fill it once:
 
 ## Local setup — the engine on your machine
 
-To run `python3 hobbes/cli.py cycle` (baseline → findings → diff) on a laptop:
+To run `python3 hobbes/cli.py cycle` (baseline → findings) on a laptop:
 
 - **Python ≥ 3.11** — stdlib only (`tomllib`); nothing to pip-install.
 - **SiteOne crawler** on `PATH` — the whole-site crawl. macOS: `brew install janreges/tap/siteone-crawler` (or the desktop GUI app).
@@ -80,7 +80,7 @@ GitHub runs `workflow_dispatch` workflows only from the **default branch** — m
 
 ## 6. First run
 
-- **Actions → "Hobbes cycle" → Run workflow** (blank budget = the `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings/diff *and* the code change, plus a GitHub email. (Needs all of steps 1–3 + 5.)
+- **Actions → "Hobbes cycle" → Run workflow** (blank budget = the `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings *and* the code change, plus a GitHub email. (Needs all of steps 1–3 + 5.)
 - Run it again whenever you want a fresh cycle — there's no cron; it fires on demand.
 
 ## Already wired in the workflow YAML — you don't touch these

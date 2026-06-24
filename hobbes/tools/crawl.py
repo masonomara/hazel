@@ -18,14 +18,14 @@ and crawl exactly that set: pinned with --include-regex, gentle pace so 429s sta
 near zero, no truncation. Same sitemap → same pages → comparable numbers.
 
 Mirrors psi.py / seo.py: gentle live crawl, a cached crawl.json (reused on
---resume / re-crawled on --fresh), and a durable crawl-results.md in the cycle folder.
+--resume / re-crawled on --fresh), and prints §F to stdout for baseline.py to capture.
 
 USAGE:
   python3 hobbes/tools/crawl.py            # reuse cached crawl.json if present
   python3 hobbes/tools/crawl.py --fresh    # re-crawl (stratified sitemap sample)
   python3 hobbes/tools/crawl.py --full     # crawl the entire sitemap (slow — occasional audit)
-  python3 hobbes/tools/crawl.py --out PATH # write digest elsewhere
-  python3 hobbes/tools/crawl.py --run-dir DIR # cycle folder (raw/crawl.json + digest)
+  python3 hobbes/tools/crawl.py --out PATH # also write the digest to PATH
+  python3 hobbes/tools/crawl.py --run-dir DIR # cycle folder (raw/crawl.json)
 """
 
 import html
@@ -205,9 +205,9 @@ def run_crawl(fresh, cache, full=False):
     httpd, seed = serve_flat_sitemap(pages)
     print(f"… crawling {len(pages)} pages (1 req/s, 1 worker, images off) — be patient",
           file=sys.stderr, flush=True)
-    # JSON → raw/ is the only output: it's the machine source findings.py and
-    # baseline.py read, and crawl-results.md is the durable human digest. The
-    # SiteOne HTML report (~1 MB/cycle, regenerable, read by nobody in the
+    # JSON → raw/ is the only durable output: it's the machine source findings.py
+    # reads, and the rendered §F is printed to stdout for baseline.py to capture.
+    # The SiteOne HTML report (~1 MB/cycle, regenerable, read by nobody in the
     # pipeline) is deliberately NOT emitted; the default tmp/ text dump is off
     # too. Seed from the localhost flat sitemap; pin pages to the chosen set;
     # allow crawling/asset-loading on the real domain.
@@ -309,7 +309,7 @@ def main():
     full = "--full" in args
     rd = resolve_run_dir(args)
     cache = rd / "raw" / "crawl.json"
-    out = rd / "crawl-results.md"
+    out = None                                    # no default file: baseline.py reads stdout; --out opts in
     if "--out" in args:
         out = Path(args[args.index("--out") + 1])
 
@@ -427,9 +427,10 @@ def main():
         *detail(missing_desc, path),
     ]
     report = "\n".join(L) + "\n"
-    print(report)
-    out.write_text(report)
-    print(f"→ written to {out}", file=sys.stderr)
+    print(report)                                 # stdout — baseline.py captures §F into the one digest
+    if out:                                        # --out only; no default per-tool file
+        out.write_text(report)
+        print(f"→ written to {out}", file=sys.stderr)
 
 
 if __name__ == "__main__":

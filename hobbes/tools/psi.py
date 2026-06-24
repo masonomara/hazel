@@ -15,10 +15,11 @@ USAGE:
   python3 hobbes/tools/psi.py                 # default golden path
   python3 hobbes/tools/psi.py URL [URL ...]   # custom URLs
   python3 hobbes/tools/psi.py --fresh         # ignore cache, re-fetch all
-  python3 hobbes/tools/psi.py --out PATH      # write digest elsewhere
-  python3 hobbes/tools/psi.py --run-dir DIR   # cycle folder (raw/ + digest); default today's
-Prints the scorecard tables AND writes them to the cycle folder
-hobbes/scorecards/<date>/psi-results.md (raw *.psi.json caches go in raw/).
+  python3 hobbes/tools/psi.py --out PATH      # also write the digest to PATH
+  python3 hobbes/tools/psi.py --run-dir DIR   # cycle folder (raw/); default today's
+Prints the scorecard tables to stdout — baseline.py captures that into the one
+combined digest (baseline.md). Raw *.psi.json caches go in raw/. No per-tool
+file is written unless --out is given.
 The keyless PSI API is rate-capped to a shared pool
 that is usually exhausted (HTTP 429) — a key is required, not optional.
 """
@@ -189,7 +190,7 @@ def main():
     fresh = "--fresh" in args  # ignore cache, re-fetch everything
     rd = resolve_run_dir(args)
     raw = rd / "raw"
-    out = rd / "psi-results.md"                   # durable digest, in the cycle folder
+    out = None                                    # no default file: baseline.py reads stdout; --out opts in
     for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
         if flag in args:
             i = args.index(flag)
@@ -347,9 +348,10 @@ def main():
               + ", ".join(f"{lbl} {strat}" for lbl, _u, strat in failed)]
     report = "\n".join(L) + "\n"
 
-    print(report)                                   # stdout, as before
-    out.write_text(report)                          # durable artifact
-    print(f"→ written to {out}", file=sys.stderr)
+    print(report)                                   # stdout — baseline.py captures this into the one digest
+    if out:                                          # --out only; no default per-tool file
+        out.write_text(report)
+        print(f"→ written to {out}", file=sys.stderr)
 
 
 if __name__ == "__main__":

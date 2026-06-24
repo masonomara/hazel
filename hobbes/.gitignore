@@ -8,11 +8,10 @@ __pycache__/
 # The PSI key — never commit (it was historically tracked; rotate if exposed)
 tools/.psi-key
 
-# Cycle build intermediates — written to disk during a run, consumed once, then
-# inert. raw/ is the machine source (findings.py/baseline.py parse it); the
-# *-results.md digests are read once by baseline.py to stamp the scorecard, after
-# which baseline.md (A–F) + raw/ hold everything downstream needs. Neither is a
-# durable deliverable, so both stay out of git to keep the repo from ballooning.
-# The durable record is baseline.md, findings.md, plan.md, diff.md.
+# Cycle build intermediate — raw/ is the machine source the tools write and
+# findings.py parses; the capture tools print their sections to stdout for
+# baseline.py to assemble into baseline.md, so there's no *-results.md digest to
+# ignore anymore. raw/ isn't a durable deliverable, so it stays out of git to
+# keep the repo from ballooning. The durable record is baseline.md, findings.md,
+# plan.md, diff.md.
 scorecards/*/raw/
-scorecards/*/*-results.md

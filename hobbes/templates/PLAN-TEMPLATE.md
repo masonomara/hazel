@@ -65,7 +65,7 @@ Every finding in the cycle lands in exactly one system — none dropped, none in
 
 ## The handoff
 
-The ordered table is what execution consumes. It works the systems top-down, proving each against the BASELINE targets and the `DEVELOPMENT.md` "done means" bar before moving on. After execution, re-baseline and diff the next cycle against this one — closed findings and any regressions tell you whether the plan worked.
+The ordered table is what execution consumes. It works the systems top-down, proving each against the BASELINE targets and the `DEVELOPMENT.md` "done means" bar before moving on. After publish, the review re-baselines the live site and diffs against this cycle's baseline — closed findings and any regressions tell you whether the plan worked.
 
 ## Pointers
 

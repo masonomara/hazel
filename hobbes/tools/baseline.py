@@ -16,9 +16,11 @@ USAGE:
   python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick rerun)
   python3 hobbes/tools/baseline.py --full     # crawl the entire sitemap, not the sample (slow)
 
-Writes the whole cycle into one folder: hobbes/scorecards/YYYY-MM-DD/ —
-baseline.md plus the raw artifacts (raw/) and the digests, so the
-baseline and the generated findings.md sit beside the artifacts they came from.
+Each tool prints its rendered scorecard sections to stdout; baseline.py captures
+those and assembles the ONE combined digest — baseline.md — so there are no
+per-tool *-results.md intermediates. Writes the whole cycle into one folder:
+hobbes/scorecards/YYYY-MM-DD/ — baseline.md beside the raw artifacts (raw/), so
+the baseline and the generated findings.md sit beside the data they came from.
 """
 
 import subprocess
@@ -39,13 +41,15 @@ CONFIG = client_meta()  # [client] from hobbes.toml
 
 def run_tool(name, passthrough):
     print(f"\n=== running {name} ===", file=sys.stderr, flush=True)
-    # stdout discarded (the big table also lands in the artifact); stderr flows
-    # so the per-call progress / ⚠ warnings stay visible.
+    # Capture stdout (the rendered scorecard sections) and return it — this is the
+    # one digest's source, so the tools no longer write their own *-results.md.
+    # stderr is left to flow so the per-call progress / ⚠ warnings stay visible.
     r = subprocess.run([sys.executable, str(TOOLS / name)] + passthrough,
-                       stdout=subprocess.DEVNULL)
+                       stdout=subprocess.PIPE, text=True)
     if r.returncode != 0:
         sys.exit(f"\n✗ {name} failed (exit {r.returncode}) — aborting; "
                  f"fix it or `--resume` to reuse cached calls.")
+    return r.stdout
 
 
 def after(text, marker):
@@ -71,29 +75,29 @@ def main():
     else:
         rundir = HOBBES / "scorecards" / date      # default: one dated folder per cycle
     (rundir / "raw").mkdir(parents=True, exist_ok=True)
-    # Thread the cycle folder through every tool so raw artifacts + digests land together.
+    # Thread the cycle folder through every tool so raw artifacts land together.
+    # Each tool prints its rendered sections to stdout; we slice the ones the
+    # scorecard wants straight from that — no per-tool *-results.md in between.
     passthrough = ([] if "--resume" in args else ["--fresh"]) + ["--run-dir", str(rundir)]
-    run_tool("psi.py", passthrough)
-    run_tool("seo.py", passthrough)
+    psi = run_tool("psi.py", passthrough)
+    seo = run_tool("seo.py", passthrough)
+    crawl = ""
     if not no_crawl:
         # --full cascades to crawl.py only: the whole sitemap instead of the sample.
-        run_tool("crawl.py", passthrough + (["--full"] if full else []))
+        crawl = run_tool("crawl.py", passthrough + (["--full"] if full else []))
 
-    psi = (rundir / "psi-results.md").read_text()
-    seo = (rundir / "seo-results.md").read_text()
     tmpl = TEMPLATE.read_text()
 
     abcd = after(psi, "## A.")                      # A, B, C, D (+ failed-call note)
     e = between(seo, "## E.", "## Page titles")     # E + site-level
     g = after(tmpl, "## G.")                        # manual a11y, blank for the human
     if not (abcd and e and g):
-        sys.exit("✗ couldn't extract sections — check psi-results.md / seo-results.md / TEMPLATE.md")
+        sys.exit("✗ couldn't extract sections from the tool output — check psi.py / seo.py / TEMPLATE.md")
 
-    # F — site-wide grades + counts straight from crawl.py (per-URL detail stays
-    # in crawl-results.md for findings).
+    # F — site-wide grades + counts straight from crawl.py's stdout (the per-URL
+    # detail it also prints is for findings, which reads raw/crawl.json directly).
     f = ""
     if not no_crawl:
-        crawl = (rundir / "crawl-results.md").read_text()
         f = between(crawl, "## F. Site-wide", "## Detail")
 
     golden = " · ".join(f"[{lbl}]({u})" for lbl, u in DEFAULT_URLS)
@@ -122,7 +126,7 @@ def main():
     print(f"\n✓ MVP baseline written → {out}", file=sys.stderr)
     print("  A–F filled from the tools; Section G (manual a11y) left for human sign-off.",
           file=sys.stderr)
-    print(f"  Cycle folder: {rundir} (raw/ + digests alongside).", file=sys.stderr)
+    print(f"  Cycle folder: {rundir} (raw/ alongside; baseline.md is the one digest).", file=sys.stderr)
     print("  Next: python3 hobbes/tools/findings.py — builds findings.md (the problem catalog) from raw/.",
           file=sys.stderr)
 

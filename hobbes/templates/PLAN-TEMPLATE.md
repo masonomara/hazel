@@ -14,8 +14,11 @@ Two runs of the plan may differ — judgment isn't deterministic, and that's cor
 - **`02-evaluation.md`** — the problems to group. Every system cites its finding IDs.
 - **`01-baseline.md`** — the numbers, targets, and the **field-vs-lab** reality (e.g. §C CrUX may already pass where lab fails — that changes impact).
 - **`raw/`** — go deeper on any finding when grouping or effort needs more than the catalog shows.
-- **`MISSION.md`** — what impact is rated against: the three priorities (Accessibility › SEO › Performance), the mission line, and "Needs work".
-- **`DEVELOPMENT.md` + `CONTEXT.md`** — the stack, the constraints, the people and access. This is what "the resources we have" *means* — who can do each kind of work.
+- **`MISSION.md`** — what **impact** is rated against: the three priorities (Accessibility › SEO › Performance), the mission line, and "Needs work". This file decides *what matters*.
+- **`DEVELOPMENT.md`** — what **effort** and **feasibility** are rated against on the *stack* side: whether a fix is theme-authorable at all or lives in content / app / platform Hobbes can't reach, how hard it is on a Dawn fork (Dawn-core risk, `settings_data.json`, the browser gate, fork-upgrade-safety), and the "done means" bar each system must clear.
+- **`CONTEXT.md`** — what **effort** and **feasibility** are rated against on the *people* side: which resource each fix needs (Mason's code · Jenna/Britni admin & content · app-config · Brenda social) and the hard constraints that gate it (Advanced-not-Plus, the brand bar + Jenna's sign-off on brand-visible work, accessibility as a standing requirement). This is what "the resources we have" *means*.
+
+> **The three files map cleanly onto the two scores.** **Impact ← `MISSION.md`** (what matters). **Effort & feasibility ← `DEVELOPMENT.md` + `CONTEXT.md`** (what it costs — the stack's reality and the people behind it). Read all three; a plan that rates impact without the mission, or effort without the stack and the people, is guessing.
 
 ## The method — four phases
 
@@ -23,7 +26,7 @@ Read findings, raw, and baseline in depth first. Understand each problem deeply 
 
 1. **Group.** Cluster the findings into **systems** — by same problem, similar problem, cascading dependency, related or coupled cause. A system is the set of findings one body of work would address together. **Systems cut across the finding domains** — a missing-alt system spans A11Y *and* SEO; a heading system spans A11Y *and* SEO with one cascading root. Understand each system deeply: the shared root cause, and what a single fix would clear. Cite the finding IDs.
 
-2. **Effort.** For each system, estimate the effort to fix it — a subjective **1–5**, weighing: how long it takes, **the resources it needs and which kind** (Mason's code time · admin/content work from Jenna or Britni · an app-config change · Jenna's sign-off), how complicated it is, and how much we already know vs. still have to investigate.
+2. **Effort.** For each system, estimate the effort to fix it — a subjective **1–5** rated against **`DEVELOPMENT.md`** (the stack) and **`CONTEXT.md`** (the people), weighing: whether it's theme-authorable at all or lives in content / app / platform Hobbes can't reach (`DEVELOPMENT.md`); how hard on a Dawn fork — Dawn-core risk, `settings_data.json`, the browser gate, fork-upgrade-safety (`DEVELOPMENT.md`); **which resource it needs and which kind** — Mason's code time · admin/content from Jenna or Britni · an app-config change · Brenda on social · Jenna's brand sign-off (`CONTEXT.md`); how complicated it is; and how much we already know vs. still have to investigate. When a hard constraint *gates* a system — not theme-authorable, breaks fork-upgrade-safety, needs Jenna's brand sign-off — name it: it sets the owner and can sink the system to won't-chase regardless of its raw score.
 
 3. **Impact.** For each system, estimate the impact of fixing it — a subjective **1–5**, weighed against `MISSION.md`: which priority it advances, whether it serves the mission directly, and how many findings / pages one fix clears. Weigh the field-vs-lab reality — a perf fix matters less to real users where CrUX already passes.
 
@@ -31,8 +34,10 @@ Read findings, raw, and baseline in depth first. Understand each problem deeply 
 
 ## Scoring
 
-- **Impact (1–5)** — against the mission. `5` = clears a Priority-1 (accessibility) gap, or a cross-cutting root whose single fix cascades across many findings/pages. `3` = a real SEO/perf gap on the golden path. `1` = cosmetic, platform-bound, or already fine for real users (field passes).
-- **Effort (1–5, cost)** — `5` = long, needs scarce resources (client content at scale, app removal + coordination, or risky Dawn-core change), and complex. `1` = a token tweak or a single self-contained snippet Mason ships in minutes. Name the resource — a system that needs *Jenna to write 76 descriptions* is a different cost than one Mason fixes in Liquid.
+The two scores read from different files — keep them apart so a cheap fix can't inflate its impact and a mission-critical one can't hide its cost.
+
+- **Impact (1–5)** — against `MISSION.md`. `5` = clears a Priority-1 (accessibility) gap, or a cross-cutting root whose single fix cascades across many findings/pages. `3` = a real SEO/perf gap on the golden path. `1` = cosmetic, platform-bound, or already fine for real users (field passes).
+- **Effort (1–5, cost)** — against `DEVELOPMENT.md` (the stack: theme-authorable? how hard on a Dawn fork? browser-gated?) and `CONTEXT.md` (which person/resource, what access, whose sign-off). `5` = long, needs scarce resources (client content at scale, app removal + coordination, or risky Dawn-core change), and complex. `1` = a token tweak or a single self-contained snippet Mason ships in minutes. Name the resource — a system that needs *Jenna to write 76 descriptions* is a different cost than one Mason fixes in Liquid.
 - **Priority = Impact ÷ Effort** — leverage. High impact, low cost, first.
 
 > Formula note: the brief said *impact × effort*. Taken literally that ranks the **hardest** work first — a 5×5 monster above a 5×1 quick win — which buries exactly the quick wins you'd want to ship first. So this scores leverage as Impact ÷ Effort. If you truly want the product, it's a one-character flip; the recommendation is leverage.
@@ -71,5 +76,6 @@ The ordered table is what execution consumes. It works the systems top-down, pro
 
 - `02-evaluation.md` — the problems this plan groups (cite the IDs).
 - `01-baseline.md` — the numbers and field-vs-lab context.
-- `MISSION.md` — what impact is rated against.
-- `DEVELOPMENT.md` · `CONTEXT.md` — the stack, constraints, and people behind every effort estimate.
+- `MISSION.md` — what **impact** is rated against (the priorities and the mission line).
+- `DEVELOPMENT.md` — the **stack** behind every effort/feasibility call: theme-authorable vs not, Dawn-fork risk, the "done means" bar.
+- `CONTEXT.md` — the **people, access, and hard constraints** behind every effort estimate and every gated system.

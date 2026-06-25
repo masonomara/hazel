@@ -74,6 +74,8 @@ def _agent_stage(template, rest):
     print(f"Stage prompt → hobbes/templates/{template}")
     print(f"Cycle        → {c.name if c else '(none)'}")
     print(f"Findings     → {findings if findings and findings.exists() else '(run findings first)'}")
+    print("Context      → hobbes/context/MISSION.md · DEVELOPMENT.md · CONTEXT.md "
+          "(read all three: impact ← MISSION; effort/feasibility ← DEVELOPMENT + CONTEXT)")
     print("Drive this stage with Claude Code (claude-code-action in CI, or `claude` locally): "
           "follow the template, open a PR, write only to GitHub, never publish.")
 

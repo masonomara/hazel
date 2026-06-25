@@ -130,7 +130,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 ### The CLI
 | File | Lines | Role |
 |---|---|---|
-| [`cli.py`](cli.py) | 111 | `cycle` (baseline→findings), the individual steps (incl. `diff` as a manual drift check), `status`, `plan`/`execute` (print the stage prompt), `budget`, `today`. Run as `python3 hobbes/cli.py <cmd>`. |
+| [`cli.py`](../cli.py) | 111 | `cycle` (baseline→findings), the individual steps (incl. `diff` as a manual drift check), `status`, `plan`/`execute` (print the stage prompt), `budget`, `today`. Run as `python3 hobbes/cli.py <cmd>`. |
 
 ### Stage contracts — `hobbes/templates/*.md`
 | File | Role |
@@ -151,6 +151,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 *(Engine-generic — same across clients; read by the agent and the human operator.)*
 | File | Role |
 |---|---|
+| [`guides/SYSTEM.md`](SYSTEM.md) | **This file** — the map of the whole system: the pipeline, the data flow, every file's role, and the load-bearing design decisions. |
 | [`guides/SETUP.md`](SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
 | [`guides/BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 

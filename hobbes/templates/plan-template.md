@@ -13,7 +13,7 @@ Two runs of the plan may differ — judgment isn't deterministic, and that's cor
 
 - **`02-evaluation.md`** — the problems to group. Every system cites its finding IDs.
 - **`01-baseline.md`** — the numbers, targets, and the **field-vs-lab** reality (e.g. §C CrUX may already pass where lab fails — that changes impact).
-- **`raw/`** — go deeper on any finding when grouping or effort needs more than the catalog shows.
+- **`raw/`** *(break-glass)* — go deeper on any finding when grouping or effort needs more than the catalog shows; default to the catalog, drop to raw only when it falls short.
 - **`MISSION.md`** — what **impact** is rated against: the priorities (in their stated order), the mission line, and "Needs work". This file decides *what matters*.
 - **`DEVELOPMENT.md`** — what **effort** and **feasibility** are rated against on the *stack* side: whether a fix is authorable in the code we control at all or lives in content / third-party / platform the cycle can't reach, how hard it is given the stack's constraints (core-file risk, generated config, the browser gate, any upgrade-safety rule), and the "done means" bar each system must clear.
 - **`CONTEXT.md`** — what **effort** and **feasibility** are rated against on the *people* side: which kind of work each fix needs (code · content/admin · integration or platform config · sign-off) and **who** `CONTEXT.md` names for it, plus the hard constraints that gate it (platform limits, the brand bar and whose sign-off brand-visible work needs, accessibility as a standing requirement). This is what "the resources we have" *means*.

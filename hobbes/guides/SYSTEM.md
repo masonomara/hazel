@@ -116,19 +116,25 @@ flowchart TD
     end
 
     %% ============ AGENT STAGES ============
-    subgraph AGENT["judgment — the Claude agent (reads catalog + scorecard; may consult raw/ for evidence)"]
-        PLAN["agent · PLAN<br/>reads: 02-eval + 01-baseline + MISSION (+ raw/)<br/>writes: plan.md"]:::agent
+    subgraph AGENT["judgment — the Claude agent (primary input is the catalog/plan; raw/ is break-glass for evidence)"]
+        PLAN["agent · PLAN<br/>reads: 02-eval + 01-baseline + MISSION + DEVELOPMENT + CONTEXT<br/>break-glass: raw/<br/>writes: plan.md"]:::agent
         PLANMD["plan.md<br/>systems · rated · ordered by leverage"]:::doc
-        EXEC["agent · EXECUTE<br/>reads: plan.md + 02-eval + 01-baseline + theme code<br/>writes: execution.md, theme code, PR body"]:::agent
+        EXEC["agent · EXECUTE<br/>primary: plan.md · also: 02-eval + 01-baseline + MISSION + DEVELOPMENT + CONTEXT + theme code<br/>break-glass: raw/<br/>writes: execution.md, theme code, PR body"]:::agent
         EXECOUT["execution.md + theme code + PR body"]:::doc
         PLAN --> PLANMD --> EXEC --> EXECOUT
     end
     EMD --> PLAN
     BMD --> PLAN
-    MISSION --> PLAN
+    MISSION -- "impact" --> PLAN
+    DEV -- "effort: stack" --> PLAN
+    CONTEXTMD -- "effort: people" --> PLAN
+    RAW -. "break-glass: evidence" .-> PLAN
     PTMPL -. fills .-> PLAN
     EMD --> EXEC
     BMD --> EXEC
+    MISSION --> EXEC
+    CONTEXTMD --> EXEC
+    RAW -. "break-glass: evidence" .-> EXEC
     ETMPL -. fills .-> EXEC
     DEV -. bounds .-> EXEC
     CLAUDE -. steers .-> AGENT
@@ -193,7 +199,7 @@ flowchart TD
 1. **Two readers, one source — no middle file.** Each capture tool writes its raw JSON to `raw/` (and, run standalone, also prints a human-readable digest to stdout). `baseline.py` **imports the three tools and renders §A–F straight from `raw/`** — calling each tool's own `scorecard_section(s)()` — then stamps them into `01-baseline.md` with §G from `baseline-template.md`. No stdout is scraped and no per-tool `*-results.md` lands on disk. `evaluation.py` reads the **same** `raw/` artifacts (`raw/*.psi.json`, `raw/crawl.json`) directly for its node-level detail. `raw/` is git-ignored. This is why `02-evaluation.md` can't be rebuilt from `01-baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
 2. **The catalog and the scorecard share their renderers, and both rebuild from `raw/`.** `baseline.py` renders each scorecard section by calling the *same function* the standalone tool uses (`psi.scorecard_sections`, `seo.scorecard_section`, `crawl.scorecard_section`), so the digest and a standalone tool run can't disagree — and the scorecard re-renders from cache with no re-fetch. `evaluation.py` then *imports* the extractors it needs — `Page` / `head_ok` / `OG_REQUIRED` from `seo.py`, `table_rows` / `count_for` / `rollup_texts` / `header_set` from `crawl.py`, and the `a11y_audit_failed` predicate from `psi.py` — so where a number depends on "what counts" (a failing axe audit, a missing OG tag, a flagged crawl row), the catalog and the scorecard ride the *same definition*. The two are still **separate scripts** — the scorecard renders compact section tables, the catalog re-walks the PSI JSON for per-node evidence the scorecard never keeps — but neither scrapes the other's output, and both read only `raw/`.
 3. **`diff.py` runs only in the review phase — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the diff lives entirely in the post-publish **review**: it reads two `01-baseline.md` files — the pre-publish baseline and the re-baselined live site — re-parses their tables back into numbers, and compares them tier by tier (field / lab / axe / counts). It touches no raw and only a findings *count*. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
-4. **The agent reads `02-evaluation.md`, never `raw/`.** Judgment works off the catalog — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
+4. **The agent's primary input is the catalog, not `raw/`.** Judgment works off `02-evaluation.md` — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. `raw/` stays a **break-glass** fallback: plan or execute may drop to it when the catalog's extract isn't enough to group, cost, or author a fix — but it's the exception, never the default, because routing judgment through raw re-derives findings non-deterministically and erodes the determinism boundary. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
 5. **The capture tools run in both phases; the diff doesn't.** `baseline.py` + `evaluation.py` (driving psi/seo/crawl) run in the cycle (pre-fix) **and** in the review (post-publish, on the now-live site). `diff.py` is the one piece that's review-only — the review re-baselines the live site, rebuilds findings, then diffs against the pre-publish baseline, and that diff *is* the PR comment.
 
 **The determinism boundary, restated as authorship:** every **number** and every **comparison** in this flow is emitted by Python (`baseline.py`, `evaluation.py`, `diff.py`) — reproducible, unspinnable. Only the **fix narrative and the PR prose** are the agent's, and even those ride a fixed template skeleton. The PR comment (`diff.md`) is 100% Python; the PR body is agent prose constrained by `execute-template.md`.
@@ -208,8 +214,8 @@ flowchart TD
 | `baseline.py` | `raw/` (via the tools' renderers) + `baseline-template.md` | `01-baseline.md` (the one digest) | the agent, the human, `diff.py` (review only) |
 | `evaluation.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `02-evaluation.md` | the agent (plan + execute), `diff.py` (count, review only) |
 | `diff.py` | two `01-baseline.md` (pre-publish + live re-baseline) | `diff.md` | the **post-publish PR comment** — **review phase only, not a cycle** |
-| agent · `PLAN` | `02-evaluation.md`, `MISSION.md` | `plan.md` | the execute stage |
-| agent · `EXECUTE` | `plan.md`, `02-evaluation.md`, `01-baseline.md`, source | `execution.md`, code, **PR body** | the human (review → publish) |
+| agent · `PLAN` | `02-evaluation.md`, `01-baseline.md`, `MISSION.md` (impact), `DEVELOPMENT.md` + `CONTEXT.md` (effort) · `raw/` break-glass | `plan.md` | the execute stage |
+| agent · `EXECUTE` | `plan.md` (primary), `02-evaluation.md`, `01-baseline.md`, `MISSION.md`, `DEVELOPMENT.md`, `CONTEXT.md`, source · `raw/` break-glass | `execution.md`, code, **PR body** | the human (review → publish) |
 
 ---
 

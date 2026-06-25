@@ -72,7 +72,11 @@ That open PR **is** the handoff to `publish` — execution is done. The cycle cl
 
 ## Pointers
 
-- `plan.md` — the ordered systems this batch is drawn from.
+Execution runs **primarily off `plan.md`** — the ordered batch. The rest is context it draws on as the work demands; `raw/` is break-glass only.
+
+- `plan.md` — **the primary input**: the ordered systems this batch is drawn from.
 - `02-evaluation.md` / `01-baseline.md` — what each task closes, and the targets to hold.
+- `MISSION.md` — the priorities plan rated impact against; hold to them on any judgment call inside a system.
 - `DEVELOPMENT.md` — the stack and the real "done means" gates.
 - `CONTEXT.md` — who owns the non-code work (content, integration/platform decisions, sign-off).
+- `raw/` — **break-glass only**: the underlying capture JSON, reached for when `02-evaluation.md`'s extract isn't enough to author a fix. Default to the catalog; drop to raw only when it falls short.

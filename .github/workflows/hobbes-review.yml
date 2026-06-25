@@ -1,11 +1,11 @@
 # Hobbes review — post-publish verification, fired by an explicit GitHub signal.
-# The operator publishes the theme live (however that works for this client), then
+# The operator publishes/deploys the site live (however that works for this client), then
 # adds the `published` label to the PR. THAT is the trigger: this re-baselines the
 # LIVE site, diffs against the pre-publish baseline, and comments the before/after
 # on the PR. Deterministic (no LLM). Writes only a PR comment.
 #
 # Why a label, not the merge event: "merged" does not mean "live" — every client's
-# Shopify is wired differently, so the trigger must not guess at live state. The
+# hosting/deploy is wired differently, so the trigger must not guess at live state. The
 # label is a safe, GitHub-native signal the human controls and only adds once the
 # change is actually serving users. (Create the label once: `gh label create published`.)
 name: Hobbes review

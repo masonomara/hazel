@@ -168,18 +168,26 @@ def field(metrics, mkey, scale=1.0):
     return round(m["percentile"] * scale, 3 if scale != 1 else 0)
 
 
+def a11y_audit_failed(audit):
+    """The single predicate for 'this accessibility audit failed': a binary
+    axe-core check that scored 0. The scorecard's §D count (a11y_fails, below)
+    and findings.py's A11Y catalog BOTH ride this, so the two can't disagree on
+    what counts as a failure. Manual checks (keyboard, screen reader, focus) come
+    back as 'manual' scoreDisplayMode and are intentionally excluded — those stay
+    human. Change the definition of a failure here, in one place, and both follow."""
+    return audit.get("scoreDisplayMode") == "binary" and audit.get("score") == 0
+
+
 def a11y_fails(lh):
     """Failing accessibility audits from PSI's Lighthouse run — these ARE
     axe-core checks, so no separate axe run is needed. Returns a list of
-    (audit_id, failing_node_count) for the binary a11y audits that scored 0.
-    Manual checks (keyboard, screen reader, focus) come back as 'manual'
-    scoreDisplayMode and are intentionally excluded — those stay human."""
+    (audit_id, failing_node_count) for the binary a11y audits that scored 0."""
     cat = lh.get("categories", {}).get("accessibility", {})
     audits = lh.get("audits", {})
     fails = []
     for ref in cat.get("auditRefs", []):
         a = audits.get(ref["id"], {})
-        if a.get("scoreDisplayMode") == "binary" and a.get("score") == 0:
+        if a11y_audit_failed(a):
             nodes = len(a.get("details", {}).get("items", []))
             fails.append((ref["id"], nodes))
     return sorted(fails, key=lambda x: -x[1])

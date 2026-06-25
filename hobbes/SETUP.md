@@ -1,6 +1,6 @@
 # Setup — once per client
 
-How to stand Hobbes up. First fill the per-client config (`hobbes.toml`, below); then set up **local** (run the deterministic cycle on a laptop) and/or **cloud** (the automated GitHub runner). Local alone is enough to capture a baseline by hand; the cloud runner fires measure + fix together into one PR. Hobbes writes only to GitHub (branches, PRs, comments); every Shopify action stays human.
+How to stand Hobbes up. First fill the per-client config (`hobbes.toml`, below); then set up **local** (run the deterministic cycle on a laptop) and/or **cloud** (the automated GitHub runner). Local alone is enough to capture a baseline by hand; the cloud runner fires measure + fix together into one PR. Hobbes writes only to GitHub (branches, PRs, comments); every deploy/go-live action stays human.
 
 ## Configure the client (`hobbes.toml`)
 
@@ -67,10 +67,10 @@ The `cycle` workflow opens its PR with the built-in `GITHUB_TOKEN`, which a repo
 The `review` phase fires when you add a **`published`** label to a merged PR — your explicit "it's live now" signal (merge ≠ live, and it varies per client). Create it once:
 
 ```
-gh label create published --description "Theme is live — fire the Hobbes review" --color 0e8a16
+gh label create published --description "Site is live — fire the Hobbes review" --color 0e8a16
 ```
 
-Per release: merge the fix PR → publish the theme live in Shopify → **add `published` to the PR**. The review re-baselines the **live** site and comments the before/after. Label it *only after* it's actually live, or you measure the old site.
+Per release: merge the fix PR → publish/deploy the site live on your platform → **add `published` to the PR**. The review re-baselines the **live** site and comments the before/after. Label it *only after* it's actually live, or you measure the old site.
 
 ## 5. Workflows on the default branch
 

@@ -61,33 +61,33 @@ LIMITS = ["--max-reqs-per-sec=1", "--workers=1", "--timeout=15",
           "--disable-images", "--regex-filtering-only-for-pages"]
 
 # Default crawl is a STRATIFIED SAMPLE, not the whole sitemap: every distinct
-# low-volume template (collections, pages, policies, blogs) every cycle, plus a
-# fixed deterministic slice of products. Products are template-driven, so a slice
-# reveals the same template-level issues (missing description, heading order,
-# missing alt) as all 700 would — without hammering the store past its throttle.
+# low-volume page type every cycle, plus a fixed deterministic slice of the one
+# high-volume type (named by [cycle].sample_path, e.g. "/products/"). That type is
+# template-driven, so a slice reveals the same template-level issues (missing
+# description, heading order, missing alt) as the whole would — without hammering
+# the host past its throttle. With no sample_path set, every page is crawled.
 # --full overrides this and crawls the entire sitemap (slow; for an occasional
 # complete audit). The sample is deterministic, so the page set — and the counts —
 # are identical every cycle.
-PRODUCT_SAMPLE = 100
-
-
-def is_product(url):
-    return "/products/" in url
+SAMPLE_SIZE = 100   # how many of the high-volume page type to keep when subsampling
 
 
 def select_pages(pages, full):
-    """Choose the crawl set from the full sitemap. Returns (chosen, note)."""
-    if full:
-        return pages, "full sitemap"
-    products = [p for p in pages if is_product(p)]
-    other = [p for p in pages if not is_product(p)]
-    if len(products) > PRODUCT_SAMPLE:
-        step = len(products) // PRODUCT_SAMPLE      # deterministic: every Nth, sorted
-        sample = products[::step][:PRODUCT_SAMPLE]
+    """Choose the crawl set from the full sitemap. Returns (chosen, note).
+    Subsamples the one high-volume page type named by [cycle].sample_path; with no
+    sample_path set (or --full), takes every page."""
+    pat = config.sample_path()
+    if full or not pat:
+        return pages, "full sitemap" if full else "all pages (no sample_path set)"
+    bucket = [p for p in pages if pat in p]
+    other = [p for p in pages if pat not in p]
+    if len(bucket) > SAMPLE_SIZE:
+        step = len(bucket) // SAMPLE_SIZE           # deterministic: every Nth, sorted
+        sample = bucket[::step][:SAMPLE_SIZE]
     else:
-        sample = products
+        sample = bucket
     chosen = sorted(set(other) | set(sample))
-    note = f"all {len(other)} non-product + {len(sample)}/{len(products)} products sampled"
+    note = f"all {len(other)} other + {len(sample)}/{len(bucket)} '{pat}' sampled"
     return chosen, note
 
 
@@ -118,18 +118,18 @@ def _locs(xml):
 
 
 def _is_page(url):
-    """A crawlable storefront HTML page — a clean path with no file extension.
-    Shopify handles are extensionless slugs; this drops child sitemaps (.xml) and
-    non-HTML sitemap entries like /agents.md or /robots.txt."""
+    """A crawlable HTML page — a clean path with no file extension. Page URLs are
+    extensionless paths; this drops child sitemaps (.xml) and non-HTML sitemap
+    entries like /agents.md or /robots.txt."""
     last = urllib.parse.urlparse(url).path.rstrip("/").rsplit("/", 1)[-1]
     return "." not in last
 
 
 def expand_sitemap(root):
     """The authoritative page list. SiteOne crawls a *flat* sitemap but does NOT
-    recurse a sitemap *index* (Shopify's `sitemap.xml` is an index of signed,
-    rotating child sitemaps), so we expand it here: fetch the index, follow each
-    child, collect every non-sitemap <loc>. Returns (sorted unique pages, note)."""
+    recurse a sitemap *index* (many hosts serve `sitemap.xml` as an index of
+    child sitemaps), so we expand it here: fetch the index, follow each child,
+    collect every non-sitemap <loc>. Returns (sorted unique pages, note)."""
     idx = _fetch(root + "sitemap.xml")
     top = _locs(idx)
     pages, notes = [], []

@@ -32,7 +32,7 @@ HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
 import config
 # Reuse the capture tools' logic so findings can't drift from the scorecard.
-from psi import DEFAULT_URLS, cache_path as psi_cache
+from psi import DEFAULT_URLS, cache_path as psi_cache, a11y_audit_failed
 from seo import Page, head_ok, OG_REQUIRED
 from crawl import table_rows, count_for, rollup_texts, header_set
 
@@ -174,7 +174,7 @@ def a11y_findings(psi, crawl):
         au = lh.get("audits", {})
         for ref in cat.get("auditRefs", []):
             a = au.get(ref["id"], {})
-            if a.get("scoreDisplayMode") == "binary" and a.get("score") == 0:
+            if a11y_audit_failed(a):   # shared predicate with psi.py — scorecard §D and this catalog can't disagree
                 e = agg.setdefault(ref["id"], {"pages": set(), "nodes": {}, "title": a.get("title", "")})
                 e["pages"].add(f"{label} — {strat}")
                 for it in a.get("details", {}).get("items", []):

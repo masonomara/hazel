@@ -1,6 +1,6 @@
 # Hobbes
 
-Hobbes is a **web-baseline + agentic-fix system**: it measures a live site, catalogs what's wrong, plans the highest-leverage fixes, writes them as a pull request, and — once a human publishes — re-measures to prove the impact. It runs in GitHub Actions on a Claude Code subscription, and it **writes only to GitHub** (branches, PRs, comments). Every Shopify action — preview, publish, go-live — stays human.
+Hobbes is a **web-baseline + agentic-fix system**: it measures a live site, catalogs what's wrong, plans the highest-leverage fixes, writes them as a pull request, and — once a human publishes — re-measures to prove the impact. It runs in GitHub Actions on a Claude Code subscription, and it **writes only to GitHub** (branches, PRs, comments). Every deploy action — preview, publish, go-live — stays human.
 
 This file is the map of the whole system. For *setup*, see [`SETUP.md`](SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../CLAUDE.md).
 
@@ -21,7 +21,7 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
                        ▼ you review + merge
    HUMAN
    ┌─────────────────────────────────────────────┐
-   │  publish (Shopify go-live)  +  `published`   │   ← you, in Shopify, then a PR label
+   │  publish (go-live)  +  `published`           │   ← you, on your platform, then a PR label
    └─────────────────────────────────────────────┘
                        │ label fires
                        ▼
@@ -36,11 +36,11 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | **baseline** | tool | `01-baseline.md` (+ raw/) — the scorecard | cycle workflow |
 | **findings** | tool | `02-evaluation.md` — the problem catalog | cycle workflow |
 | **plan** | agent | `plan.md` — systems grouped, rated, ordered by leverage | cycle workflow |
-| **execute** | agent | `execution.md` + theme-code changes | cycle workflow |
-| **publish** | human | the change live on the store | you, in Shopify |
+| **execute** | agent | `execution.md` + code changes | cycle workflow |
+| **publish** | human | the change live on the site | you, on your platform |
 | **review** | tool (`diff.py`) | a **before/after comment** on the PR | review workflow (on `published`) |
 
-> The first four stages (baseline, findings, plan, execute) run in **one** `Hobbes cycle` workflow and land in **one PR** — the scorecard/findings (data) beside the theme-code fix. The determinism boundary still holds inside that run: the Python tools measure first (reproducibly, no LLM), then the agent judges and fixes. **There is no diff in a cycle** — a cycle measures the current site and has no "after" to compare (this cycle's fix isn't live yet). The before/after is the **review** stage's job, after a publish.
+> The first four stages (baseline, findings, plan, execute) run in **one** `Hobbes cycle` workflow and land in **one PR** — the scorecard/findings (data) beside the code fix. The determinism boundary still holds inside that run: the Python tools measure first (reproducibly, no LLM), then the agent judges and fixes. **There is no diff in a cycle** — a cycle measures the current site and has no "after" to compare (this cycle's fix isn't live yet). The before/after is the **review** stage's job, after a publish.
 
 **Why the boundary matters:** measurement must be reproducible (same raw → same findings, IDs and all), so it's deterministic and rebuilt every cycle. Fixing is judgment (what to group, what it costs, what it's worth, what the root cause is), so it's the agent's. Going live is irreversible and outward-facing, so it's the human's.
 
@@ -51,7 +51,7 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 The stage table above says *what each stage produces*. This is the other axis — the one that's easy to lose: **what each file reads, what it writes, and who consumes that next.** Follow one cycle's data from the live site all the way to the PR comment.
 
 ```
-  LIVE SITE  (hazelboutique.com — the only source of truth for numbers)
+  LIVE SITE  (the client's live URL — the only source of truth for numbers)
      │
      │  ── CAPTURE: three tools hit the site. Each writes a raw artifact and PRINTS its sections ──
      ├─ psi.py    ─►  raw/*.psi.json     (prints §A–D)
@@ -65,9 +65,9 @@ The stage table above says *what each stage produces*. This is the other axis �
                                                                                   │   (no diff in a cycle)
      │  ── JUDGMENT: the agent reads the catalog (never the raw) and works against the real code ──
                             02-evaluation.md + MISSION.md ─────────────►  [agent · PLAN-TEMPLATE]  ──►  plan.md
-            plan.md + 02-evaluation.md + 01-baseline.md + the theme source ───►  [agent · EXECUTE-TEMPLATE] ─►  execution.md + theme code + PR body
+            plan.md + 02-evaluation.md + 01-baseline.md + the source ───►  [agent · EXECUTE-TEMPLATE] ─►  execution.md + code + PR body
                                                                                   │
-                                              ONE PR  ──►  human review + merge  ──►  publish in Shopify  ──►  add `published` label
+                                              ONE PR  ──►  human review + merge  ──►  publish on your platform  ──►  add `published` label
                                                                                   │
      │  ── VERIFY: the same three tools re-run on the now-LIVE site, then diff'd ──
                           baseline.py ─► findings.py ─► diff.py  ──►  diff.md  ──►  gh pr comment  (the before/after)
@@ -76,7 +76,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 **Five handoffs worth understanding — this is the "what each file does along the way":**
 
 1. **Two readers, two different diets — one source, no middle file.** Each tool *prints* its rendered sections to stdout and writes its raw JSON to `raw/`. `baseline.py` runs the three as subprocesses and **captures their stdout**, slicing §A–F straight from the printed sections — there is no per-tool `*-results.md` on disk. `findings.py` eats the **raw** artifacts (`raw/*.psi.json`, `raw/crawl.json`) *directly*. `raw/` is git-ignored. This is why `02-evaluation.md` can't be rebuilt from `01-baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
-2. **The catalog can't drift from the scorecard.** `findings.py` doesn't re-implement parsing — it *imports* the same extractors from `psi.py` / `seo.py` / `crawl.py` that produced the numbers. One parser, two outputs, so a finding and its scorecard row can never disagree.
+2. **The catalog and the scorecard share their parsing logic, not their plumbing.** `findings.py` *imports* the extractors it can — `Page` / `head_ok` / `OG_REQUIRED` from `seo.py`, `table_rows` / `count_for` / `rollup_texts` / `header_set` from `crawl.py`, and the `a11y_audit_failed` predicate from `psi.py` — so where a number depends on "what counts" (a failing axe audit, a missing OG tag, a flagged crawl row), the catalog and the scorecard ride the *same definition* and can't disagree on it. They are still **two scripts reading `raw/` independently**, not one parser: `baseline.py` renders the scorecard from each tool's own stdout, and `findings.py` re-walks the PSI JSON itself to pull node-level evidence the scorecard never keeps. So treat the shared predicates/extractors as the guarantee — not the whole pipeline.
 3. **`diff.py` runs only in the review phase — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the diff lives entirely in the post-publish **review**: it reads two `01-baseline.md` files — the pre-publish baseline and the re-baselined live site — re-parses their tables back into numbers, and compares them tier by tier (field / lab / axe / counts). It touches no raw and only a findings *count*. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
 4. **The agent reads `02-evaluation.md`, never `raw/`.** Judgment works off the catalog — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
 5. **The capture tools run in both phases; the diff doesn't.** `baseline.py` + `findings.py` (driving psi/seo/crawl) run in the cycle (pre-fix) **and** in the review (post-publish, on the now-live site). `diff.py` is the one piece that's review-only — the review re-baselines the live site, rebuilds findings, then diffs against the pre-publish baseline, and that diff *is* the PR comment.
@@ -94,7 +94,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 | `findings.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `02-evaluation.md` | the agent (plan + execute), `diff.py` (count, review only) |
 | `diff.py` | two `01-baseline.md` (pre-publish + live re-baseline) | `diff.md` | the **post-publish PR comment** — **review phase only, not a cycle** |
 | agent · `PLAN` | `02-evaluation.md`, `MISSION.md` | `plan.md` | the execute stage |
-| agent · `EXECUTE` | `plan.md`, `02-evaluation.md`, `01-baseline.md`, theme source | `execution.md`, theme code, **PR body** | the human (review → publish) |
+| agent · `EXECUTE` | `plan.md`, `02-evaluation.md`, `01-baseline.md`, source | `execution.md`, code, **PR body** | the human (review → publish) |
 
 ---
 
@@ -106,7 +106,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 | File | Role |
 |---|---|
 | [`../CLAUDE.md`](../CLAUDE.md) | Hobbes's identity, stance, and **the hard line** (never publish/merge/spend without sign-off). Identical across all clients. |
-| [`context/MISSION.md`](context/MISSION.md) | What this client optimizes for, as **baseline → target** priorities (a11y, SEO, performance). Points at the scorecard for the numbers. |
+| [`context/MISSION.md`](context/MISSION.md) | What this client optimizes for, as **baseline → target** priorities (e.g. a11y, SEO, performance). Points at the scorecard for the numbers. |
 | [`context/DEVELOPMENT.md`](context/DEVELOPMENT.md) | The stack and the build rules — the "done means" gates. |
 | [`context/CONTEXT.md`](context/CONTEXT.md) | The client: goals, users, the people who sign off, where access lives. |
 | [`context/CHANGELOG.md`](context/CHANGELOG.md) | What has shipped, why, and to what result. |
@@ -114,12 +114,12 @@ The stage table above says *what each stage produces*. This is the other axis �
 ### Config — the one source of per-client truth
 | File | Lines | Role |
 |---|---|---|
-| [`hobbes.toml`](hobbes.toml) | 22 | Per-client config: the golden path (home/collection/product URLs), where secrets live (names, not values), branch prefix, **timezone** (pins cycle dates), **effort_budget**. |
+| [`hobbes.toml`](hobbes.toml) | 29 | Per-client config: the golden path (`[[golden_path]]` label + URL entries), branch prefix, **timezone** (pins cycle dates), **effort_budget**, **sample_path** (the crawler's high-volume page type). |
 
 ### The deterministic engine — `hobbes/tools/`
 | File | Lines | Role |
 |---|---|---|
-| [`tools/config.py`](tools/config.py) | 70 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
+| [`tools/config.py`](tools/config.py) | 81 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `sample_path()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
 | [`tools/psi.py`](tools/psi.py) | 358 | PageSpeed Insights / Lighthouse capture → prints scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) to stdout. Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
 | [`tools/seo.py`](tools/seo.py) | 316 | Per-page HTML SEO checklist → prints **§E** (titles, meta, canonical, OG, structured data). |
 | [`tools/crawl.py`](tools/crawl.py) | 437 | SiteOne sitemap crawl (stratified sample) → prints **§F** site-wide SEO/a11y/security counts. |
@@ -138,7 +138,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 | [`templates/TEMPLATE.md`](templates/TEMPLATE.md) | The baseline scorecard shape — §A–G (A–F tool-filled, G manual a11y for the human). |
 | [`templates/FINDINGS-TEMPLATE.md`](templates/FINDINGS-TEMPLATE.md) | The findings contract — dense, evidence-based, deterministic. |
 | [`templates/PLAN-TEMPLATE.md`](templates/PLAN-TEMPLATE.md) | The plan contract — group findings into systems → estimate effort → estimate impact → **order by leverage (impact ÷ effort)**. |
-| [`templates/EXECUTE-TEMPLATE.md`](templates/EXECUTE-TEMPLATE.md) | The execute contract — select a batch by effort budget, research, implement the **whole** batch, gates ("no *new* Theme Check offenses"), and the PR's before/after. Never publishes. |
+| [`templates/EXECUTE-TEMPLATE.md`](templates/EXECUTE-TEMPLATE.md) | The execute contract — select a batch by effort budget, research, implement the **whole** batch, gates ("no *new* checker offenses"), and the PR's before/after. Never publishes. |
 | [`templates/PUBLISH-TEMPLATE.md`](templates/PUBLISH-TEMPLATE.md) | The publish contract — human-owned: PR review → sign-off → merge → go-live → `published` label → review. |
 
 ### The cloud runner — `.github/workflows/`
@@ -163,24 +163,24 @@ Each cycle is a folder — the **filesystem is the state machine**. A folder acc
 
 **Cloud (the default).** Both workflows run from the **default branch** in GitHub Actions:
 - **Measure + fix:** Actions → *Hobbes cycle* → Run (blank budget = `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings *and* the code change. Manual trigger only — there is no cron; a cycle fires when you ask for one.
-- **Verify:** add the **`published`** label to the merged PR (after you publish in Shopify). → before/after comment. Manual re-run: Actions → *Hobbes review* → Run → enter the PR number.
+- **Verify:** add the **`published`** label to the merged PR (after you publish/go live). → before/after comment. Manual re-run: Actions → *Hobbes review* → Run → enter the PR number.
 
 GitHub emails you when a PR opens or a comment posts — that's the notification; you don't watch anything.
 
 **Local.** The deterministic half runs on a laptop with Python 3.11+ and the SiteOne crawler — `python3 hobbes/cli.py cycle` produces the data (scorecard + findings) only. The agent half (plan + fix) runs as the cloud workflow, or as local Claude Code against the templates (no secret needed — uses your login).
 
-**The operator's loop:** run *Hobbes cycle* when you want work → one PR (data + fix) in your inbox · review + merge → publish in Shopify → add `published` → the review posts the impact.
+**The operator's loop:** run *Hobbes cycle* when you want work → one PR (data + fix) in your inbox · review + merge → publish (go live) → add `published` → the review posts the impact.
 
 ---
 
 ## Load-bearing design decisions
 
-- **GitHub-only.** Hobbes touches nothing but GitHub. No Shopify CLI, no Shopify credentials. Going live is always a human in Shopify.
+- **GitHub-only.** Hobbes touches nothing but GitHub. No platform CLI, no deploy credentials. Going live is always a human on the platform.
 - **Claude Code, not the API.** The agent stage (plan + fix) authenticates with a **Claude Code subscription token** (`claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`), never a pay-per-token API key. The deterministic stages use no Claude at all.
 - **The determinism boundary.** Tools measure and compare (reproducible); the agent judges and builds (creative); the human publishes (irreversible). Each thing lives where it belongs.
 - **Measure and fix fire together, into one PR.** A CI cycle always runs the deterministic measure *and* the agent fix on one trigger, landing the scorecard/findings beside the code change in a single PR — so the fix is always planned against fresh measurements, never a stale cycle folder. There's no measure-only cron; a data-only run is the local `cli.py cycle`.
 - **The diff is the review's, not the cycle's.** A cycle measures the current site and has no "after" — this cycle's fix isn't live yet — so it writes no diff. The before/after lives entirely in the **review** phase (post-publish), where `diff.py` re-baselines the live site and compares it to the pre-publish baseline. This also gives the 28-day CrUX field signal time to move, which an at-publish comparison can't.
 - **The diff doesn't lie.** When it does run (in review), it separates the trustworthy field signal from volatile lab noise, gates site-wide counts on crawl coverage (a collapsed crawl can't read as "improvement"), and surfaces the §D a11y findings the agent actually targets — distinguishing a real win from noise from an *unfulfilled claim*.
-- **`published` is an explicit signal.** The review fires on a human-added label, not on merge — because "merged" doesn't mean "live," and every client's Shopify is wired differently.
+- **`published` is an explicit signal.** The review fires on a human-added label, not on merge — because "merged" doesn't mean "live," and every client's hosting/deploy is wired differently.
 - **Pinned-timezone dates.** Cycle folders are stamped in `[cycle].timezone`, so a local run and a UTC CI runner always land on the same calendar day.
 - **Effort budget is a ceiling, not a quota.** Execute fills it with leverage-ordered work and won't shoehorn; a high budget only produces a big PR when there's that much worthwhile work queued.

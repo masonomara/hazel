@@ -16,7 +16,7 @@ flowchart TD
         PSI["psi.py (358)<br/>reads: live (PSI API)<br/>writes: raw/*.psi.json + prints §A–D<br/>median-of-3, retry-resilient"]:::py
         SEO["seo.py (316)<br/>reads: live (HTML)<br/>writes: raw/*.seo.json + prints §E"]:::py
         CRAWL["crawl.py (437)<br/>reads: live (SiteOne crawl)<br/>writes: raw/crawl.json + prints §F"]:::py
-        BASELINE["baseline.py (135)<br/>reads: 3 tools' stdout + TEMPLATE.md<br/>writes: 01-baseline.md"]:::py
+        BASELINE["baseline.py (135)<br/>reads: 3 tools' stdout + baseline-template.md<br/>writes: 01-baseline.md"]:::py
         FINDINGS["evaluation.py (737)<br/>reads: raw/* directly<br/>imports the SAME extractors<br/>writes: 02-evaluation.md"]:::py
         DIFF["diff.py (241) — REVIEW-ONLY<br/>reads: 2 × 01-baseline.md<br/>writes: diff.md, honest by tier"]:::py
     end
@@ -45,11 +45,11 @@ flowchart TD
 
     %% ============ TEMPLATES ============
     subgraph TEMPLATES["stage contracts — hobbes/templates/*.md"]
-        TTMPL["TEMPLATE.md<br/>scorecard shape §A–G"]:::tmpl
-        FTMPL["FINDINGS-TEMPLATE.md<br/>the findings contract"]:::tmpl
-        PTMPL["PLAN-TEMPLATE.md<br/>group → effort → impact → leverage"]:::tmpl
-        ETMPL["EXECUTE-TEMPLATE.md<br/>batch by budget · gates · PR before/after"]:::tmpl
-        PUBTMPL["PUBLISH-TEMPLATE.md<br/>human-owned go-live contract"]:::tmpl
+        TTMPL["baseline-template.md<br/>scorecard shape §A–G"]:::tmpl
+        FTMPL["evaluation-template.md<br/>the findings contract"]:::tmpl
+        PTMPL["plan-template.md<br/>group → effort → impact → leverage"]:::tmpl
+        ETMPL["execute-template.md<br/>batch by budget · gates · PR before/after"]:::tmpl
+        PUBTMPL["publish-template.md<br/>human-owned go-live contract"]:::tmpl
     end
     TTMPL --> BASELINE
     FTMPL -. shape .-> FINDINGS

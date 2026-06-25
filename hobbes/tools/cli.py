@@ -93,11 +93,11 @@ def _agent_stage(template, rest):
 
 
 def cmd_plan(rest):
-    _agent_stage("PLAN-TEMPLATE.md", rest)
+    _agent_stage("plan-template.md", rest)
 
 
 def cmd_execute(rest):
-    _agent_stage("EXECUTE-TEMPLATE.md", rest)
+    _agent_stage("execute-template.md", rest)
 
 
 def cmd_budget(rest):

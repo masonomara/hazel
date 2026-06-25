@@ -1,6 +1,6 @@
 # Changelog
 
-<!-- Human-owned record. At the publish stage Hobbes drafts a new entry for the human to review and approve (see hobbes/templates/PUBLISH-TEMPLATE.md); past entries are history and are never rewritten. Per-cycle numbers live in the scorecard, not here. -->
+<!-- Human-owned record. At the publish stage Hobbes drafts a new entry for the human to review and approve (see hobbes/templates/publish-template.md); past entries are history and are never rewritten. Per-cycle numbers live in the scorecard, not here. -->
 
 The running record of shipped work. One change per entry, numbered in order, newest at the bottom of **Entries**.
 

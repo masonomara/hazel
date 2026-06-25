@@ -3,7 +3,7 @@
 baseline.py — one-command MVP baseline runner.
 
 Runs psi.py (A–D), seo.py (E), and crawl.py (site-wide F), then stamps a dated
-scorecard from TEMPLATE.md with the header populated and sections A–F pasted in.
+scorecard from baseline-template.md with the header populated and sections A–F pasted in.
 Section G (manual a11y) is left blank for the human — the above-and-beyond pass.
 
 A baseline should reflect the CURRENT site, so this fetches fresh by default.
@@ -30,7 +30,7 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
-TEMPLATE = HOBBES / "templates" / "TEMPLATE.md"
+TEMPLATE = HOBBES / "templates" / "baseline-template.md"
 
 sys.path.insert(0, str(TOOLS))
 import config
@@ -49,7 +49,7 @@ def after(text, marker):
 
 
 def section_g(template_text):
-    """Section G (manual a11y) — intro + column header come from TEMPLATE.md; the
+    """Section G (manual a11y) — intro + column header come from baseline-template.md; the
     page rows are generated from the golden path so G speaks the same URL-derived
     labels as A–F. The template's own rows are illustrative and dropped."""
     g = after(template_text, "## G.")

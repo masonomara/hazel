@@ -3,7 +3,7 @@
 evaluation.py — the problem catalog. Reads a cycle's raw artifacts and emits a
 dense, deterministic 02-evaluation.md: every problem, with verbatim evidence, for an
 agent. Step after baseline.py (which captures) and before the plan (which groups,
-fixes, and rates effort/impact). See hobbes/templates/FINDINGS-TEMPLATE.md.
+fixes, and rates effort/impact). See hobbes/templates/evaluation-template.md.
 
 WHY DETERMINISTIC: findings get rebuilt every cycle. Same raw → same findings,
 IDs and all. Everything here is extracted and sorted, never written fresh per
@@ -988,7 +988,7 @@ def main():
         "weighting, no hand-picking; same raw always yields the same findings. Where a list "
         "is long it is capped with an explicit `+N more`, never silently trimmed. "
         "Numbers and scorecard in `01-baseline.md`; the fix, effort, and impact are the **plan's** job, not this file's. "
-        "See `hobbes/templates/FINDINGS-TEMPLATE.md`.",
+        "See `hobbes/templates/evaluation-template.md`.",
     ]
     for key, name, note in DOMAINS:
         items = sections[key]

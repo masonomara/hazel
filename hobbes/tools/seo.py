@@ -13,14 +13,14 @@ lack alt; a human judges whether the alt that exists is meaningful. Same
 AI-vs-human split as the manual a11y pass.
 
 No API key needed (plain HTML fetch). Mirrors psi.py: retry, per-page cache
-(git-ignored *.seo.json), and a durable artifact at hobbes/tools/seo-results.md.
+(git-ignored *.seo.json), and prints §E to stdout for baseline.py to capture.
 
 USAGE:
   python3 hobbes/tools/seo.py                 # default golden path
   python3 hobbes/tools/seo.py URL [URL ...]   # custom URLs
   python3 hobbes/tools/seo.py --fresh         # ignore cache, re-fetch
-  python3 hobbes/tools/seo.py --out PATH      # write digest elsewhere
-  python3 hobbes/tools/seo.py --run-dir DIR   # cycle folder (raw/ + digest); default today's
+  python3 hobbes/tools/seo.py --out PATH      # also write the digest to PATH
+  python3 hobbes/tools/seo.py --run-dir DIR   # cycle folder (raw/); default today's
 """
 
 import json
@@ -44,13 +44,13 @@ LD_KNOWN = {"Product", "BreadcrumbList", "Organization", "WebSite", "WebPage",
 
 
 def resolve_run_dir(args):
-    """Per-cycle output folder: hobbes/scorecards/<date>/. Raw *.seo.json caches
-    live in raw/; the digest sits at the top. baseline.py passes --run-dir so
-    psi/seo/crawl share one cycle folder; a standalone run defaults to today's."""
+    """Per-cycle output folder: hobbes/cycle/<date>/. Raw *.seo.json caches
+    live in raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle
+    folder; a standalone run defaults to today's."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "scorecards" / config.today()
+        d = HOBBES / "cycle" / config.today()
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 
@@ -235,7 +235,7 @@ def main():
     fresh = "--fresh" in args
     rd = resolve_run_dir(args)
     raw = rd / "raw"
-    out = rd / "seo-results.md"
+    out = None                                    # no default file: baseline.py reads stdout; --out opts in
     for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
         if flag in args:
             i = args.index(flag)
@@ -300,9 +300,10 @@ def main():
         L += ["", "> ✗ Fetch failed (cells show —): " + ", ".join(failed)]
     report = "\n".join(L) + "\n"
 
-    print(report)
-    out.write_text(report)
-    print(f"→ written to {out}", file=sys.stderr)
+    print(report)                                 # stdout — baseline.py captures this into the one digest
+    if out:                                        # --out only; no default per-tool file
+        out.write_text(report)
+        print(f"→ written to {out}", file=sys.stderr)
 
 
 def _quick_title(html):

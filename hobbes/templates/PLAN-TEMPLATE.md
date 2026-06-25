@@ -1,18 +1,18 @@
 # Plan — YYYY-MM-DD
 
-Site: [url] · Cycle: [YYYY-MM-DD] · Authored by Hobbes from `findings.md` + `baseline.md` + `raw/`.
+Site: [url] · Cycle: [YYYY-MM-DD] · Authored by Hobbes from `02-evaluation.md` + `01-baseline.md` + `raw/`.
 
 This is the **plan** — where the system goes from deterministic extraction to judgment. Baseline and findings are tool-built and repeat exactly; the plan is Hobbes thinking. It sits between two documents and is not either of them:
 
-- `findings.md` is the **problem catalog** — every problem, deterministic, no fix and no weighting. The plan **groups** those problems into systems and **rates** them.
+- `02-evaluation.md` is the **problem catalog** — every problem, deterministic, no fix and no weighting. The plan **groups** those problems into systems and **rates** them.
 - **Execution** (next stage) does the work, top-down through the order the plan sets. The plan does not write the fix line-by-line — it understands each system well enough to estimate effort and impact and tell execution where to start.
 
 Two runs of the plan may differ — judgment isn't deterministic, and that's correct. The one hard rule: **invent nothing.** Every system maps to real finding IDs from this cycle. Facts (the findings) stay apart from the calls (your effort/impact ratings), and you own the calls.
 
 ## Inputs — read all, in depth, before grouping
 
-- **`findings.md`** — the problems to group. Every system cites its finding IDs.
-- **`baseline.md`** — the numbers, targets, and the **field-vs-lab** reality (e.g. §C CrUX may already pass where lab fails — that changes impact).
+- **`02-evaluation.md`** — the problems to group. Every system cites its finding IDs.
+- **`01-baseline.md`** — the numbers, targets, and the **field-vs-lab** reality (e.g. §C CrUX may already pass where lab fails — that changes impact).
 - **`raw/`** — go deeper on any finding when grouping or effort needs more than the catalog shows.
 - **`MISSION.md`** — what impact is rated against: the three priorities (Accessibility › SEO › Performance), the mission line, and "Needs work".
 - **`DEVELOPMENT.md` + `CONTEXT.md`** — the stack, the constraints, the people and access. This is what "the resources we have" *means* — who can do each kind of work.
@@ -65,11 +65,11 @@ Every finding in the cycle lands in exactly one system — none dropped, none in
 
 ## The handoff
 
-The ordered table is what execution consumes. It works the systems top-down, proving each against the BASELINE targets and the `DEVELOPMENT.md` "done means" bar before moving on. After execution, re-baseline and diff the next cycle against this one — closed findings and any regressions tell you whether the plan worked.
+The ordered table is what execution consumes. It works the systems top-down, proving each against the BASELINE targets and the `DEVELOPMENT.md` "done means" bar before moving on. After publish, the review re-baselines the live site and diffs against this cycle's baseline — closed findings and any regressions tell you whether the plan worked.
 
 ## Pointers
 
-- `findings.md` — the problems this plan groups (cite the IDs).
-- `baseline.md` — the numbers and field-vs-lab context.
+- `02-evaluation.md` — the problems this plan groups (cite the IDs).
+- `01-baseline.md` — the numbers and field-vs-lab context.
 - `MISSION.md` — what impact is rated against.
 - `DEVELOPMENT.md` · `CONTEXT.md` — the stack, constraints, and people behind every effort estimate.

@@ -12,12 +12,12 @@ The per-client config every tool reads. Fill it once:
 
 ## Local setup — the engine on your machine
 
-To run `python3 hobbes/cli.py cycle` (baseline → findings → diff) on a laptop:
+To run `python3 hobbes/cli.py cycle` (baseline → findings) on a laptop:
 
 - **Python ≥ 3.11** — stdlib only (`tomllib`); nothing to pip-install.
 - **SiteOne crawler** on `PATH` — the whole-site crawl. macOS: `brew install janreges/tap/siteone-crawler` (or the desktop GUI app).
-- **PSI key** — at `hobbes/tools/.psi-key` (git-ignored), or the `$PSI_API_KEY` env var. Get one: Google Cloud Console → enable *PageSpeed Insights API* → Credentials → API key.
-- **First run:** `python3 hobbes/cli.py cycle` → a dated `hobbes/scorecards/<date>/` folder. `python3 hobbes/cli.py status` shows which stage it reached.
+- **PSI key** — the `$PSI_API_KEY` env var (`export` it for the run). Get one: Google Cloud Console → enable *PageSpeed Insights API* → Credentials → API key.
+- **First run:** `python3 hobbes/cli.py cycle` → a dated `hobbes/cycle/<date>/` folder. `python3 hobbes/cli.py status` shows which stage it reached.
 
 The agent stages (plan / execute) can run as local Claude Code instead of the cloud action — no secret needed; it uses your login.
 
@@ -37,11 +37,11 @@ Details below.
 
 ## 1. Two repo secrets
 
-**Secrets never live in the repo.** `hobbes.toml` only *names* where to look; the values go in GitHub (cloud) and a git-ignored file (local).
+**Secrets never live in the repo.** They go in GitHub as repo secrets (cloud) and as env vars (local).
 
 | Secret | What it is | Where to get it | Cloud (GitHub) | Local |
 |---|---|---|---|---|
-| `PSI_API_KEY` | Google PageSpeed Insights key | Google Cloud Console → enable *PageSpeed Insights API* → Credentials → API key | repo secret | `hobbes/tools/.psi-key` (git-ignored) |
+| `PSI_API_KEY` | Google PageSpeed Insights key | Google Cloud Console → enable *PageSpeed Insights API* → Credentials → API key | repo secret | `export $PSI_API_KEY` |
 | `CLAUDE_CODE_OAUTH_TOKEN` | Claude Code **subscription** token (Pro/Max) — drives the agent fix in the cycle. **Not** a pay-per-token API key | run **`claude setup-token`** locally, copy the token | repo secret | not needed (local Claude Code uses your login) |
 
 **Settings → Secrets and variables → Actions → New repository secret**, add both by the exact names. A headless runner has no Claude login, so the cycle's agent step needs the subscription token stored as a secret — but it's your subscription, **never an Anthropic API key**. The deterministic measurement (and the `review` workflow) use no Claude — only PSI.
@@ -80,7 +80,7 @@ GitHub runs `workflow_dispatch` workflows only from the **default branch** — m
 
 ## 6. First run
 
-- **Actions → "Hobbes cycle" → Run workflow** (blank budget = the `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings/diff *and* the code change, plus a GitHub email. (Needs all of steps 1–3 + 5.)
+- **Actions → "Hobbes cycle" → Run workflow** (blank budget = the `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings *and* the code change, plus a GitHub email. (Needs all of steps 1–3 + 5.)
 - Run it again whenever you want a fresh cycle — there's no cron; it fires on demand.
 
 ## Already wired in the workflow YAML — you don't touch these

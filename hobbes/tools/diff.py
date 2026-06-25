@@ -26,13 +26,13 @@ TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
 import config
-SCORECARDS = HOBBES / "scorecards"
+CYCLES = HOBBES / "cycle"
 COVERAGE_OK = 0.8   # §F counts compared only if min/max crawl-page ratio ≥ this
 
 
 def cycle_dirs():
-    ds = [d for d in SCORECARDS.glob("[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]")
-          if (d / "baseline.md").exists()]
+    ds = [d for d in CYCLES.glob("[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]")
+          if (d / "01-baseline.md").exists()]
     return sorted(ds, key=lambda d: d.name)
 
 
@@ -93,23 +93,33 @@ def crawl_pages(md):
 
 
 def findings_total(run):
-    f = run / "findings.md"
+    f = run / "02-evaluation.md"
     m = re.search(r"(\d+)\s+findings", f.read_text()) if f.exists() else None
     return int(m.group(1)) if m else None
 
 
-def _delta_lines(d_cur, d_prior, worse):
-    """(regressions, improvements) for two {key: value} dicts. `worse` says which
-    direction is a regression: 'gt' (higher = worse) or 'lt' (lower = worse)."""
-    regr, impr = [], []
+# Short parse keys → the scorecard's own display labels, so the diff speaks the
+# same language 01-baseline.md does (not "perf"/"bp"/"lcp").
+SCORE_LABELS = {"perf": "Performance", "a11y": "Accessibility", "bp": "Best Practices", "seo": "SEO"}
+FIELD_LABELS = {"lcp": "LCP (s)", "inp": "INP (ms)", "cls": "CLS"}
+
+
+def _fmt(v):
+    """Ints plain, floats trimmed (50.0 → '50', 1.562 → '1.562')."""
+    return f"{v:g}" if isinstance(v, float) else str(v)
+
+
+def _deltas(d_cur, d_prior, worse, label):
+    """Changed keys shared by both cycles → [(label, before, after, improved)].
+    `worse`: 'gt' (higher = regression) or 'lt' (lower = regression)."""
+    rows = []
     for k in sorted(d_cur.keys() & d_prior.keys()):
         a, b = d_prior[k], d_cur[k]
         if a == b:
             continue
-        label = (f"{k[0]} {k[1]}" if isinstance(k, tuple) else k) + f": {a:g} → {b:g}"
-        bad = (b > a) if worse == "gt" else (b < a)
-        (regr if bad else impr).append(label)
-    return regr, impr
+        regressed = (b > a) if worse == "gt" else (b < a)
+        rows.append((label(k), a, b, not regressed))
+    return rows
 
 
 def axe(md):
@@ -126,24 +136,38 @@ def axe(md):
     return out
 
 
-def _axe_delta(cur, prior):
-    """(regressions, improvements) over the UNION of rules — a rule fixed to 0 vanishes from
-    §D, so absent = 0. Fewer failing nodes is better."""
-    regr, impr = [], []
+def _axe_deltas(cur, prior):
+    """axe nodes over the UNION of rules (a rule fixed to 0 leaves §D, so absent = 0).
+    Fewer failing nodes = better → [(rule, before, after, improved)]."""
+    rows = []
     for k in sorted(cur.keys() | prior.keys()):
         a, b = prior.get(k, 0), cur.get(k, 0)
         if a == b:
             continue
-        (regr if b > a else impr).append(f"{k}: {a} → {b}")
-    return regr, impr
+        rows.append((k, a, b, b < a))
+    return rows
+
+
+def _tier(title, prior_name, cur_name, rows, note=""):
+    """One tier of the diff, rendered like a baseline section: a before→after table
+    of only the rows that moved — or a single 'no change' line if none did."""
+    out = [f"## {title}", ""]
+    if note:
+        out += [f"*{note}*", ""]
+    if not rows:
+        return out + ["_No change._", ""]
+    out += [f"| Item | {prior_name} | {cur_name} | |", "|---|---|---|---|"]
+    for label, a, b, improved in rows:
+        out.append(f"| {label} | {_fmt(a)} | {_fmt(b)} | {'▲' if improved else '▼'} |")
+    return out + [""]
 
 
 def main():
     args = sys.argv[1:]
     runs = cycle_dirs()
     cur = Path(args[args.index("--run-dir") + 1]).resolve() if "--run-dir" in args else (runs[-1] if runs else None)
-    if cur is None or not (cur / "baseline.md").exists():
-        sys.exit("✗ no cycle with baseline.md to diff")
+    if cur is None or not (cur / "01-baseline.md").exists():
+        sys.exit("✗ no cycle with 01-baseline.md to diff")
     out = Path(args[args.index("--out") + 1]) if "--out" in args else cur / "diff.md"
     if "--prior" in args:
         prior = Path(args[args.index("--prior") + 1]).resolve()
@@ -158,7 +182,7 @@ def main():
         print(f"{cur.name}: baseline established (no prior)")
         return
 
-    cb, pb = (cur / "baseline.md").read_text(), (prior / "baseline.md").read_text()
+    cb, pb = (cur / "01-baseline.md").read_text(), (prior / "01-baseline.md").read_text()
     cs, ps = scores(cb), scores(pb)
     cf, pf = field(cb), field(pb)
     if not (cs.keys() & ps.keys()) and not (cf.keys() & pf.keys()):
@@ -168,20 +192,22 @@ def main():
         print(f"{cur.name}: prior {prior.name} not comparable (older format)")
         return
 
-    field_regr, field_impr = _delta_lines(cf, pf, worse="gt")          # field: lower better
-    score_regr, score_impr = _delta_lines(cs, ps, worse="lt")          # lab: higher better
-    lab = [f"▼ {r}" for r in score_regr] + [f"▲ {i}" for i in score_impr]
-    axe_regr, axe_impr = _axe_delta(axe(cb), axe(pb))                   # §D axe nodes: lower better
+    field_rows = _deltas(cf, pf, "gt", lambda k: f"{k[0]} · {FIELD_LABELS[k[1]]}")   # field: lower better
+    score_rows = _deltas(cs, ps, "lt", lambda k: f"{k[0]} · {SCORE_LABELS[k[1]]}")   # lab: higher better
+    axe_rows = _axe_deltas(axe(cb), axe(pb))                                          # §D axe nodes: lower better
 
     cpg, ppg = crawl_pages(cb), crawl_pages(pb)
     coverage_gap = cpg and ppg and min(cpg, ppg) / max(cpg, ppg) < COVERAGE_OK
-    count_regr, count_impr, findings_line = [], [], ""
+    count_rows, findings_row = [], None
     if not coverage_gap:
-        count_regr, count_impr = _delta_lines(counts(cb), counts(pb), worse="gt")
+        count_rows = _deltas(counts(cb), counts(pb), "gt", lambda k: k)
         cft, pft = findings_total(cur), findings_total(prior)
         if cft is not None and pft is not None and cft != pft:
-            (count_regr if cft > pft else count_impr).append(f"findings: {pft} → {cft}")
+            findings_row = (f"Findings (catalog total)", pft, cft, cft < pft)
 
+    field_regr = [r for r in field_rows if not r[3]]
+    axe_impr = [r for r in axe_rows if r[3]]
+    count_regr = [r for r in count_rows if not r[3]]
     tldr = f"{len(field_regr)} field regression(s) vs {prior.name}"
     if axe_impr:
         tldr += f" · {len(axe_impr)} a11y rule(s) improved"
@@ -190,24 +216,24 @@ def main():
     elif count_regr:
         tldr += f" · {len(count_regr)} site-wide count regression(s)"
 
-    L = [f"# Diff — {cur.name} vs {prior.name}", "", f"Generated {stamp}. **{tldr}.**", "",
-         "## Field data — CrUX, the trustworthy signal (lower = better)", "",
-         "**Regressions:**", *([f"- {r}" for r in field_regr] or ["- (none)"]),
-         "", "**Improvements:**", *([f"- {i}" for i in field_impr] or ["- (none)"]),
-         "", "## Lab scores — §A, volatile (PSI lab swings ±~10 even at median-of-3; small moves are noise)", "",
-         *(lab or ["- (no change)"]),
-         "", "## Accessibility — §D axe findings (failing nodes on the golden path, lower = better)", "",
-         "**Fixed / improved:**", *([f"- {i}" for i in axe_impr] or ["- (none)"]),
-         "", "**Regressions:**", *([f"- {r}" for r in axe_regr] or ["- (none)"]),
-         "", "## Site-wide counts — §F (crawl-coverage dependent)", ""]
+    pn, cn = prior.name, cur.name
+    L = [f"# Diff — {cn} vs {pn}", "",
+         f"Generated {stamp}. **{tldr}.**", "",
+         "▲ better · ▼ worse · only rows that changed are shown.", ""]
+    L += _tier("Field data — CrUX (28-day, the trustworthy signal)", pn, cn, field_rows,
+               "Real-user data — a just-published change lands here in a later cycle, not now.")
+    L += _tier("Lab scores — Lighthouse §A", pn, cn, score_rows,
+               "PSI lab swings ±~10 even at median-of-3; treat small moves as noise.")
+    L += _tier("Accessibility — axe failing nodes (§D, golden path)", pn, cn, axe_rows)
     if coverage_gap:
-        L += [f"⚠ Crawl coverage changed **{ppg} → {cpg} pages** — site-wide counts are not "
-              f"comparable this cycle and are omitted. A smaller crawl drops every count; "
-              f"that is sample size, not improvement."]
+        L += ["## Site-wide counts — §F", "",
+              f"⚠ Crawl coverage changed **{ppg} → {cpg} pages** — counts aren't comparable this "
+              f"cycle, so they're omitted. A smaller crawl drops every count; that's sample size, "
+              f"not improvement.", ""]
     else:
-        L += ["**Regressions:**", *([f"- {r}" for r in count_regr] or ["- (none)"]),
-              "", "**Improvements:**", *([f"- {i}" for i in count_impr] or ["- (none)"])]
-    out.write_text("\n".join(L) + "\n")
+        L += _tier("Site-wide counts — §F (whole-site crawl)", pn, cn,
+                   count_rows + ([findings_row] if findings_row else []))
+    out.write_text("\n".join(L).rstrip() + "\n")
     print(tldr)
 
 

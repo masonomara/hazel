@@ -10,7 +10,7 @@ Make the Hazel storefront fast, accessible, and easy to find — clean and consi
 
 ## Top priorities
 
-Each is written **baseline → target** so "done" is measured, not argued. This file holds the **target**; the **baseline** — the current numbers — lives in the latest scorecard under `hobbes/scorecards/`. If a priority has no number in the scorecard yet, it isn't a priority yet — baseline it first.
+Each is written **baseline → target** so "done" is measured, not argued. This file holds the **target**; the **baseline** — the current numbers — lives in the latest scorecard under `hobbes/cycle/` (`<date>/01-baseline.md`). If a priority has no number in the scorecard yet, it isn't a priority yet — baseline it first.
 
 1. **Accessibility** → Lighthouse Accessibility 100 and zero accessibility errors (axe via PSI and the sitewide crawl), all core pages.
 2. **SEO & discoverability** → Lighthouse SEO ≥ 95 and the full SEO checklist passing, all core pages.

@@ -25,7 +25,7 @@ The plan already ordered every system by leverage. Execution just draws a line o
 
 > Study **[selected systems]** in great detail. Understand the intricacies of each. **[selected systems]** need to be improved. Create a detailed plan document outlining how to achieve this. Use **web search** and the **context7 MCP** to research — framework/library docs (Shopify, Liquid, Dawn where covered) via context7, app-specific config and current specifics via web. Include code snippets. **Read the actual source files before suggesting any change — base the plan on the real codebase, not assumptions.** Add a detailed todo list to the plan, with all the phases and individual tasks necessary to complete it.
 
-Write the plan to `execution.md` in the cycle folder. Each task names the system / finding ID it closes, so the diff back to `findings.md` stays traceable.
+Write the plan to `execution.md` in the cycle folder. Each task names the system / finding ID it closes, so the diff back to `02-evaluation.md` stays traceable.
 
 ## 3. Implement
 
@@ -50,7 +50,7 @@ The "done means" bar belongs to the stack, and it lives in `DEVELOPMENT.md` — 
 - **Run `shopify theme check` continuously** — the theme's checker (the role "typecheck" plays elsewhere). The bar is **no new offenses in the files you touched**; pre-existing ones elsewhere are out of scope.
 - **Browser verification is the human's, at review** — the agent can't run a browser in CI. It authors against the source; the mobile + desktop check and "no new console errors" happen at review, and every bucket-2 change is flagged for exactly that.
 - **Keep the fork upgrade-safe** — self-contained snippets, Hazel overrides in the appended `base.css` section, minimal Dawn-core edits. Do not hand-edit `settings_data.json`.
-- **No regression** against the `baseline.md` targets.
+- **No regression** against the `01-baseline.md` targets.
 - **No unnecessary comments**; match the surrounding file's style.
 
 > The seed prompt's "no any/unknown types · run typecheck" is TypeScript language. This codebase has none — so it maps to: honor whatever type discipline the stack has (here, none) and run whatever checker it has (here, `shopify theme check`). Don't carry a gate the stack can't run; substitute the real one from `DEVELOPMENT.md`.
@@ -59,8 +59,8 @@ The "done means" bar belongs to the stack, and it lives in `DEVELOPMENT.md` — 
 
 When the batch is implemented and the gates pass: **stop.** Do not merge, and do not publish the live theme — that's the `publish` stage, and a human owns it. Push the feature branch and open the PR. The PR body must carry the **baseline before/after**, not just a prose summary:
 
-- **Before** — for every finding the batch closes, its *current measured value* pulled from this cycle's `baseline.md` / `findings.md` (e.g. "a11y 88 mobile", "73 pages missing meta description"), plus the target it should hit. This is the pre-fix state, captured before the PR opens.
-- **After (measured) comes post-publish, by necessity.** PSI and the crawl only measure the **live** site, and the fix isn't live until a human publishes — so the true after is not knowable at PR time. It lands in the **next cycle's `diff.md`** once the change is live; link that diff back to this PR to close the loop. Do not fabricate an after from local guesses or unpublished previews.
+- **Before** — for every finding the batch closes, its *current measured value* pulled from this cycle's `01-baseline.md` / `02-evaluation.md` (e.g. "a11y 88 mobile", "73 pages missing meta description"), plus the target it should hit. This is the pre-fix state, captured before the PR opens.
+- **After (measured) comes post-publish, by necessity.** PSI and the crawl only measure the **live** site, and the fix isn't live until a human publishes — so the true after is not knowable at PR time. It lands in the **review's before/after comment** once the change is live (the review re-baselines the live site and diffs against this cycle's baseline); the 28-day CrUX field part confirms in a later review still. Do not fabricate an after from local guesses or unpublished previews.
 - **What shipped** — the systems implemented this run, each naming the finding/system IDs it closes.
 - **Human to-do — the actions only a person can take, as a checkbox list grouped by owner.** Execution writes only code; everything else the cycle surfaced lands here so the PR is a complete handoff, not a code drop with the rest lost. Write each as `- [ ]` so it can be ticked off, and give each item *the action · the owner · the finding/system it closes*. Always cover:
   - **Publish** (every PR, owner: Mason) — merge → push to a dev theme → verify mobile + desktop → publish live → add the `published` label. (Steps in `PUBLISH-TEMPLATE.md`.)
@@ -73,6 +73,6 @@ That open PR **is** the handoff to `publish` — execution is done. The cycle cl
 ## Pointers
 
 - `plan.md` — the ordered systems this batch is drawn from.
-- `findings.md` / `baseline.md` — what each task closes, and the targets to hold.
+- `02-evaluation.md` / `01-baseline.md` — what each task closes, and the targets to hold.
 - `DEVELOPMENT.md` — the stack and the real "done means" gates.
 - `CONTEXT.md` — who owns the non-code work (content, app decisions, sign-off).

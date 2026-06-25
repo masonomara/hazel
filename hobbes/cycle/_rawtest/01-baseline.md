@@ -1,6 +1,6 @@
-# Baseline scorecard — 2026-06-22
+# Baseline scorecard — 2026-06-24
 
-Client: Hazel Boutique · Site: hazelboutique.com · Platform: Shopify Advanced · Run by: Mason · Date: 2026-06-22
+Client: Hazel Boutique · Site: hazelboutique.com · Platform: Shopify Advanced · Run by: Mason · Date: 2026-06-24
 
 Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelboutique.com/collections/all-hazel-brand) · [Product](https://hazelboutique.com/products/the-capri-collection-baby-pink)
 
@@ -10,44 +10,44 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile | 63 | 97 | 92 | 100 |
-| Home — desktop | 48 | 97 | 96 | 100 |
-| Collection — mobile | 62 | 97 | 96 | 100 |
-| Collection — desktop | 51 | 97 | 92 | 100 |
-| Product — mobile | 70 | 97 | 92 | 100 |
-| Product — desktop | 60 | 97 | 92 | 100 |
+| Home — mobile | 50 | 100 | 96 | 100 |
+| Home — desktop | 57 | 100 | 96 | 100 |
+| Collection — mobile | 59 | 100 | 96 | 100 |
+| Collection — desktop | 60 | 100 | 96 | 100 |
+| Product — mobile | 59 | 100 | 92 | 100 |
+| Product — desktop | 76 | 100 | 92 | 100 |
 
-> Perf-score spread across 3 runs (median kept): Home — mobile 63/63/63 · Home — desktop 48/48/48 · Collection — mobile 62/62/62 · Collection — desktop 51/51/51 · Product — mobile 52/70/70 · Product — desktop 60/60/60.
+> Perf-score spread across 3 runs (median kept): Home — mobile 42/50/54 · Home — desktop 50/57/76 · Collection — mobile 46/59/59 · Collection — desktop 41/60/60 · Product — mobile 43/59/68 · Product — desktop 64/76/76.
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile | 12.6 | 0.138 | 1.89 | 0.01 | 150 | 5.11 |
-| Home — desktop | 2.38 | 1.01 | 0.52 | 0.01 | 302 | 1.61 |
-| Collection — mobile | 13.95 | 0.06 | 2.94 | 0.01 | 182 | 5.53 |
-| Collection — desktop | 1.7 | 1.008 | 0.52 | 0.01 | 384 | 1.25 |
-| Product — mobile | 5.55 | 0.123 | 1.83 | 0.01 | 158 | 4.49 |
-| Product — desktop | 1.56 | 1.01 | 0.52 | 0.01 | 247 | 1.29 |
+| Home — mobile | 22.25 | 0 | 5.79 | 0.01 | 322 | 8.64 |
+| Home — desktop | 2.3 | 1.008 | 0.52 | 0.01 | 193 | 1.39 |
+| Collection — mobile | 14.55 | 0.06 | 2.72 | 0.01 | 324 | 5.39 |
+| Collection — desktop | 2.26 | 1.01 | 0.52 | 0.01 | 153 | 1.15 |
+| Product — mobile | 16.26 | 0.06 | 3.24 | 0.01 | 249 | 5.98 |
+| Product — desktop | 2.14 | 0.204 | 0.5 | 0.01 | 121 | 1.59 |
 
 ## C. Field data (CrUX 28-day)
 
 | Page | LCP (s) | INP (ms) | CLS | Pass |
 |---|---|---|---|---|
-| Home | 1.551 | 105.0 | 0.08 | ✓ |
-| Collection | 0.731 | 78.0 | 0.01 | ✓ |
-| Product — origin agg. | 1.028 | 98.0 | 0.0 | ✓ |
+| Home | 1.562 | 111.0 | 0.08 | ✓ |
+| Collection | 0.747 | 78.0 | 0.01 | ✓ |
+| Product — origin agg. | 1.043 | 103.0 | 0.0 | ✓ |
 
 ## D. Accessibility — automated (axe via PSI)
 
 | Page / Device | Failing audits | Pass | Details (rule × nodes) |
 |---|---|---|---|
-| Home — mobile | 2 | ✗ | label-content-name-mismatch×3, frame-title×1 |
-| Home — desktop | 1 | ✗ | frame-title×1 |
-| Collection — mobile | 1 | ✗ | frame-title×1 |
-| Collection — desktop | 1 | ✗ | frame-title×1 |
-| Product — mobile | 1 | ✗ | frame-title×1 |
-| Product — desktop | 1 | ✗ | frame-title×1 |
+| Home — mobile | 0 | ✓ | none |
+| Home — desktop | 0 | ✓ | none |
+| Collection — mobile | 0 | ✓ | none |
+| Collection — desktop | 0 | ✓ | none |
+| Product — mobile | 0 | ✓ | none |
+| Product — desktop | 0 | ✓ | none |
 
 ## E. SEO checklist (golden path)
 
@@ -67,44 +67,44 @@ Golden path: [Home](https://hazelboutique.com/) · [Collection](https://hazelbou
 | sitemap.xml | ✓ |
 | robots.txt | ✓ |
 
-## F. Site-wide (sitemap sample crawl — 185 pages)
+## F. Site-wide (sitemap sample crawl — 171 pages)
 
 | SiteOne quality score (0–10) | Value |
 |---|---|
 | Performance | 10.0 |
-| SEO | 9.8 |
-| Security | 6.5 |
-| Accessibility | 6.0 |
-| Best practices | 4.6 |
+| SEO | 10.0 |
+| Security | 7.0 |
+| Accessibility | 5.0 |
+| Best practices | 4.7 |
 
 | SEO / structure | Count | Pass |
 |---|---|---|
 | Broken links (4xx) | 0 | ✓ |
 | Redirects | 0 | ✓ |
 | Missing titles | 0 | ✓ |
-| Duplicate titles | 4 | ✗ |
+| Duplicate titles | 0 | ✓ |
 | Missing meta descriptions | 0 | ✓ |
 | Pages with multiple H1 | 1 | ✗ |
-| Pages with skipped heading levels | 2 | ✗ |
+| Pages with skipped heading levels | 1 | ✗ |
 
 | Accessibility | Count | Pass |
 |---|---|---|
-| Pages missing image alt | 1 | ✗ |
-| Pages missing aria-labels | 1 | ✗ |
-| Pages missing roles | 0 | ✓ |
+| Pages missing image alt | 171 | ✗ |
+| Pages missing aria-labels | 171 | ✗ |
+| Pages missing roles | 171 | ✗ |
 | Pages missing html lang | 0 | ✓ |
 
 | Best practices | Count | Pass |
 |---|---|---|
-| Pages with invalid inline SVG | 185 | ✗ |
-| Pages with duplicate inline SVG | 10 | ✗ |
+| Pages with invalid inline SVG | 171 | ✗ |
+| Pages with duplicate inline SVG | 9 | ✗ |
 | Pages with non-clickable phone numbers | 0 | ✓ |
-| Valid HTML | 185 | ✓ |
+| Valid HTML | 171 | ✓ |
 
 | Security | Pass |
 |---|---|
-| HSTS header | ✓ |
-| Content-Security-Policy | ✓ |
+| HSTS header | ✗ |
+| Content-Security-Policy | ✗ |
 | Referrer-Policy | ✗ |
 | Permissions-Policy | ✗ |
 | Brotli compression | ✓ |

@@ -86,5 +86,5 @@ Do not escalate by asking what I want you to do. Lay out the issue and the trade
 - **Keep this file under 200 lines.** Past 200 it eats context every session and adherence drops. Detail belongs in the `hobbes/` files, never here.
 - **This file is identical across every client.** Anything client-specific goes in `hobbes/context/CONTEXT.md` or `hobbes/context/DEVELOPMENT.md`, not here.
 - **No `@import` for the `hobbes/` files, on purpose.** An `@import` loads at launch and stays in context all session — it costs the same as pasting the file inline, so it buys organization but saves no context. Reading on demand is what keeps the session lean. `MISSION.md` and `DEVELOPMENT.md` are read in full by instruction above; the rest are read only when the task calls for them.
-- **File names.** `CLAUDE.md` is uppercase because the product requires it. Every file in `hobbes/` is `UPPERCASE.md` to match the names referenced above. Dated outputs live in `hobbes/scorecards/`.
+- **File names.** `CLAUDE.md` is uppercase because the product requires it. Every file in `hobbes/` is `UPPERCASE.md` to match the names referenced above. Dated cycle outputs live in `hobbes/cycle/<date>/` (`01-baseline.md`, `02-evaluation.md`, …).
 - **Dates are ISO 8601 everywhere:** `YYYY-MM-DD`. Sortable, unambiguous, one format, no exceptions.

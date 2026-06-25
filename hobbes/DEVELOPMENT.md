@@ -15,7 +15,7 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 
 - **Install:** Nothing for the theme itself. You need the Shopify CLI — `npm i -g @shopify/cli @shopify/theme` (or `brew install shopify-cli`), then `shopify auth login`. (Running the Hobbes baseline tools locally has its own prereqs — see `hobbes/guides/SETUP.md`.)
 - **Run locally:** `shopify theme dev` — hot-reloading preview bound to the live store's data.
-- **Test:** None automated. Verify by hand in the browser (mobile + desktop) and via the Hobbes baseline cycle (`python3 hobbes/cli.py cycle`).
+- **Test:** None automated. Verify by hand in the browser (mobile + desktop) and via the Hobbes baseline cycle (`python3 hobbes/tools/cli.py cycle`).
 - **Lint / format:** `shopify theme check` (Theme Check). No `.theme-check.yml` is committed, so it runs Shopify's defaults.
 - **Deploy:** `shopify theme push` to a theme on the store. Always push to an **unpublished / dev theme and preview first** — only Mason publishes the live theme, never without sign-off. `config/settings_data.json` is admin-generated and the editor can overwrite it, so coordinate pushes so code and editor edits don't clobber each other.
 

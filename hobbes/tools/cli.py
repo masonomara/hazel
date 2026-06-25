@@ -13,15 +13,15 @@ hobbes CLI — runs the cycle stages and reads the filesystem state machine.
   publish and diffs against the pre-publish baseline. `cli.py diff` stays as a
   manual escape hatch for an ad-hoc cross-cycle drift check.
 
-USAGE: python3 hobbes/cli.py <command> [args passed through to the tool]
+USAGE: python3 hobbes/tools/cli.py <command> [args passed through to the tool]
 """
 
 import subprocess
 import sys
 from pathlib import Path
 
-HOBBES = Path(__file__).resolve().parent
-TOOLS = HOBBES / "tools"
+TOOLS = Path(__file__).resolve().parent   # cli.py lives in hobbes/tools/
+HOBBES = TOOLS.parent                      # .../<repo>/hobbes
 CYCLES = HOBBES / "cycle"
 sys.path.insert(0, str(TOOLS))
 import config
@@ -83,7 +83,7 @@ def _agent_stage(template, rest):
         f"Findings     → {findings if findings and findings.exists() else '(run findings first)'}"
     )
     print(
-        "Context      → hobbes/context/MISSION.md · DEVELOPMENT.md · CONTEXT.md "
+        "Context      → hobbes/MISSION.md · DEVELOPMENT.md · CONTEXT.md "
         "(read all three: impact ← MISSION; effort/feasibility ← DEVELOPMENT + CONTEXT)"
     )
     print(

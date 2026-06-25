@@ -5,7 +5,7 @@
 # + the SiteOne crawler (no LLM); the agent half is Claude Code (subscription auth). It
 # writes only to GitHub — no platform/deploy CLI, no publish. Review + publish are human.
 #
-# (Data collection alone runs locally via `python3 hobbes/cli.py cycle`; in CI the data
+# (Data collection alone runs locally via `python3 hobbes/tools/cli.py cycle`; in CI the data
 #  and the fix always fire together — there's no measure-only automation.)
 name: Hobbes cycle
 
@@ -52,15 +52,15 @@ jobs:
       - name: Resolve effort budget (input override, else hobbes.toml)
         run: |
           EFFORT="${{ inputs.budget }}"
-          [ -z "$EFFORT" ] && EFFORT="$(python3 hobbes/cli.py budget)"
+          [ -z "$EFFORT" ] && EFFORT="$(python3 hobbes/tools/cli.py budget)"
           echo "EFFORT=$EFFORT" >> "$GITHUB_ENV"
 
       - name: Measure — baseline + evaluation (deterministic, no LLM)
         env:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: |
-          python3 hobbes/cli.py cycle          # baseline + evaluation only — no diff in a cycle
-          DATE=$(python3 hobbes/cli.py today)   # pinned tz — must match the folder cli wrote
+          python3 hobbes/tools/cli.py cycle          # baseline + evaluation only — no diff in a cycle
+          DATE=$(python3 hobbes/tools/cli.py today)   # pinned tz — must match the folder cli wrote
           echo "CYCLE_DATE=$DATE" >> "$GITHUB_ENV"
           # The before/after is the review phase's job (post-publish), not the cycle's.
           echo "Cycle $DATE — 01-baseline.md + 02-evaluation.md written; the fix and data ship in one PR below." >> "$GITHUB_STEP_SUMMARY"

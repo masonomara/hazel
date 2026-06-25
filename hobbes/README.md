@@ -11,4 +11,4 @@ This folder is the system. Start here:
 | [`guides/BASELINE.md`](guides/BASELINE.md) | **Run a cycle** — the tools, the run, the targets, the deliverables. Every cycle. |
 | [`../CLAUDE.md`](../CLAUDE.md) | **Who Hobbes is** — identity, stance, and the hard line. Identical across all clients. |
 
-**Standing context** (per-client, read on demand): [`context/MISSION.md`](context/MISSION.md) · [`context/DEVELOPMENT.md`](context/DEVELOPMENT.md) · [`context/CONTEXT.md`](context/CONTEXT.md) · [`context/CHANGELOG.md`](context/CHANGELOG.md). Config lives in [`hobbes.toml`](hobbes.toml).
+**Standing context** (per-client, read on demand): [`MISSION.md`](MISSION.md) · [`DEVELOPMENT.md`](DEVELOPMENT.md) · [`CONTEXT.md`](CONTEXT.md) · [`CHANGELOG.md`](CHANGELOG.md). Config lives in [`hobbes.toml`](hobbes.toml).

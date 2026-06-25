@@ -1,11 +1,11 @@
 # Hobbes review — post-publish verification, fired by an explicit GitHub signal.
-# The operator publishes the theme live (however that works for this client), then
+# The operator publishes/deploys the site live (however that works for this client), then
 # adds the `published` label to the PR. THAT is the trigger: this re-baselines the
 # LIVE site, diffs against the pre-publish baseline, and comments the before/after
 # on the PR. Deterministic (no LLM). Writes only a PR comment.
 #
 # Why a label, not the merge event: "merged" does not mean "live" — every client's
-# Shopify is wired differently, so the trigger must not guess at live state. The
+# hosting/deploy is wired differently, so the trigger must not guess at live state. The
 # label is a safe, GitHub-native signal the human controls and only adds once the
 # change is actually serving users. (Create the label once: `gh label create published`.)
 name: Hobbes review
@@ -13,7 +13,7 @@ name: Hobbes review
 on:
   pull_request:
     types: [labeled]
-  workflow_dispatch:               # manual escape hatch — runs main's code, not the PR's frozen ref
+  workflow_dispatch: # manual escape hatch — runs main's code, not the PR's frozen ref
     inputs:
       pr:
         description: "PR number to re-baseline against and comment on"
@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}   # latest tools + cycle data, not the PR's merge ref
+          ref: ${{ github.event.repository.default_branch }} # latest tools + cycle data, not the PR's merge ref
 
       - uses: actions/setup-python@v5
         with:
@@ -56,29 +56,23 @@ jobs:
           "$HOME/siteone/siteone-crawler" --version || true   # --version prints then exits nonzero; the line above confirms it runs
 
       - name: Brief CDN cushion
-        run: sleep 60    # the `published` label already means it's live; small buffer for CDN cache
+        run: sleep 60 # the `published` label already means it's live; small buffer for CDN cache
 
-      - name: Re-baseline the live site + diff vs the pre-publish baseline
+      - name: Re-baseline the live site into the cycle's raw-review/ + diff vs pre-publish
         env:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: |
-          PRIOR=$(ls -d hobbes/cycle/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] 2>/dev/null | sort | tail -1)
-          echo "Pre-publish baseline: $PRIOR"
-          python3 hobbes/tools/baseline.py --fresh --run-dir post-publish
-          python3 hobbes/tools/findings.py --run-dir post-publish
-          python3 hobbes/tools/diff.py --run-dir post-publish --prior "$PRIOR" --out /tmp/diff.md
+          CYCLE=$(ls -d hobbes/cycle/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[A-Z] 2>/dev/null | sort | tail -1)
+          echo "PR cycle (pre-publish 01-baseline.md is the before): $CYCLE"
+          echo "CYCLE=$CYCLE" >> "$GITHUB_ENV"
+          # publish-review.py captures the LIVE site into $CYCLE/raw-review/ and renders
+          # raw-review/baseline.md; review.py diffs 01-baseline.md (before) vs that (after).
+          python3 hobbes/tools/publish-review.py --run-dir "$CYCLE"
+          python3 hobbes/tools/review.py --run-dir "$CYCLE"
 
       - name: Comment the before/after on the merged PR
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          {
-            echo "## 🔎 Post-publish review"
-            echo
-            echo "Re-baselined the **live** site after this PR went live, against the pre-publish baseline."
-            echo
-            echo "> **Read each row by its latency.** Crawl counts (alt text, headings, meta) and lab a11y/SEO scores reflect the change **now**. **Field / CrUX is a 28-day rolling average** — a just-published change won't move it yet; that lands in a later regular cycle, not in this comment."
-            echo
-            cat /tmp/diff.md
-          } > /tmp/comment.md
-          gh pr comment ${{ github.event.pull_request.number || inputs.pr }} --body-file /tmp/comment.md
+          # 06-review.md already carries the title + the latency caveat (from review-template.md).
+          gh pr comment ${{ github.event.pull_request.number || inputs.pr }} --body-file "$CYCLE/06-review.md"

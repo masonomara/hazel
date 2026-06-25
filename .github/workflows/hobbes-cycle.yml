@@ -3,9 +3,9 @@
 # the reviewable code fix, in a single PR. (The before/after diff is NOT here — it's
 # the review phase's job, after a publish.) The deterministic half is pure Python (stdlib)
 # + the SiteOne crawler (no LLM); the agent half is Claude Code (subscription auth). It
-# writes only to GitHub — no Shopify CLI, no publish. Review + publish are human.
+# writes only to GitHub — no platform/deploy CLI, no publish. Review + publish are human.
 #
-# (Data collection alone runs locally via `python3 hobbes/cli.py cycle`; in CI the data
+# (Data collection alone runs locally via `python3 hobbes/tools/cli.py cycle`; in CI the data
 #  and the fix always fire together — there's no measure-only automation.)
 name: Hobbes cycle
 
@@ -19,9 +19,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write        # claude-code-action fetches an OIDC token → exchanges for the Claude GitHub App token
+  id-token: write # claude-code-action fetches an OIDC token → exchanges for the Claude GitHub App token
 
-concurrency:             # one cycle at a time
+concurrency: # one cycle at a time
   group: hobbes-cycle
   cancel-in-progress: false
 
@@ -52,15 +52,15 @@ jobs:
       - name: Resolve effort budget (input override, else hobbes.toml)
         run: |
           EFFORT="${{ inputs.budget }}"
-          [ -z "$EFFORT" ] && EFFORT="$(python3 hobbes/cli.py budget)"
+          [ -z "$EFFORT" ] && EFFORT="$(python3 hobbes/tools/cli.py budget)"
           echo "EFFORT=$EFFORT" >> "$GITHUB_ENV"
 
-      - name: Measure — baseline + findings (deterministic, no LLM)
+      - name: Measure — baseline + evaluation (deterministic, no LLM)
         env:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: |
-          python3 hobbes/cli.py cycle          # baseline + findings only — no diff in a cycle
-          DATE=$(python3 hobbes/cli.py today)   # pinned tz — must match the folder cli wrote
+          python3 hobbes/tools/cli.py cycle          # baseline + evaluation only — no diff in a cycle
+          DATE=$(python3 hobbes/tools/cli.py today)   # pinned tz — must match the folder cli wrote
           echo "CYCLE_DATE=$DATE" >> "$GITHUB_ENV"
           # The before/after is the review phase's job (post-publish), not the cycle's.
           echo "Cycle $DATE — 01-baseline.md + 02-evaluation.md written; the fix and data ship in one PR below." >> "$GITHUB_STEP_SUMMARY"
@@ -68,7 +68,7 @@ jobs:
       - name: Plan + fix — Claude agent, then ONE PR (data + code)
         uses: anthropics/claude-code-action@v1
         env:
-          GH_TOKEN: ${{ github.token }}        # authenticates the agent's git push + `gh pr create`
+          GH_TOKEN: ${{ github.token }} # authenticates the agent's git push + `gh pr create`
         with:
           # Auth via the Claude Code subscription (Pro/Max), NOT a pay-per-token API key.
           # Generate once with `claude setup-token`, store as the CLAUDE_CODE_OAUTH_TOKEN secret.
@@ -85,15 +85,15 @@ jobs:
             Read hobbes/templates/PLAN-TEMPLATE.md and hobbes/templates/EXECUTE-TEMPLATE.md and
             follow them exactly. Effort budget: ${{ env.EFFORT }}.
             Write plan.md and execution.md into hobbes/cycle/${{ env.CYCLE_DATE }}/, then make
-            the theme-code changes.
+            the code changes.
             Open ONE pull request carrying BOTH the cycle data and the fix:
               - create a branch `hobbes-cycle-${{ env.CYCLE_DATE }}`
-              - `git add -A` (stages the scorecard/findings, your plan.md/execution.md, and the
+              - `git add -A` (stages the scorecard/evaluation, your plan.md/execution.md, and the
                 code changes; raw/ is git-ignored, so it's excluded)
               - commit, `git push -u origin`
               - `gh pr create` with title "Hobbes ${{ env.CYCLE_DATE }} — <a short summary of what you
-                shipped this batch>" and a body carrying the current baseline + findings summary, what
-                shipped, and any human-owned deferrals (content at scale, app-config, sign-off). There
+                shipped this batch>" and a body carrying the current baseline + evaluation summary, what
+                shipped, and any human-owned deferrals (content at scale, integration/platform config, sign-off). There
                 is no before/after here — the measured impact lands in the review comment after publish.
-            Hard rules: write only to GitHub. Do NOT run the Shopify CLI. Do NOT publish. Verification
-            (Theme Check, browser) and the live publish are the human's, at review.
+            Hard rules: write only to GitHub. Do NOT run any deploy/platform CLI. Do NOT publish. Verification
+            (the stack's checker, browser) and the live publish are the human's, at review.

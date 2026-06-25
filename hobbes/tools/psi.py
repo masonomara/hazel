@@ -10,6 +10,11 @@ Each page×device is measured 3× and the MEDIAN run is kept — single-run lab
 scores swing too much to compare cycle-to-cycle (a page drew perf 89 then 73
 an hour apart). CrUX field data is 28-day, so the median doesn't touch it.
 
+CAPTURE vs RENDER: capture() fetches into raw/; scorecard_sections() renders
+§A–D straight from raw/. main() does both for a standalone run. baseline.py
+calls the same two — capture once, then render — so the digest and a standalone
+run share one renderer and can't disagree, and a re-render needs no re-fetch.
+
 KEY: read from $PSI_API_KEY (a repo secret in CI; export it for local runs).
 USAGE:
   python3 hobbes/tools/psi.py                 # default golden path
@@ -17,9 +22,8 @@ USAGE:
   python3 hobbes/tools/psi.py --fresh         # ignore cache, re-fetch all
   python3 hobbes/tools/psi.py --out PATH      # also write the digest to PATH
   python3 hobbes/tools/psi.py --run-dir DIR   # cycle folder (raw/); default today's
-Prints the scorecard tables to stdout — baseline.py captures that into the one
-combined digest (01-baseline.md). Raw *.psi.json caches go in raw/. No per-tool
-file is written unless --out is given.
+Prints the scorecard tables to stdout. Raw *.psi.json caches go in raw/. No
+per-tool file is written unless --out is given.
 The keyless PSI API is rate-capped to a shared pool
 that is usually exhausted (HTTP 429) — a key is required, not optional.
 """
@@ -62,13 +66,13 @@ HOBBES = TOOLS.parent
 
 
 def resolve_run_dir(args):
-    """Per-cycle output folder: hobbes/cycle/<date>/. Big raw JSON caches
+    """Per-cycle output folder: hobbes/cycle/<date>-<letter>/. Big raw JSON caches
     live in raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle
-    folder; a standalone run defaults to today's."""
+    folder; a standalone run attaches to the latest cycle (or a fresh one)."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "cycle" / config.today()
+        d = config.default_run_dir(HOBBES / "cycle")
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 
@@ -168,39 +172,38 @@ def field(metrics, mkey, scale=1.0):
     return round(m["percentile"] * scale, 3 if scale != 1 else 0)
 
 
+def a11y_audit_failed(audit):
+    """The single predicate for 'this accessibility audit failed': a binary
+    axe-core check that scored 0. The scorecard's §D count (a11y_fails, below)
+    and evaluation.py's A11Y catalog BOTH ride this, so the two can't disagree on
+    what counts as a failure. Manual checks (keyboard, screen reader, focus) come
+    back as 'manual' scoreDisplayMode and are intentionally excluded — those stay
+    human. Change the definition of a failure here, in one place, and both follow."""
+    return audit.get("scoreDisplayMode") == "binary" and audit.get("score") == 0
+
+
 def a11y_fails(lh):
     """Failing accessibility audits from PSI's Lighthouse run — these ARE
     axe-core checks, so no separate axe run is needed. Returns a list of
-    (audit_id, failing_node_count) for the binary a11y audits that scored 0.
-    Manual checks (keyboard, screen reader, focus) come back as 'manual'
-    scoreDisplayMode and are intentionally excluded — those stay human."""
+    (audit_id, failing_node_count) for the binary a11y audits that scored 0."""
     cat = lh.get("categories", {}).get("accessibility", {})
     audits = lh.get("audits", {})
     fails = []
     for ref in cat.get("auditRefs", []):
         a = audits.get(ref["id"], {})
-        if a.get("scoreDisplayMode") == "binary" and a.get("score") == 0:
+        if a11y_audit_failed(a):
             nodes = len(a.get("details", {}).get("items", []))
             fails.append((ref["id"], nodes))
     return sorted(fails, key=lambda x: -x[1])
 
 
-def main():
-    args = sys.argv[1:]
-    fresh = "--fresh" in args  # ignore cache, re-fetch everything
-    rd = resolve_run_dir(args)
-    raw = rd / "raw"
-    out = None                                    # no default file: baseline.py reads stdout; --out opts in
-    for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
-        if flag in args:
-            i = args.index(flag)
-            if flag == "--out":
-                out = Path(args[i + 1])
-            del args[i:i + 2]
-    positional = [a for a in args if a != "--fresh"]
-    urls = [(f"URL{i+1}", u) for i, u in enumerate(positional)] or DEFAULT_URLS
+def capture(raw, urls, fresh):
+    """Fetch every page×device into raw/ — the median-of-3 to cache_path() and the
+    per-run checkpoints to run_cache_path(). Network side-effects ONLY: the
+    scorecard is rendered separately, straight from raw/, by scorecard_sections().
+    So baseline.py captures once then renders the same way psi.py does standalone —
+    no stdout to scrape, and re-rendering needs no re-fetch."""
     key = load_key()
-
     # Fire all page×strategy calls at once — wall-clock = slowest call, not the sum.
     # Cached (already-succeeded) calls return instantly, so a re-run only hits the
     # network for what's still missing — which also means lower concurrency and
@@ -212,7 +215,7 @@ def main():
         cf = cache_path(raw, url, strat)
         if not fresh and cf.exists():   # canonical median already chosen — reuse
             print(f"  ⤿ cached {label} {strat}", file=sys.stderr, flush=True)
-            return job, json.loads(cf.read_text()), None
+            return
         runs = []
         for i in range(RUNS):
             rf = run_cache_path(raw, url, strat, i)
@@ -225,38 +228,59 @@ def main():
                 rf.write_text(json.dumps(d))   # checkpoint each run — never re-pay
                 runs.append(d)
         if not runs:
-            return job, None, None
+            return
         med = median_run(runs)
         cf.write_text(json.dumps(med))          # canonical = the median run
         spread = sorted(round(perf_score(d) * 100) for d in runs if perf_score(d) >= 0)
         print(f"  ✓ {label} {strat} — perf {round(perf_score(med)*100)} "
               f"(median of {len(runs)}: {'/'.join(map(str, spread)) or '—'})",
               file=sys.stderr, flush=True)
-        return job, med, spread
 
     with ThreadPoolExecutor(max_workers=min(MAX_CONCURRENCY, len(jobs))) as ex:
-        triples = list(ex.map(run, jobs))
-    results = {j: d for j, d, _ in triples}
-    spreads = {j: sp for j, d, sp in triples if sp}
+        list(ex.map(run, jobs))
 
+
+def _load_results(raw, urls):
+    """Rebuild the median docs and the per-cell perf spread from raw/ — the exact
+    files capture() wrote. Pure over raw/, so the scorecard renders identically
+    whether psi.py runs standalone or baseline.py calls it, and re-renders from
+    cache with no re-fetch. A cell with no median file on disk reads as failed; the
+    spread is reconstructed from whatever per-run files are present."""
+    results, spreads = {}, {}
+    for label, url in urls:
+        for strat in ("mobile", "desktop"):
+            cf = cache_path(raw, url, strat)
+            results[(label, url, strat)] = json.loads(cf.read_text()) if cf.exists() else None
+            runs = []
+            for i in range(RUNS):
+                rf = run_cache_path(raw, url, strat, i)
+                if rf.exists():
+                    runs.append(json.loads(rf.read_text()))
+            sp = sorted(round(perf_score(d) * 100) for d in runs if perf_score(d) >= 0)
+            if sp:
+                spreads[(label, url, strat)] = sp
+    return results, spreads
+
+
+def scorecard_sections(raw, urls):
+    """Scorecard sections A–D (+ the failed-calls note), rendered from raw/.
+    This is the exact block baseline.py drops into 01-baseline.md AND the block
+    psi.py prints under its standalone header — one renderer, two callers, so the
+    digest and a standalone run can never disagree on a number."""
+    results, spreads = _load_results(raw, urls)
     rows_a, rows_lab, rows_field, rows_c = [], [], [], []
-    failed = [j for j, d in results.items() if d is None]
-    idle_fail = []   # runs PSI cut at the time limit (page never reached idle)
-    lcp_cut = []     # runs where the LCP itself is a cutoff artifact, not a real paint
+    failed = [(label, url, strat) for label, url in urls for strat in ("mobile", "desktop")
+              if results[(label, url, strat)] is None]
     for label, url in urls:
         for strat in ("mobile", "desktop"):
             lh = (results[(label, url, strat)] or {}).get("lighthouseResult", {})
             warns = lh.get("runWarnings") or []
             incomplete = any(INCOMPLETE_SIG in w.lower() for w in warns)  # classify, don't lump
             mark = ""   # truncated values are flagged per-cell with ✗cut; no row-level ⚠
-            if incomplete:
-                idle_fail.append((label, strat))
 
             lcp = audit_s(lh, "largest-contentful-paint")
             # Trust an early LCP even on an incomplete run; flag ONLY a truncated one.
             cut = incomplete and isinstance(lcp, (int, float)) and lcp > LCP_ARTIFACT_S
-            if cut:
-                lcp_cut.append((label, strat))
             lcp_cell = f"{lcp} ✗cut" if cut else f"{lcp}"
             perf_cell = f"{score(lh,'performance')} ✗cut" if cut else f"{score(lh,'performance')}"
 
@@ -295,8 +319,8 @@ def main():
             rows_field.append(f"| {label} | — | — | — | — |")
 
     # Per-page×device perf-score spread across the 3 runs — shows the volatility the
-    # median smooths over, so the human can judge how shaky a cell is. Omitted for
-    # cells served from cache (no fresh runs this pass).
+    # median smooths over, so the human can judge how shaky a cell is. Shown for
+    # every cell whose per-run files are on disk (reconstructed from raw/).
     spread_bits = []
     for label, url in urls:
         for strat in ("mobile", "desktop"):
@@ -306,18 +330,7 @@ def main():
     spread_note = ([f"> Perf-score spread across 3 runs (median kept): {' · '.join(spread_bits)}.", ""]
                    if spread_bits else [])
 
-    stamp = config.stamp()
     L = [
-        f"# PSI results — {stamp}",
-        "",
-        "Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field",
-        "are pulled and labelled SEPARATELY so they can't be mixed. Each page×device",
-        "is the **median of 3 runs** (lab scores swing; the median is the comparable",
-        "number). Transcribe these into scorecard sections A–D; SEO (E) comes from",
-        "seo.py and the manual a11y rows (F) are signed by a human.",
-        "",
-        "Golden path: " + " · ".join(f"[{lbl}]({u})" for lbl, u in urls),
-        "",
         "## A. Lighthouse scores",
         "",
         "| Page / Device | Performance | Accessibility | Best Practices | SEO |",
@@ -346,9 +359,41 @@ def main():
     if failed:
         L += ["", "> ✗ Failed calls (cells show — above): "
               + ", ".join(f"{lbl} {strat}" for lbl, _u, strat in failed)]
-    report = "\n".join(L) + "\n"
+    return "\n".join(L).rstrip()
 
-    print(report)                                   # stdout — baseline.py captures this into the one digest
+
+def main():
+    args = sys.argv[1:]
+    fresh = "--fresh" in args  # ignore cache, re-fetch everything
+    rd = resolve_run_dir(args)
+    raw = rd / "raw"
+    out = None                                    # no default file: --out opts in
+    for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
+        if flag in args:
+            i = args.index(flag)
+            if flag == "--out":
+                out = Path(args[i + 1])
+            del args[i:i + 2]
+    positional = [a for a in args if a != "--fresh"]
+    urls = [(f"URL{i+1}", u) for i, u in enumerate(positional)] or DEFAULT_URLS
+
+    capture(raw, urls, fresh)
+    stamp = config.stamp()
+    report = "\n".join([
+        f"# PSI results — {stamp}",
+        "",
+        "Captured by `hobbes/tools/psi.py` (PageSpeed Insights API). Lab and field",
+        "are pulled and labelled SEPARATELY so they can't be mixed. Each page×device",
+        "is the **median of 3 runs** (lab scores swing; the median is the comparable",
+        "number). Transcribe these into scorecard sections A–D; SEO (E) comes from",
+        "seo.py and the manual a11y rows (F) are signed by a human.",
+        "",
+        "Golden path: " + " · ".join(f"[{lbl}]({u})" for lbl, u in urls),
+        "",
+        scorecard_sections(raw, urls),
+    ]) + "\n"
+
+    print(report)                                   # stdout — human-readable standalone digest
     if out:                                          # --out only; no default per-tool file
         out.write_text(report)
         print(f"→ written to {out}", file=sys.stderr)

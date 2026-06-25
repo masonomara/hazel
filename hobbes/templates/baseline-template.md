@@ -6,48 +6,48 @@ Golden path: [page 1 url] · [page 2 url] · [page 3 url]
 
 `✓` = pass / present · `✗` = fail / missing · `✗cut` = PSI run truncated before network-idle (value is the cutoff) · blank = human sign-off pending.
 
-Filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E, `crawl.py` → F. Section G (manual a11y) is the human's to sign. The filled file **is** the baseline; compare each cycle to the previous and to the Targets in `hobbes/BASELINE.md`.
+Filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E, `crawl.py` → F. Section G (manual a11y) is the human's to sign. The filled file **is** the baseline; compare each cycle to the previous and to the Targets in `hobbes/guides/BASELINE.md`. Page labels come from each `[[golden_path]]` entry in `hobbes.toml` (or, if no `label` is set, are derived from the URL); the `Page 1/2/3` rows below are illustrative.
 
 ## A. Lighthouse scores
 
 | Page / Device | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Home — mobile |  |  |  |  |
-| Home — desktop |  |  |  |  |
-| Collection — mobile |  |  |  |  |
-| Collection — desktop |  |  |  |  |
-| Product — mobile |  |  |  |  |
-| Product — desktop |  |  |  |  |
+| Page 1 — mobile |  |  |  |  |
+| Page 1 — desktop |  |  |  |  |
+| Page 2 — mobile |  |  |  |  |
+| Page 2 — desktop |  |  |  |  |
+| Page 3 — mobile |  |  |  |  |
+| Page 3 — desktop |  |  |  |  |
 
 ## B. Lab metrics
 
 | Page / Device | LCP (s) | CLS | FCP (s) | TTFB (s) | TBT (ms) | Speed Index (s) |
 |---|---|---|---|---|---|---|
-| Home — mobile |  |  |  |  |  |  |
-| Home — desktop |  |  |  |  |  |  |
-| Collection — mobile |  |  |  |  |  |  |
-| Collection — desktop |  |  |  |  |  |  |
-| Product — mobile |  |  |  |  |  |  |
-| Product — desktop |  |  |  |  |  |  |
+| Page 1 — mobile |  |  |  |  |  |  |
+| Page 1 — desktop |  |  |  |  |  |  |
+| Page 2 — mobile |  |  |  |  |  |  |
+| Page 2 — desktop |  |  |  |  |  |  |
+| Page 3 — mobile |  |  |  |  |  |  |
+| Page 3 — desktop |  |  |  |  |  |  |
 
 ## C. Field data (CrUX 28-day)
 
 | Page | LCP (s) | INP (ms) | CLS | Pass |
 |---|---|---|---|---|
-| Home |  |  |  |  |
-| Collection |  |  |  |  |
-| Product |  |  |  |  |
+| Page 1 |  |  |  |  |
+| Page 2 |  |  |  |  |
+| Page 3 |  |  |  |  |
 
 ## D. Accessibility — automated (axe via PSI)
 
 | Page / Device | Failing audits | Pass | Details (rule × nodes) |
 |---|---|---|---|
-| Home — mobile |  |  |  |
-| Home — desktop |  |  |  |
-| Collection — mobile |  |  |  |
-| Collection — desktop |  |  |  |
-| Product — mobile |  |  |  |
-| Product — desktop |  |  |  |
+| Page 1 — mobile |  |  |  |
+| Page 1 — desktop |  |  |  |
+| Page 2 — mobile |  |  |  |
+| Page 2 — desktop |  |  |  |
+| Page 3 — mobile |  |  |  |
+| Page 3 — desktop |  |  |  |
 
 ## E. SEO checklist (golden path)
 
@@ -116,9 +116,9 @@ Tools cannot judge these. A page is not certified fully pass until these rows ar
 
 | Page / Device | Keyboard | Focus visible | Logical order | Screen reader | Alt meaningful | Contrast | Reduced motion |
 |---|---|---|---|---|---|---|---|
-| Home — mobile |  |  |  |  |  |  |  |
-| Home — desktop |  |  |  |  |  |  |  |
-| Collection — mobile |  |  |  |  |  |  |  |
-| Collection — desktop |  |  |  |  |  |  |  |
-| Product — mobile |  |  |  |  |  |  |  |
-| Product — desktop |  |  |  |  |  |  |  |
+| Page 1 — mobile |  |  |  |  |  |  |  |
+| Page 1 — desktop |  |  |  |  |  |  |  |
+| Page 2 — mobile |  |  |  |  |  |  |  |
+| Page 2 — desktop |  |  |  |  |  |  |  |
+| Page 3 — mobile |  |  |  |  |  |  |  |
+| Page 3 — desktop |  |  |  |  |  |  |  |

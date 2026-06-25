@@ -13,9 +13,9 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 
 ## Build & run
 
-- **Install:** Nothing for the theme itself. You need the Shopify CLI — `npm i -g @shopify/cli @shopify/theme` (or `brew install shopify-cli`), then `shopify auth login`. (Running the Hobbes baseline tools locally has its own prereqs — see `hobbes/SETUP.md`.)
+- **Install:** Nothing for the theme itself. You need the Shopify CLI — `npm i -g @shopify/cli @shopify/theme` (or `brew install shopify-cli`), then `shopify auth login`. (Running the Hobbes baseline tools locally has its own prereqs — see `hobbes/guides/SETUP.md`.)
 - **Run locally:** `shopify theme dev` — hot-reloading preview bound to the live store's data.
-- **Test:** None automated. Verify by hand in the browser (mobile + desktop) and via the Hobbes baseline cycle (`python3 hobbes/cli.py cycle`).
+- **Test:** None automated. Verify by hand in the browser (mobile + desktop) and via the Hobbes baseline cycle (`python3 hobbes/tools/cli.py cycle`).
 - **Lint / format:** `shopify theme check` (Theme Check). No `.theme-check.yml` is committed, so it runs Shopify's defaults.
 - **Deploy:** `shopify theme push` to a theme on the store. Always push to an **unpublished / dev theme and preview first** — only Mason publishes the live theme, never without sign-off. `config/settings_data.json` is admin-generated and the editor can overwrite it, so coordinate pushes so code and editor edits don't clobber each other.
 
@@ -26,4 +26,4 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 - **Don't hand-edit** `config/settings_data.json` (admin-generated), anything under `.shopify/` (gitignored), or Dawn base styles in place — override in the appended Hazel section instead.
 - **Keep the fork upgrade-safe.** Minimize core-theme edits: prefer a self-contained snippet rendered from one insertion point (the embroidery build holds to a single render line) over scattered changes.
 - **Secrets:** none in the repo. App and store credentials live in the Shopify admin and the CLI's own auth — never hard-code tokens, API keys, or app secrets. (The store id in CDN URLs is public and fine.)
-- **Done means:** verified in the browser on mobile + desktop · no new console errors · Theme Check shows no *new* offenses · no regression against the baseline targets (`hobbes/BASELINE.md`).
+- **Done means:** verified in the browser on mobile + desktop · no new console errors · Theme Check shows no *new* offenses · no regression against the baseline targets (`hobbes/guides/BASELINE.md`).

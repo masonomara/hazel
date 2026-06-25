@@ -3,7 +3,7 @@
 baseline.py — one-command MVP baseline runner.
 
 Runs psi.py (A–D), seo.py (E), and crawl.py (site-wide F), then stamps a dated
-scorecard from TEMPLATE.md with the header populated and sections A–F pasted in.
+scorecard from baseline-template.md with the header populated and sections A–F pasted in.
 Section G (manual a11y) is left blank for the human — the above-and-beyond pass.
 
 A baseline should reflect the CURRENT site, so this fetches fresh by default.
@@ -16,40 +16,31 @@ USAGE:
   python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick rerun)
   python3 hobbes/tools/baseline.py --full     # crawl the entire sitemap, not the sample (slow)
 
-Each tool prints its rendered scorecard sections to stdout; baseline.py captures
-those and assembles the ONE combined digest — 01-baseline.md — so there are no
-per-tool *-results.md intermediates. Writes the whole cycle into one folder:
-hobbes/cycle/YYYY-MM-DD/ — 01-baseline.md beside the raw artifacts (raw/), so
-the baseline and the generated 02-evaluation.md sit beside the data they came from.
+CAPTURE then RENDER, in-process. baseline.py imports psi/seo/crawl and calls each
+tool's capture() (the network step, into raw/) then its scorecard_section(s)()
+(rendered straight from raw/). Those are the SAME renderers the tools use
+standalone — so the digest and a standalone tool run can't disagree, and there's
+no stdout to scrape or section markers to slice. Writes the whole cycle into one
+folder: hobbes/cycle/YYYY-MM-DD-<letter>/ — 01-baseline.md beside the raw artifacts (raw/),
+so the baseline and the generated 02-evaluation.md sit beside the data they came from.
 """
 
-import subprocess
 import sys
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
-TEMPLATE = HOBBES / "templates" / "TEMPLATE.md"
+TEMPLATE = HOBBES / "templates" / "baseline-template.md"
 
 sys.path.insert(0, str(TOOLS))
 import config
+import psi
+import seo
+import crawl
 from psi import DEFAULT_URLS  # single source of truth for the golden path
 from config import client_meta
 
 CONFIG = client_meta()  # [client] from hobbes.toml
-
-
-def run_tool(name, passthrough):
-    print(f"\n=== running {name} ===", file=sys.stderr, flush=True)
-    # Capture stdout (the rendered scorecard sections) and return it — this is the
-    # one digest's source, so the tools no longer write their own *-results.md.
-    # stderr is left to flow so the per-call progress / ⚠ warnings stay visible.
-    r = subprocess.run([sys.executable, str(TOOLS / name)] + passthrough,
-                       stdout=subprocess.PIPE, text=True)
-    if r.returncode != 0:
-        sys.exit(f"\n✗ {name} failed (exit {r.returncode}) — aborting; "
-                 f"fix it or `--resume` to reuse cached calls.")
-    return r.stdout
 
 
 def after(text, marker):
@@ -57,50 +48,57 @@ def after(text, marker):
     return text[i:].rstrip() if i >= 0 else ""
 
 
-def between(text, start, end):
-    i = text.find(start)
-    if i < 0:
-        return ""
-    j = text.find(end, i)
-    return (text[i:j] if j >= 0 else text[i:]).rstrip()
+def section_g(template_text):
+    """Section G (manual a11y) — intro + column header come from baseline-template.md; the
+    page rows are generated from the golden path so G speaks the same URL-derived
+    labels as A–F. The template's own rows are illustrative and dropped."""
+    g = after(template_text, "## G.")
+    head = []
+    for ln in g.splitlines():
+        head.append(ln)
+        if "|" in ln and "-" in ln and set(ln) <= set("|-: \t"):   # the header separator row
+            break
+    ncols = head[-1].count("|") - 1
+    rows = [f"| {lbl} — {strat} |" + "  |" * (ncols - 1)
+            for lbl, _ in DEFAULT_URLS for strat in ("mobile", "desktop")]
+    return "\n".join(head + rows)
 
 
 def main():
     args = sys.argv[1:]
     no_crawl = "--no-crawl" in args
     full = "--full" in args
+    fresh = "--resume" not in args                 # fresh capture by default; --resume reuses cache
     date = config.today()
-    if "--run-dir" in args:                        # honor an explicit folder (e.g. the review's post-publish)
+    if "--run-dir" in args:                        # honor an explicit folder (cli.py passes the cycle dir)
         rundir = Path(args[args.index("--run-dir") + 1]).resolve()
     else:
-        rundir = HOBBES / "cycle" / date           # default: one dated folder per cycle
-    (rundir / "raw").mkdir(parents=True, exist_ok=True)
-    # Thread the cycle folder through every tool so raw artifacts land together.
-    # Each tool prints its rendered sections to stdout; we slice the ones the
-    # scorecard wants straight from that — no per-tool *-results.md in between.
-    passthrough = ([] if "--resume" in args else ["--fresh"]) + ["--run-dir", str(rundir)]
-    psi = run_tool("psi.py", passthrough)
-    seo = run_tool("seo.py", passthrough)
-    crawl = ""
-    if not no_crawl:
-        # --full cascades to crawl.py only: the whole sitemap instead of the sample.
-        crawl = run_tool("crawl.py", passthrough + (["--full"] if full else []))
+        rundir = config.new_cycle_dir(HOBBES / "cycle")   # a fresh cycle: <date>-<letter>
+    raw = rundir / "raw"
+    raw.mkdir(parents=True, exist_ok=True)
+    urls = DEFAULT_URLS
 
+    # Capture: each tool fetches into raw/ (the network step). psi/seo share the
+    # golden path; crawl is whole-site. --full cascades to the crawl only.
+    psi.capture(raw, urls, fresh)
+    seo.capture(raw, urls, fresh)
+    if not no_crawl:
+        crawl.capture(raw, fresh, full)
+
+    # Render: pull each scorecard section straight from raw/ via the tools' own
+    # renderers — the exact functions a standalone tool run uses — so the digest
+    # and a standalone run can't disagree. No stdout capture, no text slicing.
     tmpl = TEMPLATE.read_text()
-
-    abcd = after(psi, "## A.")                      # A, B, C, D (+ failed-call note)
-    e = between(seo, "## E.", "## Page titles")     # E + site-level
-    g = after(tmpl, "## G.")                        # manual a11y, blank for the human
+    abcd = psi.scorecard_sections(raw, urls)        # A, B, C, D (+ failed-call note)
+    e = seo.scorecard_section(raw, urls)            # E + site-level
+    g = section_g(tmpl)                             # manual a11y — page rows from the golden path
     if not (abcd and e and g):
-        sys.exit("✗ couldn't extract sections from the tool output — check psi.py / seo.py / TEMPLATE.md")
+        sys.exit("✗ couldn't render sections from raw/ — check the capture step ran and raw/ exists.")
 
-    # F — site-wide grades + counts straight from crawl.py's stdout (the per-URL
-    # detail it also prints is for findings, which reads raw/crawl.json directly).
-    f = ""
-    if not no_crawl:
-        f = between(crawl, "## F. Site-wide", "## Detail")
+    # F — site-wide grades + counts from the crawl (skipped with --no-crawl).
+    f = crawl.scorecard_section(raw) if not no_crawl else ""
 
-    golden = " · ".join(f"[{lbl}]({u})" for lbl, u in DEFAULT_URLS)
+    golden = " · ".join(f"[{lbl}]({u})" for lbl, u in urls)
     doc = "\n".join([
         f"# Baseline scorecard — {date}",
         "",
@@ -127,7 +125,7 @@ def main():
     print("  A–F filled from the tools; Section G (manual a11y) left for human sign-off.",
           file=sys.stderr)
     print(f"  Cycle folder: {rundir} (raw/ alongside; 01-baseline.md is the one digest).", file=sys.stderr)
-    print("  Next: python3 hobbes/tools/findings.py — builds 02-evaluation.md (the problem catalog) from raw/.",
+    print("  Next: python3 hobbes/tools/evaluation.py — builds 02-evaluation.md (the problem catalog) from raw/.",
           file=sys.stderr)
 
 

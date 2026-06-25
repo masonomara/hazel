@@ -1,23 +1,23 @@
 # Setup — once per client
 
-How to stand Hobbes up. First fill the per-client config (`hobbes.toml`, below); then set up **local** (run the deterministic cycle on a laptop) and/or **cloud** (the automated GitHub runner). Local alone is enough to capture a baseline by hand; the cloud runner fires measure + fix together into one PR. Hobbes writes only to GitHub (branches, PRs, comments); every Shopify action stays human.
+How to stand Hobbes up. First fill the per-client config (`hobbes.toml`, below); then set up **local** (run the deterministic cycle on a laptop) and/or **cloud** (the automated GitHub runner). Local alone is enough to capture a baseline by hand; the cloud runner fires measure + fix together into one PR. Hobbes writes only to GitHub (branches, PRs, comments); every deploy/go-live action stays human.
 
 ## Configure the client (`hobbes.toml`)
 
 The per-client config every tool reads. Fill it once:
 
-- **Identify the client.** Set the `[client]` block — name, site, platform, who runs it. (The fuller picture — goals, people, constraints — lives in `hobbes/context/CONTEXT.md`.)
-- **Lock the golden path.** Pick 3–4 important pages with exact URLs — typically home, collection, product — and set them in `[golden_path]`. Reuse the same URLs every cycle so results stay comparable.
-- **Method is PSI.** The cycle runs the PageSpeed Insights API the same way every cycle, so numbers stay comparable. Local Lighthouse is the fallback only for URLs PSI can't reach (theme draft, localhost, staging) — never mix PSI and local scores in one baseline. (Full method in `hobbes/BASELINE.md`.)
+- **Identify the client.** Set the `[client]` block — name, site, platform, who runs it. (The fuller picture — goals, people, constraints — lives in `hobbes/CONTEXT.md`.)
+- **Lock the golden path.** Pick 3–4 important, representative pages with exact URLs, give each a short `label`, and add them as `[[golden_path]]` entries. Reuse the same URLs every cycle so results stay comparable. (`label` is optional — omit it and it's derived from the URL.)
+- **Method is PSI.** The cycle runs the PageSpeed Insights API the same way every cycle, so numbers stay comparable. Local Lighthouse is the fallback only for URLs PSI can't reach (a draft, localhost, or staging URL) — never mix PSI and local scores in one baseline. (Full method in `hobbes/guides/BASELINE.md`.)
 
 ## Local setup — the engine on your machine
 
-To run `python3 hobbes/cli.py cycle` (baseline → findings) on a laptop:
+To run `python3 hobbes/tools/cli.py cycle` (baseline → findings) on a laptop:
 
 - **Python ≥ 3.11** — stdlib only (`tomllib`); nothing to pip-install.
 - **SiteOne crawler** on `PATH` — the whole-site crawl. macOS: `brew install janreges/tap/siteone-crawler` (or the desktop GUI app).
 - **PSI key** — the `$PSI_API_KEY` env var (`export` it for the run). Get one: Google Cloud Console → enable *PageSpeed Insights API* → Credentials → API key.
-- **First run:** `python3 hobbes/cli.py cycle` → a dated `hobbes/cycle/<date>/` folder. `python3 hobbes/cli.py status` shows which stage it reached.
+- **First run:** `python3 hobbes/cli.py cycle` → a dated `hobbes/cycle/<date>-<letter>/` folder (the letter lets more than one cycle share a day). `python3 hobbes/cli.py status` shows which stage it reached.
 
 The agent stages (plan / execute) can run as local Claude Code instead of the cloud action — no secret needed; it uses your login.
 
@@ -67,10 +67,10 @@ The `cycle` workflow opens its PR with the built-in `GITHUB_TOKEN`, which a repo
 The `review` phase fires when you add a **`published`** label to a merged PR — your explicit "it's live now" signal (merge ≠ live, and it varies per client). Create it once:
 
 ```
-gh label create published --description "Theme is live — fire the Hobbes review" --color 0e8a16
+gh label create published --description "Site is live — fire the Hobbes review" --color 0e8a16
 ```
 
-Per release: merge the fix PR → publish the theme live in Shopify → **add `published` to the PR**. The review re-baselines the **live** site and comments the before/after. Label it *only after* it's actually live, or you measure the old site.
+Per release: merge the fix PR → publish/deploy the site live on your platform → **add `published` to the PR**. The review re-baselines the **live** site and comments the before/after. Label it *only after* it's actually live, or you measure the old site.
 
 ## 5. Workflows on the default branch
 

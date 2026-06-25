@@ -10,17 +10,17 @@ This repo carries a `hobbes/` folder. That folder is your standing context and t
 
 **Every session, before you act**
 
-- Read `hobbes/context/MISSION.md` in full. It is small. It says what we are optimizing for and what matters now, so you can weigh what deserves your attention.
+- Read `hobbes/MISSION.md` in full. It is small. It says what we are optimizing for and what matters now, so you can weigh what deserves your attention.
 
 **Before you touch code**
 
-- Read `hobbes/context/DEVELOPMENT.md` in full. It holds the stack and the rules of the build. Do not write a line until you have it.
+- Read `hobbes/DEVELOPMENT.md` in full. It holds the stack and the rules of the build. Do not write a line until you have it.
 
 **On demand, when the task calls for it**
 
-- `hobbes/context/CONTEXT.md` — who the client is. Their goals. Their users. Their people. Where access lives. The constraints that bind.
-- `hobbes/context/CHANGELOG.md` — what has shipped and why and to what result. Read it before you build so you do not build a thing twice.
-- `hobbes/BASELINE.md` — the operator's runbook for a baseline cycle. A human drives it. You run what can be run and you own the writing up — the scorecard and the findings and the priorities in `MISSION.md` and the line in the changelog. Read it when a baseline is in play.
+- `hobbes/CONTEXT.md` — who the client is. Their goals. Their users. Their people. Where access lives. The constraints that bind.
+- `hobbes/CHANGELOG.md` — what has shipped and why and to what result. Read it before you build so you do not build a thing twice.
+- `hobbes/guides/BASELINE.md` — the operator's runbook for a baseline cycle. A human drives it. You run what can be run and you own the writing up — the scorecard and the evaluation and the priorities in `MISSION.md` and the line in the changelog. Read it when a baseline is in play.
 
 You read these files yourself and in the session and only when they bear on the work. You do not `@import` them. See **Maintenance** at the foot of this file for why.
 
@@ -84,7 +84,7 @@ Do not escalate by asking what I want you to do. Lay out the issue and the trade
 ## Maintenance — for the engineer, not the agent
 
 - **Keep this file under 200 lines.** Past 200 it eats context every session and adherence drops. Detail belongs in the `hobbes/` files, never here.
-- **This file is identical across every client.** Anything client-specific goes in `hobbes/context/CONTEXT.md` or `hobbes/context/DEVELOPMENT.md`, not here.
+- **This file is identical across every client.** Anything client-specific goes in `hobbes/CONTEXT.md` or `hobbes/DEVELOPMENT.md`, not here.
 - **No `@import` for the `hobbes/` files, on purpose.** An `@import` loads at launch and stays in context all session — it costs the same as pasting the file inline, so it buys organization but saves no context. Reading on demand is what keeps the session lean. `MISSION.md` and `DEVELOPMENT.md` are read in full by instruction above; the rest are read only when the task calls for them.
-- **File names.** `CLAUDE.md` is uppercase because the product requires it. Every file in `hobbes/` is `UPPERCASE.md` to match the names referenced above. Dated cycle outputs live in `hobbes/cycle/<date>/` (`01-baseline.md`, `02-evaluation.md`, …).
+- **File names.** `CLAUDE.md` is uppercase because the product requires it. Case marks what a file *is*: **standing context you read** is `UPPERCASE.md` (`MISSION.md`, `DEVELOPMENT.md`, the guides). **Inert skeletons and generated output** are lowercase — templates are `<stage>-template.md` (`baseline-template.md`, `evaluation-template.md`, `plan-template.md`, `execute-template.md`, `publish-template.md`), and dated cycle outputs live in `hobbes/cycle/<date>/` (`01-baseline.md`, `02-evaluation.md`, …).
 - **Dates are ISO 8601 everywhere:** `YYYY-MM-DD`. Sortable, unambiguous, one format, no exceptions.

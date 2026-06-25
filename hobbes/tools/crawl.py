@@ -10,15 +10,17 @@ missing alt/aria/roles/lang, invalid/duplicate SVGs, and the security headers.
 
 DRIVEN BY THE SITEMAP, for a reproducible page set. Earlier cycles seeded a
 link-discovery crawl from the homepage with a hard URL cap; the sample wandered
-(200→164 pages) because Shopify throttled a different random subset each run and
+(200→164 pages) because the host throttled a different random subset each run and
 the cap truncated the rest — so cycle-over-cycle counts were noise. Now we expand
-the sitemap to the authoritative page list (SiteOne does NOT recurse a Shopify
+the sitemap to the authoritative page list (SiteOne does NOT recurse a nested
 sitemap *index*, so we expand it here), serve it as one flat sitemap on localhost,
 and crawl exactly that set: pinned with --include-regex, gentle pace so 429s stay
 near zero, no truncation. Same sitemap → same pages → comparable numbers.
 
-Mirrors psi.py / seo.py: gentle live crawl, a cached crawl.json (reused on
---resume / re-crawled on --fresh), and prints §F to stdout for baseline.py to capture.
+Mirrors psi.py / seo.py: gentle live crawl, a cached crawl.json, and the same
+capture/render split — capture() crawls into raw/crawl.json; scorecard_section()
+renders §F straight from that JSON. main() does both; baseline.py calls the same
+two, so the digest and a standalone run share one renderer.
 
 USAGE:
   python3 hobbes/tools/crawl.py            # reuse cached crawl.json if present
@@ -49,11 +51,11 @@ from psi import DEFAULT_URLS  # single source of truth for the site
 
 BIN = "siteone-crawler"
 UA = "hobbes-baseline/1.0 (+SiteOne sitemap crawl)"
-# Pace: Shopify rate-limits storefront HTML hard (a leaky bucket — a burst of ~33
+# Pace: hosts often rate-limit site HTML hard (a leaky bucket — a burst of ~33
 # pages then 429 for the rest), and SiteOne has no 429 retry, so a throttled page
 # is a lost page and the sample wanders again. We stay UNDER the limit: 1 req/s,
 # 1 worker, serialized. Images are skipped — alt/heading/SEO/security are HTML/
-# header checks that don't need the bytes (and pulling 700 product images would
+# header checks that don't need the bytes (and pulling hundreds of images would
 # both crawl for hours and, ironically, was the only thing diluting the origin
 # hit-rate; we replace that dilution with a low rate instead). Image weight/format
 # is judged on the golden path by PSI.
@@ -61,44 +63,44 @@ LIMITS = ["--max-reqs-per-sec=1", "--workers=1", "--timeout=15",
           "--disable-images", "--regex-filtering-only-for-pages"]
 
 # Default crawl is a STRATIFIED SAMPLE, not the whole sitemap: every distinct
-# low-volume template (collections, pages, policies, blogs) every cycle, plus a
-# fixed deterministic slice of products. Products are template-driven, so a slice
-# reveals the same template-level issues (missing description, heading order,
-# missing alt) as all 700 would — without hammering the store past its throttle.
+# low-volume page type every cycle, plus a fixed deterministic slice of the one
+# high-volume type (named by [cycle].sample_path, e.g. "/products/"). That type is
+# template-driven, so a slice reveals the same template-level issues (missing
+# description, heading order, missing alt) as the whole would — without hammering
+# the host past its throttle. With no sample_path set, every page is crawled.
 # --full overrides this and crawls the entire sitemap (slow; for an occasional
 # complete audit). The sample is deterministic, so the page set — and the counts —
 # are identical every cycle.
-PRODUCT_SAMPLE = 100
-
-
-def is_product(url):
-    return "/products/" in url
+SAMPLE_SIZE = 100   # how many of the high-volume page type to keep when subsampling
 
 
 def select_pages(pages, full):
-    """Choose the crawl set from the full sitemap. Returns (chosen, note)."""
-    if full:
-        return pages, "full sitemap"
-    products = [p for p in pages if is_product(p)]
-    other = [p for p in pages if not is_product(p)]
-    if len(products) > PRODUCT_SAMPLE:
-        step = len(products) // PRODUCT_SAMPLE      # deterministic: every Nth, sorted
-        sample = products[::step][:PRODUCT_SAMPLE]
+    """Choose the crawl set from the full sitemap. Returns (chosen, note).
+    Subsamples the one high-volume page type named by [cycle].sample_path; with no
+    sample_path set (or --full), takes every page."""
+    pat = config.sample_path()
+    if full or not pat:
+        return pages, "full sitemap" if full else "all pages (no sample_path set)"
+    bucket = [p for p in pages if pat in p]
+    other = [p for p in pages if pat not in p]
+    if len(bucket) > SAMPLE_SIZE:
+        step = len(bucket) // SAMPLE_SIZE           # deterministic: every Nth, sorted
+        sample = bucket[::step][:SAMPLE_SIZE]
     else:
-        sample = products
+        sample = bucket
     chosen = sorted(set(other) | set(sample))
-    note = f"all {len(other)} non-product + {len(sample)}/{len(products)} products sampled"
+    note = f"all {len(other)} other + {len(sample)}/{len(bucket)} '{pat}' sampled"
     return chosen, note
 
 
 def resolve_run_dir(args):
-    """Per-cycle output folder: hobbes/cycle/<date>/. crawl.json lives in
+    """Per-cycle output folder: hobbes/cycle/<date>-<letter>/. crawl.json lives in
     raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle folder;
-    standalone defaults to today's."""
+    standalone attaches to the latest cycle (or a fresh one)."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "cycle" / config.today()
+        d = config.default_run_dir(HOBBES / "cycle")
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 
@@ -118,18 +120,18 @@ def _locs(xml):
 
 
 def _is_page(url):
-    """A crawlable storefront HTML page — a clean path with no file extension.
-    Shopify handles are extensionless slugs; this drops child sitemaps (.xml) and
-    non-HTML sitemap entries like /agents.md or /robots.txt."""
+    """A crawlable HTML page — a clean path with no file extension. Page URLs are
+    extensionless paths; this drops child sitemaps (.xml) and non-HTML sitemap
+    entries like /agents.md or /robots.txt."""
     last = urllib.parse.urlparse(url).path.rstrip("/").rsplit("/", 1)[-1]
     return "." not in last
 
 
 def expand_sitemap(root):
     """The authoritative page list. SiteOne crawls a *flat* sitemap but does NOT
-    recurse a sitemap *index* (Shopify's `sitemap.xml` is an index of signed,
-    rotating child sitemaps), so we expand it here: fetch the index, follow each
-    child, collect every non-sitemap <loc>. Returns (sorted unique pages, note)."""
+    recurse a sitemap *index* (many hosts serve `sitemap.xml` as an index of
+    child sitemaps), so we expand it here: fetch the index, follow each child,
+    collect every non-sitemap <loc>. Returns (sorted unique pages, note)."""
     idx = _fetch(root + "sitemap.xml")
     top = _locs(idx)
     pages, notes = [], []
@@ -205,12 +207,12 @@ def run_crawl(fresh, cache, full=False):
     httpd, seed = serve_flat_sitemap(pages)
     print(f"… crawling {len(pages)} pages (1 req/s, 1 worker, images off) — be patient",
           file=sys.stderr, flush=True)
-    # JSON → raw/ is the only durable output: it's the machine source findings.py
-    # reads, and the rendered §F is printed to stdout for baseline.py to capture.
-    # The SiteOne HTML report (~1 MB/cycle, regenerable, read by nobody in the
-    # pipeline) is deliberately NOT emitted; the default tmp/ text dump is off
-    # too. Seed from the localhost flat sitemap; pin pages to the chosen set;
-    # allow crawling/asset-loading on the real domain.
+    # JSON → raw/ is the only durable output: it's the machine source evaluation.py
+    # reads, and scorecard_section() renders §F from it. The SiteOne HTML report
+    # (~1 MB/cycle, regenerable, read by nobody in the pipeline) is deliberately
+    # NOT emitted; the default tmp/ text dump is off too. Seed from the localhost
+    # flat sitemap; pin pages to the chosen set; allow crawling/asset-loading on
+    # the real domain.
     cmd = [BIN, f"--url={seed}",
            f"--allowed-domain-for-crawling={host}",
            "--allowed-domain-for-external-files=*",
@@ -229,9 +231,17 @@ def run_crawl(fresh, cache, full=False):
     data["_sitemapPages"] = len(sitemap)     # carried into coverage reporting
     data["_sampledPages"] = len(pages)
     data["_sampleNote"] = sample_note
+    data["_full"] = full                     # so scorecard_section() can label §F from raw/
     cache.write_text(json.dumps(data))
     print(f"  ✓ crawl complete · {cache.name}", file=sys.stderr, flush=True)
     return data
+
+
+def capture(raw, fresh, full):
+    """Crawl the whole site into raw/crawl.json (or reuse the cache). Network
+    side-effects only; §F is rendered from the JSON by scorecard_section(), so
+    baseline.py captures once then renders the same way crawl.py does standalone."""
+    return run_crawl(fresh, raw / "crawl.json", full)
 
 
 def table_rows(tables, name):
@@ -303,17 +313,12 @@ def coverage_line(data, html_pages):
     return " · ".join(parts), (throttled > 0 or shortfall)
 
 
-def main():
-    args = sys.argv[1:]
-    fresh = "--fresh" in args
-    full = "--full" in args
-    rd = resolve_run_dir(args)
-    cache = rd / "raw" / "crawl.json"
-    out = None                                    # no default file: baseline.py reads stdout; --out opts in
-    if "--out" in args:
-        out = Path(args[args.index("--out") + 1])
-
-    data = run_crawl(fresh, cache, full)
+def scorecard_section(raw):
+    """Scorecard Section F (site-wide grades + counts), rendered from
+    raw/crawl.json — the exact block baseline.py drops into the digest and crawl.py
+    prints under its standalone header — one renderer, two callers."""
+    data = json.loads((raw / "crawl.json").read_text())
+    full = bool(data.get("_full"))
     tables = data.get("tables", {})
     qs = quality_scores(data)
     texts = rollup_texts(data)
@@ -347,25 +352,7 @@ def main():
         s = qs.get(name)
         return f"{s:.1f}" if isinstance(s, (int, float)) else "—"
 
-    def path(r):
-        return r.get("urlPathAndQuery") or "/"
-
-    def detail(items, render):
-        return [f"- {render(r)}" for r in items] or ["- (none)"]
-
-    cov, partial = coverage_line(data, n)
-    if partial:
-        print(f"  ⚠ coverage: {cov}", file=sys.stderr, flush=True)
-    stamp = config.stamp()
     L = [
-        f"# Crawl results — {stamp}",
-        "",
-        "Captured by `hobbes/tools/crawl.py` (SiteOne, sitemap-driven whole-site crawl).",
-        "The Section F block below feeds the scorecard; the detail feeds **findings**.",
-        "",
-        f"Site: {site_root()}",
-        f"**Coverage:** {cov}",
-        "",
         f"## F. Site-wide ({'whole-site' if full else 'sitemap sample'} crawl — {n} pages)",
         "",
         "| SiteOne quality score (0–10) | Value |",
@@ -408,6 +395,50 @@ def main():
         f"| Permissions-Policy | {p(header_set(tables, 'Permissions-Policy'))} |",
         f"| Brotli compression | {p(no_brotli == 0)} |",
         f"| HTTPS / valid TLS cert | {p(tls_ok)} |",
+    ]
+    return "\n".join(L).rstrip()
+
+
+def main():
+    args = sys.argv[1:]
+    fresh = "--fresh" in args
+    full = "--full" in args
+    rd = resolve_run_dir(args)
+    raw = rd / "raw"
+    out = None                                    # no default file: --out opts in
+    if "--out" in args:
+        out = Path(args[args.index("--out") + 1])
+
+    data = capture(raw, fresh, full)
+    tables = data.get("tables", {})
+    seo = table_rows(tables, "seo")
+    n = len(seo)
+    broken = table_rows(tables, "404")
+    redirects = table_rows(tables, "redirects")
+    missing_title = [r for r in seo if not (r.get("title") or "").strip()]
+    missing_desc = [r for r in seo if not (r.get("description") or "").strip()]
+    dup_title = [r for r in table_rows(tables, "non-unique-titles") if (r.get("title") or "").strip()]
+
+    def path(r):
+        return r.get("urlPathAndQuery") or "/"
+
+    def detail(items, render):
+        return [f"- {render(r)}" for r in items] or ["- (none)"]
+
+    cov, partial = coverage_line(data, n)
+    if partial:
+        print(f"  ⚠ coverage: {cov}", file=sys.stderr, flush=True)
+    stamp = config.stamp()
+    L = [
+        f"# Crawl results — {stamp}",
+        "",
+        "Captured by `hobbes/tools/crawl.py` (SiteOne, sitemap-driven whole-site crawl).",
+        "The Section F block below feeds the scorecard; the detail feeds **findings**.",
+        "",
+        f"Site: {site_root()}",
+        f"**Coverage:** {cov}",
+        "",
+        scorecard_section(raw),
         "",
         "## Detail — for findings",
         "",
@@ -427,7 +458,7 @@ def main():
         *detail(missing_desc, path),
     ]
     report = "\n".join(L) + "\n"
-    print(report)                                 # stdout — baseline.py captures §F into the one digest
+    print(report)                                 # stdout — human-readable standalone digest
     if out:                                        # --out only; no default per-tool file
         out.write_text(report)
         print(f"→ written to {out}", file=sys.stderr)

@@ -53,142 +53,91 @@ The stage table above says *what each stage produces*. This is the other axis �
 
 ```mermaid
 flowchart TD
-    LIVE["LIVE SITE — hazelboutique.com<br/>(PSI API · page HTML · SiteOne crawl)"]:::live
+    LIVE["LIVE SITE — hazelboutique.com<br/>PSI API · page HTML · SiteOne crawl"]:::live
 
-    %% ============ CONFIG ============
-    subgraph CONFIG["config — one source of per-client truth"]
-        TOML["hobbes.toml (29)<br/>golden path · client meta · timezone<br/>effort_budget · branch_prefix · sample_path<br/>NO secrets — PSI key via $PSI_API_KEY"]:::tmpl
-        CONFIGPY["config.py<br/>golden_path() · client_meta() · psi_key()<br/>effort_budget() · sample_path() · today()/stamp() — pinned tz<br/>new_cycle_dir()/latest_cycle()/cycle_dirs()/default_run_dir() — &lt;date&gt;-&lt;letter&gt;"]:::py
-        TOML --> CONFIGPY
+    %% ═════════ CYCLE · hobbes-cycle.yml — one trigger: measure → fix → ONE PR ═════════
+    subgraph CYCLE["CYCLE · hobbes-cycle.yml"]
+        direction TB
+
+        subgraph MEASURE["deterministic measure · no LLM"]
+            direction TB
+            PSI["psi.py — LIVE (PSI API) → raw/*.psi.json<br/>renders §A–D · lab perf/a11y/BP/SEO + CrUX field"]:::py
+            SEO["seo.py — LIVE (page HTML) → raw/*.seo.json<br/>renders §E · titles/meta/canonical/OG/structured data"]:::py
+            CRAWL["crawl.py — SiteOne sitemap sample → raw/crawl.json<br/>renders §F · site-wide SEO/a11y/security counts"]:::py
+            RAW["raw/ — the three captures · git-ignored · the only intermediate"]:::raw
+            BMD["01-baseline.md — the scorecard §A–F<br/>baseline.py renders from raw/ via the tools' own renderers"]:::doc
+            EMD["02-evaluation.md — the problem catalog<br/>evaluation.py re-walks raw/ for per-node evidence"]:::doc
+            PSI --> RAW
+            SEO --> RAW
+            CRAWL --> RAW
+            RAW --> BMD
+            RAW --> EMD
+        end
+
+        subgraph FIX["judgment · Claude agent (opus-4-8)"]
+            direction TB
+            PLANMD["plan.md — agent · PLAN<br/>group findings into systems · rate effort/impact · order by leverage"]:::agent
+            EXECMD["execution.md + theme code + PR body — agent · EXECUTE"]:::agent
+            PLANMD --> EXECMD
+        end
+
+        BMD --> PLANMD
+        EMD --> PLANMD
+        BMD --> EXECMD
+        EMD --> EXECMD
+        RAW -. "break-glass: raw evidence" .-> FIX
     end
-
-    %% ============ ENGINE TOOLS ============
-    subgraph TOOLS["the deterministic engine — hobbes/tools/ (Python, no LLM)"]
-        PSI["psi.py (403)<br/>reads: live (PSI API)<br/>writes: raw/*.psi.json · renders §A–D from raw/<br/>median-of-3, retry-resilient"]:::py
-        SEO["seo.py (372)<br/>reads: live (page HTML)<br/>writes: raw/*.seo.json · renders §E from raw/"]:::py
-        CRAWL["crawl.py (468)<br/>reads: live (SiteOne stratified sample)<br/>writes: raw/crawl.json · renders §F from raw/"]:::py
-        BASELINE["baseline.py (133)<br/>imports psi/seo/crawl: drives capture() → raw/,<br/>then renders §A–F from raw/ via their own renderers<br/>(+ §G from baseline-template.md) — no stdout scraped"]:::py
-        EVAL["evaluation.py (1009)<br/>reads: raw/* directly · re-walks for node evidence<br/>imports the SAME extractors (psi/seo/crawl)<br/>writes: 02-evaluation.md"]:::py
-        PUBREV["publish-review.py — REVIEW-ONLY<br/>twin of baseline.py: drives psi/seo/crawl<br/>capture() → raw-review/, renders the after-digest<br/>raw-review/baseline.md (the live, post-publish site)"]:::py
-        REVIEW["review.py — REVIEW-ONLY<br/>reads: 01-baseline.md (before) + raw-review/baseline.md (after)<br/>fills review-template.md · writes 06-review.md, honest by tier"]:::py
-    end
-
     LIVE --> PSI
     LIVE --> SEO
     LIVE --> CRAWL
-    CONFIGPY -. loaded by all tools .-> TOOLS
 
-    %% ============ RAW DATASTORE ============
-    RAW["raw/ — per-cycle artifacts (git-ignored, the only intermediate)<br/>*.psi.json · *.seo.json · crawl.json"]:::raw
-    PSI -- writes --> RAW
-    SEO -- writes --> RAW
-    CRAWL -- writes --> RAW
-    RAW -- "renders §A–F (tools' renderers)" --> BASELINE
-    RAW -- "read directly" --> EVAL
+    PR["ONE PR — scorecard + findings + plan + the code fix"]:::pr
+    EXECMD --> PR
 
-    %% ============ DATA DOCS ============
-    BMD["01-baseline.md<br/>the ONE digest · the scorecard"]:::doc
-    EMD["02-evaluation.md<br/>the problem catalog"]:::doc
-    RREV["raw-review/baseline.md<br/>the live, post-publish after-digest"]:::raw
-    DMD["06-review.md<br/>the before/after"]:::doc
-
-    BASELINE --> BMD
-    EVAL --> EMD
-    LIVE --> PUBREV
-    PUBREV --> RREV
-    REVIEW --> DMD
-    BMD -- "before" --> REVIEW
-    RREV -- "after" --> REVIEW
-
-    %% ============ TEMPLATES ============
-    subgraph TEMPLATES["stage contracts — hobbes/templates/*.md"]
-        TTMPL["baseline-template.md<br/>scorecard shape §A–G"]:::tmpl
-        FTMPL["evaluation-template.md<br/>the findings contract"]:::tmpl
-        PTMPL["plan-template.md<br/>group → rate effort/impact → order by leverage"]:::tmpl
-        ETMPL["execute-template.md<br/>batch by budget · gates · never publish"]:::tmpl
-        PUBTMPL["publish-template.md<br/>human-owned go-live contract"]:::tmpl
-        REVTMPL["review-template.md<br/>before/after shape · 4 honest tiers"]:::tmpl
-    end
-    TTMPL -. "scorecard shape §A–G" .-> BASELINE
-    FTMPL -. shape .-> EVAL
-    REVTMPL -. fills .-> REVIEW
-
-    %% ============ STANDING CONTEXT ============
-    subgraph CTX["standing context — hobbes/*.md, prose, read by the agent"]
-        CLAUDE["CLAUDE.md<br/>identity + THE HARD LINE<br/>(never publish/merge/spend w/o sign-off)"]:::ctx
-        MISSION["MISSION.md<br/>baseline → target priorities"]:::ctx
-        DEV["DEVELOPMENT.md<br/>stack + done-means gates"]:::ctx
-        CONTEXTMD["CONTEXT.md<br/>client · sign-off · access"]:::ctx
-        CHANGELOG["CHANGELOG.md<br/>what shipped + result"]:::ctx
-    end
-
-    %% ============ AGENT STAGES ============
-    subgraph AGENT["judgment — the Claude agent (primary input is the catalog/plan; raw/ is break-glass for evidence)"]
-        PLAN["agent · PLAN<br/>reads: 02-eval + 01-baseline + MISSION + DEVELOPMENT + CONTEXT<br/>break-glass: raw/<br/>writes: plan.md"]:::agent
-        PLANMD["plan.md<br/>systems · rated · ordered by leverage"]:::doc
-        EXEC["agent · EXECUTE<br/>primary: plan.md · also: 02-eval + 01-baseline + MISSION + DEVELOPMENT + CONTEXT + theme code<br/>break-glass: raw/<br/>writes: execution.md, theme code, PR body"]:::agent
-        EXECOUT["execution.md + theme code + PR body"]:::doc
-        PLAN --> PLANMD --> EXEC --> EXECOUT
-    end
-    EMD --> PLAN
-    BMD --> PLAN
-    MISSION -- "impact" --> PLAN
-    DEV -- "effort: stack" --> PLAN
-    CONTEXTMD -- "effort: people" --> PLAN
-    RAW -. "break-glass: evidence" .-> PLAN
-    PTMPL -. fills .-> PLAN
-    EMD --> EXEC
-    BMD --> EXEC
-    MISSION --> EXEC
-    CONTEXTMD --> EXEC
-    RAW -. "break-glass: evidence" .-> EXEC
-    ETMPL -. fills .-> EXEC
-    DEV -. bounds .-> EXEC
-    CLAUDE -. steers .-> AGENT
-    CHANGELOG -. "prior work — don't rebuild" .-> AGENT
-
-    %% ============ PR / HUMAN / OUTPUT ============
-    PR["ONE PR<br/>scorecard + findings + plan + the code fix<br/>(no diff in a cycle)"]:::pr
-    EXECOUT --> PR
-    HUMAN["HUMAN — review → merge → publish in Shopify<br/>→ add the published label"]:::human
+    %% ═════════ HUMAN — the only step that touches the live site ═════════
+    HUMAN["HUMAN — review → merge → publish live → add 'published' label"]:::human
     PR --> HUMAN
-    PUBTMPL -. contract .-> HUMAN
 
-    %% ============ ORCHESTRATION ============
-    subgraph ORCH["the cloud runner + CLI"]
-        CYCLEYML["hobbes-cycle.yml — workflow_dispatch<br/>measure (no LLM) → agent (opus-4-8) fixes → ONE PR<br/>budget = input override else hobbes.toml"]:::orch
-        REVIEWYML["hobbes-review.yml — on published label (or dispatch)<br/>publish-review LIVE → raw-review/ → review.py diff → PR comment<br/>(no Claude)"]:::orch
-        CLI["tools/cli.py<br/>cycle · baseline · findings · publish-review · review<br/>status · plan · execute · budget · today<br/>(cycle = baseline + evaluation, no review)"]:::py
+    %% ═════════ REVIEW · hobbes-review.yml — fires on the label · no LLM ═════════
+    subgraph REVIEW["REVIEW · hobbes-review.yml"]
+        direction TB
+        RREV["raw-review/baseline.md — the live, post-publish after-digest<br/>publish-review.py (twin of baseline.py) re-runs psi/seo/crawl → raw-review/"]:::raw
+        RMD["06-review.md — the before/after, honest by tier<br/>review.py: field / lab / axe / §F counts (coverage-gated)"]:::doc
+        RREV --> RMD
     end
-    CYCLEYML -. runs .-> TOOLS
-    CYCLEYML -. then runs .-> AGENT
-    HUMAN -- "published label fires" --> REVIEWYML
-    REVIEWYML -. "runs publish-review then review" .-> TOOLS
-    DMD --> COMMENT["gh pr comment — the before/after"]:::pr
-    CLI -. drives locally .-> TOOLS
-    CLI -. prints stage prompts .-> AGENT
+    HUMAN -- "label fires" --> RREV
+    LIVE --> RREV
+    BMD -- "the before" --> RMD
+    RMD --> COMMENT["PR comment — the before/after"]:::pr
 
-    %% ============ OPERATOR GUIDES ============
-    subgraph GUIDES["operator guides — hobbes/guides/ (engine-generic)"]
-        SYSTEMMD["SYSTEM.md — this map"]:::ctx
-        SETUP["SETUP.md — once per client<br/>(local + cloud, each error-annotated)"]:::tmpl
-        BASELINEMD2["BASELINE.md — the cycle runbook<br/>(read by the agent during a cycle)"]:::ctx
-        READMEMD["README.md — engine overview (hobbes/ root)"]:::ctx
+    %% ═════════ FEEDERS — read by the stages, never the flow's output ═════════
+    subgraph FEED["per-client truth · contracts · the CLI"]
+        direction TB
+        CONFIGPY["config.py ← hobbes.toml<br/>golden path · pinned-tz dates · &lt;date&gt;-&lt;letter&gt; cycle dirs · $PSI_API_KEY"]:::py
+        TMPLS["templates/*.md — stage contracts<br/>baseline · evaluation · plan · execute · publish · review"]:::tmpl
+        CTXN["standing context — CLAUDE (hard line) · MISSION (impact)<br/>DEVELOPMENT + CONTEXT (effort) · CHANGELOG (prior work)"]:::ctx
+        CLI["cli.py — cycle · baseline · findings · publish-review · review<br/>status · plan/execute · budget"]:::orch
     end
-    BASELINEMD2 -. guides .-> AGENT
+    CONFIGPY -. "loaded by every tool" .-> MEASURE
+    CONFIGPY -.-> REVIEW
+    TMPLS -. "the shape each stage fills" .-> CYCLE
+    TMPLS -. "review-template" .-> RMD
+    CTXN -. "steers the agent" .-> FIX
+    CLI -. "drives the tools locally" .-> CYCLE
 
-    %% ============ LEGEND ============
+    %% ═════════ LEGEND ═════════
     subgraph LEGEND["legend"]
-        L0["live site · source of truth"]:::live
+        direction LR
+        L0["live · source of truth"]:::live
         L1["Python · deterministic"]:::py
         L1b["raw datastore"]:::raw
         L2["Claude agent · judgment"]:::agent
         L3["human · irreversible"]:::human
-        L4["output digest / doc"]:::doc
+        L4["output doc / digest"]:::doc
         L5["template / config"]:::tmpl
         L6["standing context"]:::ctx
-        L7["workflow / orchestration"]:::orch
-        L8["PR / comment · output to GitHub"]:::pr
+        L7["CLI / orchestration"]:::orch
+        L8["PR / comment → GitHub"]:::pr
     end
 
     classDef live fill:#1f2937,color:#ffffff,stroke:#0f172a,stroke-width:2px;

@@ -43,9 +43,9 @@ STRATS = ("mobile", "desktop")
 # The deterministic "how it works deeply". Site-specific root cause stays for the plan.
 A11Y_KNOW = {
     "button-name": ("A <button> has no accessible name.",
-                    "A screen reader announces it as just 'button'. In Dawn this hits icon-only buttons — media zoom toggles, quantity steppers, drawer close icons — that need aria-label or visually-hidden text."),
+                    "A screen reader announces it as just 'button'. This typically hits icon-only buttons — media zoom toggles, quantity steppers, drawer close icons — that need aria-label or visually-hidden text."),
     "image-alt": ("An <img> has no alt attribute.",
-                  "A screen reader skips it or reads the filename. On Shopify these are product/card images; alt comes from the image's alt set in admin or the theme's <img> tag."),
+                  "A screen reader skips it or reads the filename. These are usually content/card images; alt comes from the image's alt field in the CMS/admin or the template's <img> tag."),
     "link-name": ("A link has no discernible text.",
                   "Announced as 'link' with no destination. Usually icon/image links missing aria-label."),
     "frame-title": ("An <iframe> has no title attribute.",
@@ -55,11 +55,11 @@ A11Y_KNOW = {
     "color-contrast": ("Text/background contrast is below WCAG AA.",
                        "Low-vision users can't read it. Often sale/sold-out price text, placeholder grey, or button text on hover — a token/CSS value, not markup."),
     "heading-order": ("Headings skip a level (e.g. h3 with no h2).",
-                      "Breaks the document outline a screen reader navigates by. In Dawn, card titles (h3/h5) under a section with no h2 are the usual cause."),
+                      "Breaks the document outline a screen reader navigates by. A common cause: card/sub titles (h3/h5) under a section with no h2."),
 }
 BP_KNOW = {
     "errors-in-console": ("JavaScript errors logged to the browser console.",
-                          "Each is a script failing at runtime — broken behavior, often from an app embed or a theme script. Read the messages; they name the file."),
+                          "Each is a script failing at runtime — broken behavior, often from a third-party embed or a first-party script. Read the messages; they name the file."),
     "deprecations": ("Use of a deprecated browser API.",
                      "Will break in a future browser version. Usually inside a third-party script."),
     "image-aspect-ratio": ("An image is displayed at a ratio that doesn't match its file.",
@@ -237,7 +237,7 @@ def seo_findings(seo_html, crawl):
         out.append(F(
             "Missing meta descriptions",
             "Pages with no <meta name=description>.",
-            "Google then invents the SERP snippet from page text — usually worse copy, lower click-through. On Shopify, collection/policy/system pages have none unless the theme or admin sets one.",
+            "Google then invents the SERP snippet from page text — usually worse copy, lower click-through. Listing/policy/system pages often have none unless the template or CMS sets one.",
             "SiteOne crawl · seo table  ·  seo.py · golden path",
             "Every page (BASELINE §E + §F)", f"{len(miss_desc)} of {n} sitewide; golden: {', '.join(g_desc) or 'none'}",
             ", ".join(g_desc), f"{len(miss_desc)} / {n}",
@@ -264,7 +264,7 @@ def seo_findings(seo_html, crawl):
         out.append(F(
             "Heading structure (single H1 + order)",
             "Pages with no/multiple H1 or a skipped heading level.",
-            "Headings are the outline assistive tech and search engines read. A skipped level (h1→h3) or a second h1 breaks that outline. In Dawn, section/card heading levels (h2/h3/h5) drift when sections are reordered or a banner ships an h1.",
+            "Headings are the outline assistive tech and search engines read. A skipped level (h1→h3) or a second h1 breaks that outline. A common cause: section/card heading levels (h2/h3/h5) drift when sections are reordered or a banner ships an h1.",
             "SiteOne crawl · seo-headings  ·  seo.py · golden path",
             "Single H1 + ordered headings, all pages (BASELINE §E/§F)",
             f"{multi_h1} multi-H1, {skipped} skipped-level of {n}",
@@ -286,7 +286,7 @@ def seo_findings(seo_html, crawl):
         out.append(F(
             "Image alt coverage",
             "Images on the page with no alt attribute (coverage, not quality).",
-            "Same gap as the A11Y image-alt rule, seen from the SEO side. Coverage only — whether the alt that exists is meaningful is the manual pass. Product/card images get alt from the admin image alt or the theme <img>.",
+            "Same gap as the A11Y image-alt rule, seen from the SEO side. Coverage only — whether the alt that exists is meaningful is the manual pass. Content/card images get alt from the CMS/admin image field or the template <img>.",
             "seo.py · golden path",
             "All images have alt (BASELINE §E)", f"golden pages failing: {', '.join(g_alt)}",
             ", ".join(g_alt), "", ev))
@@ -305,7 +305,7 @@ def seo_findings(seo_html, crawl):
         out.append(F(
             "Open Graph / Twitter tags",
             "Pages missing og:title/og:image (and the rest of the OG/Twitter set).",
-            "These control the link preview when the page is shared (social, iMessage, etc.). Missing them = an ugly or blank share card. Set in the theme <head>; Dawn ships them but custom templates can drop them.",
+            "These control the link preview when the page is shared (social, iMessage, etc.). Missing them = an ugly or blank share card. Set in the document <head>; many templates ship them but custom pages can drop them.",
             "seo.py · golden path  ·  SiteOne crawl · open-graph",
             "OG/Twitter present, all pages", f"{len(og_miss)} of {n} sitewide",
             ", ".join(lbl for lbl, p in parsed.items()
@@ -567,7 +567,7 @@ def sec_findings(crawl):
         out.append(F(
             "Missing security response headers",
             "Standard hardening headers absent from responses.",
-            "These reduce XSS, clickjacking, and referrer-leak exposure. On Shopify (hosted, Advanced plan) the platform sets some headers and limits what a theme can add — CSP/HSTS especially may be platform-controlled. Confirm what's actually settable before treating each as fully fixable.",
+            "These reduce XSS, clickjacking, and referrer-leak exposure. On a hosted platform the host often sets some headers and limits what the app/template can add — CSP/HSTS especially may be platform-controlled. Confirm what's actually settable before treating each as fully fixable.",
             "SiteOne crawl · security table",
             "All present (BASELINE §F)", f"{len(ev)} of {len(want)} missing",
             "", "all responses", ev))
@@ -588,7 +588,7 @@ def sec_findings(crawl):
         out.append(F(
             "No Brotli compression",
             "Responses aren't served with Brotli.",
-            "Brotli beats gzip on text (HTML/CSS/JS), trimming transfer bytes. On Shopify this is largely platform-controlled — likely not theme-fixable; record as a platform note unless proven otherwise.",
+            "Brotli beats gzip on text (HTML/CSS/JS), trimming transfer bytes. On a hosted platform this is often platform-controlled — likely not app-fixable; record as a platform note unless proven otherwise.",
             "SiteOne crawl · summary rollup",
             "Brotli on (BASELINE §F)", f"{no_brotli} of {n} pages",
             "", f"{no_brotli} / {n}", [f"{no_brotli} page(s) served without Brotli"]))
@@ -626,8 +626,8 @@ def bp_findings(psi, crawl):
     # so a new SiteOne check can't fall through a hardcoded needle list. Curated
     # context where we have it; the analysis name itself otherwise.
     BP_CRAWL_WHY = {
-        "Invalid inline SVGs": "Malformed inline SVG markup — can render wrong or bloat the DOM. Usually a theme snippet or app-injected icon.",
-        "Duplicate inline SVGs": "The same SVG inlined many times instead of defined once and referenced (<use>). Minor HTML bloat; common in Dawn — low priority.",
+        "Invalid inline SVGs": "Malformed inline SVG markup — can render wrong or bloat the DOM. Usually a template partial or a third-party-injected icon.",
+        "Duplicate inline SVGs": "The same SVG inlined many times instead of defined once and referenced (<use>). Minor HTML bloat; common where an icon set is inlined per use — low priority.",
         "Non-clickable phone numbers": "A phone number shown as text with no tel: link. On mobile it can't be tapped to call.",
         "Large inline SVGs": "Oversized inline SVGs bloat the HTML payload — consider an external asset or <use> reference.",
         "DOM depth": "Deeply nested DOM raises style/layout cost and memory. Usually a section/snippet nesting issue.",

@@ -16,7 +16,7 @@ This is the **problem catalog** — dense, deterministic, agent-facing. It sits 
 What is **not** deterministic, and therefore is **not** here:
 - **The fix.** Which file, which line, which approach → the plan.
 - **Effort and impact.** How long, what's needed, how much it moves the mission → the plan.
-- **Root cause in our source.** The evidence points at a component (a selector, a class, a snippet); naming the exact Liquid file and deciding the real cause is the plan-agent's investigation.
+- **Root cause in our source.** The evidence points at a component (a selector, a class, a snippet); naming the exact source file and deciding the real cause is the plan-agent's investigation.
 
 Findings gives the *what*, the *where it shows*, and the *how it works*. The plan decides the *what-to-do*.
 
@@ -26,7 +26,7 @@ Every finding is one block with the same shape:
 
 ```
 ### <DOMAIN>-<n> · <short title>
-- **What / why:** <static explainer — what this rule/metric is, why it matters, where it usually lives in a Dawn theme>
+- **What / why:** <static explainer — what this rule/metric is, why it matters, where it usually lives in the codebase>
 - **Source:** <tool> · <audit / table id>
 - **Target → measured:** <the BASELINE.md target> → <the measured value> (**gap**)
 - **Scope:** golden path: <pages/devices affected> · sitewide: <count> / <pages crawled>
@@ -37,7 +37,7 @@ Every finding is one block with the same shape:
 
 - **Domains** run in a fixed reading order — `A11Y`, `SEO`, `PERF`, `SEC`, `BP` — **not** a priority ranking. Findings does not weigh impact; that is the plan's job, rated against `MISSION.md`. The order here is just stable and predictable so IDs don't move between cycles.
 - **IDs are stable** within a cycle (`A11Y-1`, `SEO-3` …) — quote them in the plan.
-- **Scope** separates the **golden path** (the 3 locked pages, measured deep by PSI/seo) from **sitewide** (every page, measured broad by the crawl). A problem on both is worse than one on either.
+- **Scope** separates the **golden path** (the locked golden-path pages, measured deep by PSI/seo) from **sitewide** (every page, measured broad by the crawl). A problem on both is worse than one on either.
 - **Evidence is raw.** A selector is the real DOM selector; a snippet is the real HTML; bytes/ms are the real numbers. Trust them, and open `raw/` (e.g. `raw/crawl.json`) to go deeper.
 
 ## Sections

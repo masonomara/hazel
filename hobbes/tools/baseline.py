@@ -65,6 +65,22 @@ def between(text, start, end):
     return (text[i:j] if j >= 0 else text[i:]).rstrip()
 
 
+def section_g(template_text):
+    """Section G (manual a11y) — intro + column header come from TEMPLATE.md; the
+    page rows are generated from the golden path so G speaks the same URL-derived
+    labels as A–F. The template's own rows are illustrative and dropped."""
+    g = after(template_text, "## G.")
+    head = []
+    for ln in g.splitlines():
+        head.append(ln)
+        if "|" in ln and "-" in ln and set(ln) <= set("|-: \t"):   # the header separator row
+            break
+    ncols = head[-1].count("|") - 1
+    rows = [f"| {lbl} — {strat} |" + "  |" * (ncols - 1)
+            for lbl, _ in DEFAULT_URLS for strat in ("mobile", "desktop")]
+    return "\n".join(head + rows)
+
+
 def main():
     args = sys.argv[1:]
     no_crawl = "--no-crawl" in args
@@ -90,7 +106,7 @@ def main():
 
     abcd = after(psi, "## A.")                      # A, B, C, D (+ failed-call note)
     e = between(seo, "## E.", "## Page titles")     # E + site-level
-    g = after(tmpl, "## G.")                        # manual a11y, blank for the human
+    g = section_g(tmpl)                             # manual a11y — page rows from the golden path
     if not (abcd and e and g):
         sys.exit("✗ couldn't extract sections from the tool output — check psi.py / seo.py / TEMPLATE.md")
 

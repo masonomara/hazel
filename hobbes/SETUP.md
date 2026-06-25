@@ -7,8 +7,8 @@ How to stand Hobbes up. First fill the per-client config (`hobbes.toml`, below);
 The per-client config every tool reads. Fill it once:
 
 - **Identify the client.** Set the `[client]` block — name, site, platform, who runs it. (The fuller picture — goals, people, constraints — lives in `hobbes/context/CONTEXT.md`.)
-- **Lock the golden path.** Pick 3–4 important pages with exact URLs — typically home, collection, product — and set them in `[golden_path]`. Reuse the same URLs every cycle so results stay comparable.
-- **Method is PSI.** The cycle runs the PageSpeed Insights API the same way every cycle, so numbers stay comparable. Local Lighthouse is the fallback only for URLs PSI can't reach (theme draft, localhost, staging) — never mix PSI and local scores in one baseline. (Full method in `hobbes/BASELINE.md`.)
+- **Lock the golden path.** Pick 3–4 important, representative pages with exact URLs, give each a short `label`, and add them as `[[golden_path]]` entries. Reuse the same URLs every cycle so results stay comparable. (`label` is optional — omit it and it's derived from the URL.)
+- **Method is PSI.** The cycle runs the PageSpeed Insights API the same way every cycle, so numbers stay comparable. Local Lighthouse is the fallback only for URLs PSI can't reach (a draft, localhost, or staging URL) — never mix PSI and local scores in one baseline. (Full method in `hobbes/BASELINE.md`.)
 
 ## Local setup — the engine on your machine
 

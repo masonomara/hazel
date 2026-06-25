@@ -10,9 +10,9 @@ missing alt/aria/roles/lang, invalid/duplicate SVGs, and the security headers.
 
 DRIVEN BY THE SITEMAP, for a reproducible page set. Earlier cycles seeded a
 link-discovery crawl from the homepage with a hard URL cap; the sample wandered
-(200→164 pages) because Shopify throttled a different random subset each run and
+(200→164 pages) because the host throttled a different random subset each run and
 the cap truncated the rest — so cycle-over-cycle counts were noise. Now we expand
-the sitemap to the authoritative page list (SiteOne does NOT recurse a Shopify
+the sitemap to the authoritative page list (SiteOne does NOT recurse a nested
 sitemap *index*, so we expand it here), serve it as one flat sitemap on localhost,
 and crawl exactly that set: pinned with --include-regex, gentle pace so 429s stay
 near zero, no truncation. Same sitemap → same pages → comparable numbers.
@@ -49,11 +49,11 @@ from psi import DEFAULT_URLS  # single source of truth for the site
 
 BIN = "siteone-crawler"
 UA = "hobbes-baseline/1.0 (+SiteOne sitemap crawl)"
-# Pace: Shopify rate-limits storefront HTML hard (a leaky bucket — a burst of ~33
+# Pace: hosts often rate-limit site HTML hard (a leaky bucket — a burst of ~33
 # pages then 429 for the rest), and SiteOne has no 429 retry, so a throttled page
 # is a lost page and the sample wanders again. We stay UNDER the limit: 1 req/s,
 # 1 worker, serialized. Images are skipped — alt/heading/SEO/security are HTML/
-# header checks that don't need the bytes (and pulling 700 product images would
+# header checks that don't need the bytes (and pulling hundreds of images would
 # both crawl for hours and, ironically, was the only thing diluting the origin
 # hit-rate; we replace that dilution with a low rate instead). Image weight/format
 # is judged on the golden path by PSI.

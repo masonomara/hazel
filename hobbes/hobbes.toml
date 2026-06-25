@@ -7,12 +7,23 @@ site     = "hazelboutique.com"
 platform = "Shopify Advanced"
 run_by   = "Mason"
 
-[golden_path]
-home       = "https://hazelboutique.com/"
-collection = "https://hazelboutique.com/collections/all-hazel-brand"
-product    = "https://hazelboutique.com/products/the-capri-collection-baby-pink"
+# The locked golden path: representative pages measured every cycle, in order.
+# Each entry needs a url; label is optional — omit it and the label is derived from
+# the url (first path directory, or "/" for the root). No fixed page types.
+[[golden_path]]
+label = "Home"
+url   = "https://hazelboutique.com/"
+
+[[golden_path]]
+label = "Collection"
+url   = "https://hazelboutique.com/collections/all-hazel-brand"
+
+[[golden_path]]
+label = "Product"
+url   = "https://hazelboutique.com/products/the-capri-collection-baby-pink"
 
 [cycle]
 branch_prefix = "hobbes-"   # flat, never collides with a branch literally named "hobbes"
 effort_budget = 100         # effort points per execute batch; 100 ≫ a full plan (~25 pts) = "do everything"
 timezone = "America/New_York"   # pins cycle dates so local + CI land on the same calendar day
+sample_path = "/products/"  # the high-volume page type the crawler subsamples (omit to crawl every page)

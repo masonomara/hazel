@@ -35,6 +35,9 @@ TEMPLATE = HOBBES / "templates" / "01-baseline-template.md"
 sys.path.insert(0, str(TOOLS))
 import capture
 import config
+import psi
+import seo
+import crawl
 from psi import DEFAULT_URLS  # single source of truth for the golden path
 
 

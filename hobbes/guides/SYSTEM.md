@@ -103,7 +103,7 @@ flowchart TD
         ETMPL["execute-template.md<br/>batch by budget · gates · never publish"]:::tmpl
         PUBTMPL["publish-template.md<br/>human-owned go-live contract"]:::tmpl
     end
-    TTMPL -. "§G shape" .-> BASELINE
+    TTMPL -. "scorecard shape §A–G" .-> BASELINE
     FTMPL -. shape .-> EVAL
 
     %% ============ STANDING CONTEXT ============
@@ -138,6 +138,7 @@ flowchart TD
     ETMPL -. fills .-> EXEC
     DEV -. bounds .-> EXEC
     CLAUDE -. steers .-> AGENT
+    CHANGELOG -. "prior work — don't rebuild" .-> AGENT
 
     %% ============ PR / HUMAN / OUTPUT ============
     PR["ONE PR<br/>scorecard + findings + plan + the code fix<br/>(no diff in a cycle)"]:::pr
@@ -172,6 +173,7 @@ flowchart TD
 
     %% ============ LEGEND ============
     subgraph LEGEND["legend"]
+        L0["live site · source of truth"]:::live
         L1["Python · deterministic"]:::py
         L1b["raw datastore"]:::raw
         L2["Claude agent · judgment"]:::agent
@@ -180,6 +182,7 @@ flowchart TD
         L5["template / config"]:::tmpl
         L6["standing context"]:::ctx
         L7["workflow / orchestration"]:::orch
+        L8["PR / comment · output to GitHub"]:::pr
     end
 
     classDef live fill:#1f2937,color:#ffffff,stroke:#0f172a,stroke-width:2px;

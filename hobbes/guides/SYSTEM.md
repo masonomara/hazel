@@ -114,7 +114,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 ### Config — the one source of per-client truth
 | File | Lines | Role |
 |---|---|---|
-| [`hobbes.toml`](hobbes.toml) | 29 | Per-client config: the golden path (`[[golden_path]]` label + URL entries), branch prefix, **timezone** (pins cycle dates), **effort_budget**, **sample_path** (the crawler's high-volume page type). |
+| [`hobbes.toml`](../hobbes.toml) | 29 | Per-client config: the golden path (`[[golden_path]]` label + URL entries), branch prefix, **timezone** (pins cycle dates), **effort_budget**, **sample_path** (the crawler's high-volume page type). |
 
 ### The deterministic engine — `hobbes/tools/`
 | File | Lines | Role |
@@ -144,8 +144,8 @@ The stage table above says *what each stage produces*. This is the other axis �
 ### The cloud runner — `.github/workflows/`
 | File | Trigger | Role |
 |---|---|---|
-| [`../.github/workflows/hobbes-cycle.yml`](../.github/workflows/hobbes-cycle.yml) | dispatch (budget input) | The work cycle: `cli.py cycle` measures (deterministic, no LLM), then `claude-code-action` plans + writes the fix → **one PR** carrying the scorecard/findings *and* the code. (No diff — that's the review.) |
-| [`../.github/workflows/hobbes-review.yml`](../.github/workflows/hobbes-review.yml) | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
+| [`../.github/workflows/hobbes-cycle.yml`](../../.github/workflows/hobbes-cycle.yml) | dispatch (budget input) | The work cycle: `cli.py cycle` measures (deterministic, no LLM), then `claude-code-action` plans + writes the fix → **one PR** carrying the scorecard/findings *and* the code. (No diff — that's the review.) |
+| [`../.github/workflows/hobbes-review.yml`](../../.github/workflows/hobbes-review.yml) | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
 
 ### Operator guides — `hobbes/guides/`
 *(Engine-generic — same across clients; read by the agent and the human operator.)*

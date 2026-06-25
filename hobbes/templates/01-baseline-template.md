@@ -4,9 +4,9 @@ Client: [name] · Site: [url] · Platform: [platform] · Run by: [name] · Date:
 
 Golden path: [page 1 url] · [page 2 url] · [page 3 url]
 
-`✓` = pass / present · `✗` = fail / missing · `✗cut` = PSI run truncated before network-idle (value is the cutoff) · blank = human sign-off pending.
+`✓` = pass · `✗` = fail · `✗cut` = PSI run cut off before network-idle (the value is where it stopped) · blank = human sign-off pending.
 
-Filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E, `crawl.py` → F. Section G (manual a11y) is the human's to sign. The filled file **is** the baseline; compare each cycle to the previous and to the Targets in `hobbes/guides/BASELINE.md`. Page labels come from each `[[golden_path]]` entry in `hobbes.toml` (or, if no `label` is set, are derived from the URL); the `Page 1/2/3` rows below are illustrative.
+The tools fill this in: `psi.py` → A, B, C, D · `seo.py` → E · `crawl.py` → F. Section G, manual a11y, is the human's to sign. The filled file is the baseline. Compare each cycle to the last one and to the targets in `hobbes/guides/BASELINE.md`. Page labels come from each `[[golden_path]]` entry in `hobbes.toml`, or from the URL when no `label` is set. The `Page 1/2/3` rows below are only examples.
 
 ## A. Lighthouse scores
 
@@ -112,7 +112,7 @@ Filled by the tools — `psi.py` → A / B / C / D, `seo.py` → E, `crawl.py` �
 
 ## G. Accessibility — manual (human sign-off)
 
-Tools cannot judge these. A page is not certified fully pass until these rows are signed: keyboard flow, visible focus, logical order, screen-reader sense, whether the alt that exists is meaningful, contrast by eye, reduced motion.
+Tools cannot judge these. A page is not a full pass until these rows are signed: keyboard flow, visible focus, logical order, screen-reader sense, whether the alt text means anything, contrast by eye, reduced motion.
 
 | Page / Device | Keyboard | Focus visible | Logical order | Screen reader | Alt meaningful | Contrast | Reduced motion |
 |---|---|---|---|---|---|---|---|

@@ -74,5 +74,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # 06-review.md already carries the title + the latency caveat (from review-template.md).
+          # 06-review.md already carries the title + the latency caveat (from 06-review-template.md).
           gh pr comment ${{ github.event.pull_request.number || inputs.pr }} --body-file "$CYCLE/06-review.md"

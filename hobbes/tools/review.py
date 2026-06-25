@@ -13,7 +13,7 @@ publish-review.py into raw-review/review-baseline.md. review.py diffs the two, t
                           and after page counts are close; a collapsed crawl must
                           never read as a sitewide "improvement".
 
-The tier titles, notes, and caveats live in templates/review-template.md; review.py
+The tier titles, notes, and caveats live in templates/06-review-template.md; review.py
 fills in the computed tables. Writes 06-review.md into the cycle folder; prints a
 one-line summary led by the trustworthy (field) regression count.
 
@@ -31,9 +31,10 @@ TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
 import config
+
 CYCLES = HOBBES / "cycle"
-TEMPLATE = HOBBES / "templates" / "review-template.md"
-COVERAGE_OK = 0.8   # §F counts compared only if min/max crawl-page ratio ≥ this
+TEMPLATE = HOBBES / "templates" / "06-review-template.md"
+COVERAGE_OK = 0.8  # §F counts compared only if min/max crawl-page ratio ≥ this
 BEFORE_COL = "Pre-publish"
 AFTER_COL = "Live"
 
@@ -70,7 +71,7 @@ def field(md):
     for line in _section(md, "## C.").splitlines():
         c = [x.strip() for x in line.strip().strip("|").split("|")]
         if len(c) == 5 and c[0] not in ("Page", "") and not c[0].startswith("---"):
-            page = c[0].split("—")[0].strip()           # drop "— origin agg."
+            page = c[0].split("—")[0].strip()  # drop "— origin agg."
             for metric, cell in zip(("lcp", "inp", "cls"), c[1:4]):
                 v = _num(cell)
                 if v is not None:
@@ -96,7 +97,12 @@ def crawl_pages(md):
 
 # Short parse keys → the scorecard's own display labels, so the review speaks the
 # same language 01-baseline.md does (not "perf"/"bp"/"lcp").
-SCORE_LABELS = {"perf": "Performance", "a11y": "Accessibility", "bp": "Best Practices", "seo": "SEO"}
+SCORE_LABELS = {
+    "perf": "Performance",
+    "a11y": "Accessibility",
+    "bp": "Best Practices",
+    "seo": "SEO",
+}
 FIELD_LABELS = {"lcp": "LCP (s)", "inp": "INP (ms)", "cls": "CLS"}
 
 
@@ -124,7 +130,7 @@ def axe(md):
     out = {}
     for line in _section(md, "## D.").splitlines():
         c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) == 4:                                   # | page — device | n | pass | rule×nodes, … |
+        if len(c) == 4:  # | page — device | n | pass | rule×nodes, … |
             for item in c[3].split(","):
                 m = re.match(r"([a-z0-9-]+)\s*×\s*(\d+)", item.strip())
                 if m:
@@ -145,7 +151,7 @@ def _axe_deltas(after, before):
 
 
 def parse_template(text):
-    """Split review-template.md into its head (prose + {placeholders}) and an
+    """Split 06-review-template.md into its head (prose + {placeholders}) and an
     ordered list of (key, title, note) tiers, marked by `<!-- tier: KEY -->`."""
     parts = re.split(r"<!--\s*tier:\s*(\w+)\s*-->", text)
     head = parts[0].rstrip()
@@ -185,11 +191,13 @@ def main():
     after_path = cur / "raw-review" / "review-baseline.md"
     if not after_path.exists():
         sys.exit(f"✗ no {after_path} — run publish-review.py first")
-    out = Path(args[args.index("--out") + 1]) if "--out" in args else cur / "06-review.md"
+    out = (
+        Path(args[args.index("--out") + 1]) if "--out" in args else cur / "06-review.md"
+    )
     stamp = config.stamp()
 
-    before_md = (cur / "01-baseline.md").read_text()   # everything leading up to the PR
-    after_md = after_path.read_text()                  # the live site, post-publish
+    before_md = (cur / "01-baseline.md").read_text()  # everything leading up to the PR
+    after_md = after_path.read_text()  # the live site, post-publish
 
     sa, sb = scores(after_md), scores(before_md)
     fa, fb = field(after_md), field(before_md)
@@ -203,9 +211,13 @@ def main():
         return
 
     rows = {
-        "field": _deltas(fa, fb, "gt", lambda k: f"{k[0]} · {FIELD_LABELS[k[1]]}"),   # field: lower better
-        "lab": _deltas(sa, sb, "lt", lambda k: f"{k[0]} · {SCORE_LABELS[k[1]]}"),      # lab: higher better
-        "axe": _axe_deltas(axe(after_md), axe(before_md)),                            # §D axe nodes: lower better
+        "field": _deltas(
+            fa, fb, "gt", lambda k: f"{k[0]} · {FIELD_LABELS[k[1]]}"
+        ),  # field: lower better
+        "lab": _deltas(
+            sa, sb, "lt", lambda k: f"{k[0]} · {SCORE_LABELS[k[1]]}"
+        ),  # lab: higher better
+        "axe": _axe_deltas(axe(after_md), axe(before_md)),  # §D axe nodes: lower better
         "counts": [],
     }
 
@@ -226,16 +238,22 @@ def main():
         tldr += f" · {len(count_regr)} site-wide count regression(s)"
 
     head, tiers = parse_template(TEMPLATE.read_text())
-    head = (head.replace("{cycle}", cur.name)
-                .replace("{stamp}", stamp)
-                .replace("{tldr}", tldr))
+    head = (
+        head.replace("{cycle}", cur.name)
+        .replace("{stamp}", stamp)
+        .replace("{tldr}", tldr)
+    )
     L = [head, ""]
     for key, title, note in tiers:
         if key == "counts" and coverage_gap:
-            L += [f"## {title}", "",
-                  f"⚠ Crawl coverage changed **{ppg} → {cpg} pages** — counts aren't comparable "
-                  f"this review, so they're omitted. A smaller crawl drops every count; that's "
-                  f"sample size, not improvement.", ""]
+            L += [
+                f"## {title}",
+                "",
+                f"⚠ Crawl coverage changed **{ppg} → {cpg} pages** — counts aren't comparable "
+                f"this review, so they're omitted. A smaller crawl drops every count; that's "
+                f"sample size, not improvement.",
+                "",
+            ]
         else:
             L += render_tier(title, note, rows.get(key, []))
     out.write_text("\n".join(L).rstrip() + "\n")

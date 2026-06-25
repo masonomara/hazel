@@ -21,8 +21,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-TOOLS = Path(__file__).resolve().parent   # cli.py lives in hobbes/tools/
-HOBBES = TOOLS.parent                      # .../<repo>/hobbes
+TOOLS = Path(__file__).resolve().parent  # cli.py lives in hobbes/tools/
+HOBBES = TOOLS.parent  # .../<repo>/hobbes
 CYCLES = HOBBES / "cycle"
 sys.path.insert(0, str(TOOLS))
 import config
@@ -37,7 +37,7 @@ def _latest_cycle():
 
 
 def cmd_cycle(rest):
-    rd = str(config.new_cycle_dir(CYCLES))   # a fresh <date>-<letter> folder
+    rd = str(config.new_cycle_dir(CYCLES))  # a fresh <date>-<letter> folder
     _run("baseline.py", "--fresh", "--run-dir", rd, *rest)
     _run("evaluation.py", "--run-dir", rd)
     # No review here — the cycle only measures the current site. The before/after is
@@ -95,11 +95,11 @@ def _agent_stage(template, rest):
 
 
 def cmd_plan(rest):
-    _agent_stage("plan-template.md", rest)
+    _agent_stage("03-plan-template.md", rest)
 
 
 def cmd_execute(rest):
-    _agent_stage("execute-template.md", rest)
+    _agent_stage("04-execute-template.md", rest)
 
 
 def cmd_budget(rest):

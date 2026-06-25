@@ -1,6 +1,6 @@
 # Findings — _rawtest
 
-Site: https://hazelboutique.com/ · Generated 2026-06-24 16:50 CDT by `hobbes/tools/findings.py` from `raw/`.
+Site: https://hazelboutique.com/ · Generated 2026-06-24 16:50 CDT by `hobbes/tools/evaluation.py` from `raw/`.
 
 The problem catalog — dense, deterministic, agent-facing. 28 findings. Every failing check is enumerated straight from `raw/` — no shortlist, no mission weighting, no hand-picking; same raw always yields the same findings. Where a list is long it is capped with an explicit `+N more`, never silently trimmed. Numbers and scorecard in `baseline.md`; the fix, effort, and impact are the **plan's** job, not this file's. See `hobbes/templates/FINDINGS-TEMPLATE.md`.
 

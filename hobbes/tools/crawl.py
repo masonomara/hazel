@@ -44,8 +44,9 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
-import config
 from psi import DEFAULT_URLS  # single source of truth for the site
+
+import config
 
 BIN = "siteone-crawler"
 UA = "hobbes-baseline/1.0 (+SiteOne sitemap crawl)"
@@ -57,8 +58,13 @@ UA = "hobbes-baseline/1.0 (+SiteOne sitemap crawl)"
 # both crawl for hours and, ironically, was the only thing diluting the origin
 # hit-rate; we replace that dilution with a low rate instead). Image weight/format
 # is judged on the golden path by PSI.
-LIMITS = ["--max-reqs-per-sec=1", "--workers=1", "--timeout=15",
-          "--disable-images", "--regex-filtering-only-for-pages"]
+LIMITS = [
+    "--max-reqs-per-sec=1",
+    "--workers=1",
+    "--timeout=15",
+    "--disable-images",
+    "--regex-filtering-only-for-pages",
+]
 
 # Default crawl is a STRATIFIED SAMPLE, not the whole sitemap: every distinct
 # low-volume page type every cycle, plus a fixed deterministic slice of the one
@@ -69,7 +75,7 @@ LIMITS = ["--max-reqs-per-sec=1", "--workers=1", "--timeout=15",
 # --full overrides this and crawls the entire sitemap (slow; for an occasional
 # complete audit). The sample is deterministic, so the page set — and the counts —
 # are identical every cycle.
-SAMPLE_SIZE = 100   # how many of the high-volume page type to keep when subsampling
+SAMPLE_SIZE = 100  # how many of the high-volume page type to keep when subsampling
 
 
 def select_pages(pages, full):
@@ -82,7 +88,7 @@ def select_pages(pages, full):
     bucket = [p for p in pages if pat in p]
     other = [p for p in pages if pat not in p]
     if len(bucket) > SAMPLE_SIZE:
-        step = len(bucket) // SAMPLE_SIZE           # deterministic: every Nth, sorted
+        step = len(bucket) // SAMPLE_SIZE  # deterministic: every Nth, sorted
         sample = bucket[::step][:SAMPLE_SIZE]
     else:
         sample = bucket
@@ -114,7 +120,9 @@ def _fetch(url):
 
 
 def _locs(xml):
-    return [html.unescape(m.strip()) for m in re.findall(r"<loc>\s*([^<]+?)\s*</loc>", xml)]
+    return [
+        html.unescape(m.strip()) for m in re.findall(r"<loc>\s*([^<]+?)\s*</loc>", xml)
+    ]
 
 
 def _is_page(url):
@@ -135,14 +143,19 @@ def expand_sitemap(root):
     pages, notes = [], []
     if "<sitemapindex" in idx:
         for child in top:
-            if child.lower().rstrip("/").split("?")[0].endswith(".xml") or "sitemap" in child.lower():
+            if (
+                child.lower().rstrip("/").split("?")[0].endswith(".xml")
+                or "sitemap" in child.lower()
+            ):
                 try:
                     pages += [u for u in _locs(_fetch(child)) if _is_page(u)]
                 except Exception as e:
-                    notes.append(f"child sitemap failed ({child.split('/')[-1].split('?')[0]}): {e}")
+                    notes.append(
+                        f"child sitemap failed ({child.split('/')[-1].split('?')[0]}): {e}"
+                    )
             elif _is_page(child):
                 pages.append(child)
-    else:                                   # already a flat sitemap
+    else:  # already a flat sitemap
         pages = [u for u in top if _is_page(u)]
     return sorted(set(pages)), notes
 
@@ -151,10 +164,12 @@ def serve_flat_sitemap(pages):
     """Serve the expanded page list as one flat sitemap on an ephemeral localhost
     port. SiteOne is seeded here, then crawls the real (external) page URLs via
     --allowed-domain-for-crawling. Returns (httpd, seed_url); caller shuts it down."""
-    body = ('<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-            + "".join(f"<url><loc>{html.escape(u)}</loc></url>\n" for u in pages)
-            + "</urlset>\n").encode("utf-8")
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(f"<url><loc>{html.escape(u)}</loc></url>\n" for u in pages)
+        + "</urlset>\n"
+    ).encode("utf-8")
 
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
@@ -184,7 +199,9 @@ def run_crawl(fresh, cache, full=False):
         print(f"  ⤿ cached crawl ({cache.name})", file=sys.stderr, flush=True)
         return json.loads(cache.read_text())
     if not shutil.which(BIN):
-        sys.exit(f"✗ {BIN} not found — install: brew install janreges/tap/siteone-crawler")
+        sys.exit(
+            f"✗ {BIN} not found — install: brew install janreges/tap/siteone-crawler"
+        )
     root = site_root()
     host = urllib.parse.urlparse(root).netloc
 
@@ -192,33 +209,46 @@ def run_crawl(fresh, cache, full=False):
     try:
         sitemap, notes = expand_sitemap(root)
     except Exception as e:
-        sys.exit(f"✗ could not read sitemap ({e}). The crawl is sitemap-driven; "
-                 f"confirm {root}sitemap.xml is reachable.")
+        sys.exit(
+            f"✗ could not read sitemap ({e}). The crawl is sitemap-driven; "
+            f"confirm {root}sitemap.xml is reachable."
+        )
     for n in notes:
         print(f"  ⚠ {n}", file=sys.stderr, flush=True)
     if not sitemap:
         sys.exit("✗ sitemap expanded to 0 pages — nothing to crawl.")
     pages, sample_note = select_pages(sitemap, full)
-    print(f"  ✓ {len(sitemap)} pages in sitemap → crawling {len(pages)} ({sample_note})",
-          file=sys.stderr, flush=True)
+    print(
+        f"  ✓ {len(sitemap)} pages in sitemap → crawling {len(pages)} ({sample_note})",
+        file=sys.stderr,
+        flush=True,
+    )
 
     httpd, seed = serve_flat_sitemap(pages)
-    print(f"… crawling {len(pages)} pages (1 req/s, 1 worker, images off) — be patient",
-          file=sys.stderr, flush=True)
-    # JSON → raw/ is the only durable output: it's the machine source findings.py
+    print(
+        f"… crawling {len(pages)} pages (1 req/s, 1 worker, images off) — be patient",
+        file=sys.stderr,
+        flush=True,
+    )
+    # JSON → raw/ is the only durable output: it's the machine source evaluation.py
     # reads, and the rendered §F is printed to stdout for baseline.py to capture.
     # The SiteOne HTML report (~1 MB/cycle, regenerable, read by nobody in the
     # pipeline) is deliberately NOT emitted; the default tmp/ text dump is off
     # too. Seed from the localhost flat sitemap; pin pages to the chosen set;
     # allow crawling/asset-loading on the real domain.
-    cmd = [BIN, f"--url={seed}",
-           f"--allowed-domain-for-crawling={host}",
-           "--allowed-domain-for-external-files=*",
-           f"--include-regex={pin_regex(pages)}",
-           f"--max-visited-urls={len(pages) * 2 + 1000}",
-           "--output=json", f"--output-json-file={cache}",
-           "--output-text-file=",
-           "--hide-progress-bar", "--no-color"] + LIMITS
+    cmd = [
+        BIN,
+        f"--url={seed}",
+        f"--allowed-domain-for-crawling={host}",
+        "--allowed-domain-for-external-files=*",
+        f"--include-regex={pin_regex(pages)}",
+        f"--max-visited-urls={len(pages) * 2 + 1000}",
+        "--output=json",
+        f"--output-json-file={cache}",
+        "--output-text-file=",
+        "--hide-progress-bar",
+        "--no-color",
+    ] + LIMITS
     try:
         r = subprocess.run(cmd, stdout=subprocess.DEVNULL)
     finally:
@@ -226,7 +256,7 @@ def run_crawl(fresh, cache, full=False):
     if r.returncode != 0 or not cache.exists():
         sys.exit(f"✗ crawl failed (exit {r.returncode}).")
     data = json.loads(cache.read_text())
-    data["_sitemapPages"] = len(sitemap)     # carried into coverage reporting
+    data["_sitemapPages"] = len(sitemap)  # carried into coverage reporting
     data["_sampledPages"] = len(pages)
     data["_sampleNote"] = sample_note
     cache.write_text(json.dumps(data))
@@ -248,9 +278,11 @@ def rollup_texts(data):
     """Every headline line SiteOne computed — summary items + quality-score
     deduction reasons. Page-level counts ('52 page(s) with …') live ONLY here,
     not in the per-URL tables, so the scorecard reads them from this rollup."""
-    texts = [i.get("text", "") for i in ((data.get("summary") or {}).get("items") or [])]
+    texts = [
+        i.get("text", "") for i in ((data.get("summary") or {}).get("items") or [])
+    ]
     for c in ((data.get("qualityScores") or {}).get("categories")) or []:
-        for d in (c.get("deductions") or []):
+        for d in c.get("deductions") or []:
             texts.append(d.get("reason", ""))
     return texts
 
@@ -309,7 +341,7 @@ def main():
     full = "--full" in args
     rd = resolve_run_dir(args)
     cache = rd / "raw" / "crawl.json"
-    out = None                                    # no default file: baseline.py reads stdout; --out opts in
+    out = None  # no default file: baseline.py reads stdout; --out opts in
     if "--out" in args:
         out = Path(args[args.index("--out") + 1])
 
@@ -324,7 +356,11 @@ def main():
     redirects = table_rows(tables, "redirects")
     missing_title = [r for r in seo if not (r.get("title") or "").strip()]
     missing_desc = [r for r in seo if not (r.get("description") or "").strip()]
-    dup_title = [r for r in table_rows(tables, "non-unique-titles") if (r.get("title") or "").strip()]
+    dup_title = [
+        r
+        for r in table_rows(tables, "non-unique-titles")
+        if (r.get("title") or "").strip()
+    ]
 
     # Page-level counts — SiteOne's own rollup (not derivable from the per-URL tables).
     multi_h1 = count_for(texts, "multiple <h1>")
@@ -332,13 +368,17 @@ def main():
     no_alt = count_for(texts, "without image alt")
     no_aria = count_for(texts, "without aria")
     no_roles = count_for(texts, "without role")
-    no_lang = count_for(texts, "missing html lang") or count_for(texts, "without html lang")
+    no_lang = count_for(texts, "missing html lang") or count_for(
+        texts, "without html lang"
+    )
     invalid_svg = count_for(texts, "invalid inline svg")
     dup_svg = count_for(texts, "duplicated inline svg")
     phone = count_for(texts, "non-clickable")
     no_brotli = count_for(texts, "brotli")
     invalid_html = count_for(texts, "invalid html")
-    tls_ok = any("certificate is valid" in t.lower() for t in texts) or site_root().startswith("https")
+    tls_ok = any(
+        "certificate is valid" in t.lower() for t in texts
+    ) or site_root().startswith("https")
 
     def p(ok):
         return "✓" if ok else "✗"
@@ -415,20 +455,23 @@ def main():
         *detail(broken, lambda r: f"{r.get('url')} ({r.get('statusCode')})"),
         "",
         "### Redirects",
-        *detail(redirects, lambda r: f"{r.get('url')} → {r.get('targetUrl')} ({r.get('statusCode')})"),
+        *detail(
+            redirects,
+            lambda r: f"{r.get('url')} → {r.get('targetUrl')} ({r.get('statusCode')})",
+        ),
         "",
         "### Missing titles",
         *detail(missing_title, path),
         "",
         "### Duplicate titles",
-        *detail(dup_title, lambda r: f"\"{r.get('title')}\" ×{r.get('count')}"),
+        *detail(dup_title, lambda r: f'"{r.get("title")}" ×{r.get("count")}'),
         "",
         "### Missing meta descriptions",
         *detail(missing_desc, path),
     ]
     report = "\n".join(L) + "\n"
-    print(report)                                 # stdout — baseline.py captures §F into the one digest
-    if out:                                        # --out only; no default per-tool file
+    print(report)  # stdout — baseline.py captures §F into the one digest
+    if out:  # --out only; no default per-tool file
         out.write_text(report)
         print(f"→ written to {out}", file=sys.stderr)
 

@@ -35,6 +35,7 @@ from pathlib import Path
 # Golden path + PSI key come from hobbes.toml via config.py (one source per client).
 import config
 from config import golden_path, psi_key
+
 DEFAULT_URLS = golden_path()
 ENDPOINT = "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed"
 CATEGORIES = ["performance", "accessibility", "best-practices", "seo"]
@@ -88,7 +89,13 @@ def run_cache_path(raw, url, strategy, i):
 
 def perf_score(d):
     """Performance category score 0–1 of a PSI doc, or -1 if absent (sorts last)."""
-    s = (d or {}).get("lighthouseResult", {}).get("categories", {}).get("performance", {}).get("score")
+    s = (
+        (d or {})
+        .get("lighthouseResult", {})
+        .get("categories", {})
+        .get("performance", {})
+        .get("score")
+    )
     return s if s is not None else -1.0
 
 
@@ -127,16 +134,29 @@ def fetch(url, strategy, key, tries=8, timeout=75):
                 return json.load(r)
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", "replace")
-            msg = json.loads(body).get("error", {}).get("message", body[:200]) if body else str(e)
+            msg = (
+                json.loads(body).get("error", {}).get("message", body[:200])
+                if body
+                else str(e)
+            )
             if e.code in (401, 403, 429):  # bad key / quota — fatal for every call
                 sys.exit(f"PSI API fatal {e.code}: {msg}")
             last = f"HTTP {e.code}: {msg}"  # 5xx and the like are transient — retry
-        except (urllib.error.URLError, OSError, http.client.HTTPException, ValueError) as e:
+        except (
+            urllib.error.URLError,
+            OSError,
+            http.client.HTTPException,
+            ValueError,
+        ) as e:
             # Transient transport/parse faults: timeouts, dropped sockets, and the big one —
             # IncompleteRead (HTTPException) + the chunk-size ValueError from a truncated PSI
             # response read inside json.load. Retry FRESH; one bad read must not kill the run.
             last = str(e) or type(e).__name__
-        print(f"  retry {attempt}/{tries} ({strategy} {url}): {last}", file=sys.stderr, flush=True)
+        print(
+            f"  retry {attempt}/{tries} ({strategy} {url}): {last}",
+            file=sys.stderr,
+            flush=True,
+        )
     print(f"  ✗ GAVE UP {strategy} {url}: {last}", file=sys.stderr, flush=True)
     return None
 
@@ -171,7 +191,7 @@ def field(metrics, mkey, scale=1.0):
 def a11y_audit_failed(audit):
     """The single predicate for 'this accessibility audit failed': a binary
     axe-core check that scored 0. The scorecard's §D count (a11y_fails, below)
-    and findings.py's A11Y catalog BOTH ride this, so the two can't disagree on
+    and evaluation.py's A11Y catalog BOTH ride this, so the two can't disagree on
     what counts as a failure. Manual checks (keyboard, screen reader, focus) come
     back as 'manual' scoreDisplayMode and are intentionally excluded — those stay
     human. Change the definition of a failure here, in one place, and both follow."""
@@ -198,27 +218,32 @@ def main():
     fresh = "--fresh" in args  # ignore cache, re-fetch everything
     rd = resolve_run_dir(args)
     raw = rd / "raw"
-    out = None                                    # no default file: baseline.py reads stdout; --out opts in
-    for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
+    out = None  # no default file: baseline.py reads stdout; --out opts in
+    for flag in (
+        "--run-dir",
+        "--out",
+    ):  # strip value-bearing flags before positional parse
         if flag in args:
             i = args.index(flag)
             if flag == "--out":
                 out = Path(args[i + 1])
-            del args[i:i + 2]
+            del args[i : i + 2]
     positional = [a for a in args if a != "--fresh"]
-    urls = [(f"URL{i+1}", u) for i, u in enumerate(positional)] or DEFAULT_URLS
+    urls = [(f"URL{i + 1}", u) for i, u in enumerate(positional)] or DEFAULT_URLS
     key = load_key()
 
     # Fire all page×strategy calls at once — wall-clock = slowest call, not the sum.
     # Cached (already-succeeded) calls return instantly, so a re-run only hits the
     # network for what's still missing — which also means lower concurrency and
     # far fewer of the stalls that concurrency triggers.
-    jobs = [(label, url, strat) for label, url in urls for strat in ("mobile", "desktop")]
+    jobs = [
+        (label, url, strat) for label, url in urls for strat in ("mobile", "desktop")
+    ]
 
     def run(job):
         label, url, strat = job
         cf = cache_path(raw, url, strat)
-        if not fresh and cf.exists():   # canonical median already chosen — reuse
+        if not fresh and cf.exists():  # canonical median already chosen — reuse
             print(f"  ⤿ cached {label} {strat}", file=sys.stderr, flush=True)
             return job, json.loads(cf.read_text()), None
         runs = []
@@ -227,19 +252,26 @@ def main():
             if not fresh and rf.exists():
                 runs.append(json.loads(rf.read_text()))
                 continue
-            print(f"… fetching {label} {strat} (run {i+1}/{RUNS})", file=sys.stderr, flush=True)
+            print(
+                f"… fetching {label} {strat} (run {i + 1}/{RUNS})",
+                file=sys.stderr,
+                flush=True,
+            )
             d = fetch(url, strat, key)
             if d is not None:
-                rf.write_text(json.dumps(d))   # checkpoint each run — never re-pay
+                rf.write_text(json.dumps(d))  # checkpoint each run — never re-pay
                 runs.append(d)
         if not runs:
             return job, None, None
         med = median_run(runs)
-        cf.write_text(json.dumps(med))          # canonical = the median run
+        cf.write_text(json.dumps(med))  # canonical = the median run
         spread = sorted(round(perf_score(d) * 100) for d in runs if perf_score(d) >= 0)
-        print(f"  ✓ {label} {strat} — perf {round(perf_score(med)*100)} "
-              f"(median of {len(runs)}: {'/'.join(map(str, spread)) or '—'})",
-              file=sys.stderr, flush=True)
+        print(
+            f"  ✓ {label} {strat} — perf {round(perf_score(med) * 100)} "
+            f"(median of {len(runs)}: {'/'.join(map(str, spread)) or '—'})",
+            file=sys.stderr,
+            flush=True,
+        )
         return job, med, spread
 
     with ThreadPoolExecutor(max_workers=min(MAX_CONCURRENCY, len(jobs))) as ex:
@@ -249,14 +281,16 @@ def main():
 
     rows_a, rows_lab, rows_field, rows_c = [], [], [], []
     failed = [j for j, d in results.items() if d is None]
-    idle_fail = []   # runs PSI cut at the time limit (page never reached idle)
-    lcp_cut = []     # runs where the LCP itself is a cutoff artifact, not a real paint
+    idle_fail = []  # runs PSI cut at the time limit (page never reached idle)
+    lcp_cut = []  # runs where the LCP itself is a cutoff artifact, not a real paint
     for label, url in urls:
         for strat in ("mobile", "desktop"):
             lh = (results[(label, url, strat)] or {}).get("lighthouseResult", {})
             warns = lh.get("runWarnings") or []
-            incomplete = any(INCOMPLETE_SIG in w.lower() for w in warns)  # classify, don't lump
-            mark = ""   # truncated values are flagged per-cell with ✗cut; no row-level ⚠
+            incomplete = any(
+                INCOMPLETE_SIG in w.lower() for w in warns
+            )  # classify, don't lump
+            mark = ""  # truncated values are flagged per-cell with ✗cut; no row-level ⚠
             if incomplete:
                 idle_fail.append((label, strat))
 
@@ -266,27 +300,43 @@ def main():
             if cut:
                 lcp_cut.append((label, strat))
             lcp_cell = f"{lcp} ✗cut" if cut else f"{lcp}"
-            perf_cell = f"{score(lh,'performance')} ✗cut" if cut else f"{score(lh,'performance')}"
+            perf_cell = (
+                f"{score(lh, 'performance')} ✗cut"
+                if cut
+                else f"{score(lh, 'performance')}"
+            )
 
             rows_a.append(
                 f"| {label} — {strat}{mark} | {perf_cell} | "
-                f"{score(lh,'accessibility')} | {score(lh,'best-practices')} | {score(lh,'seo')} |"
+                f"{score(lh, 'accessibility')} | {score(lh, 'best-practices')} | {score(lh, 'seo')} |"
             )
             rows_lab.append(
                 f"| {label} — {strat}{mark} | {lcp_cell} | "
-                f"{audit_raw(lh,'cumulative-layout-shift')} | {audit_s(lh,'first-contentful-paint')} | "
-                f"{audit_s(lh,'server-response-time')} | {audit_ms(lh,'total-blocking-time')} | "
-                f"{audit_s(lh,'speed-index')} |"
+                f"{audit_raw(lh, 'cumulative-layout-shift')} | {audit_s(lh, 'first-contentful-paint')} | "
+                f"{audit_s(lh, 'server-response-time')} | {audit_ms(lh, 'total-blocking-time')} | "
+                f"{audit_s(lh, 'speed-index')} |"
             )
             fails = a11y_fails(lh)
             detail = ", ".join(f"{aid}×{n}" for aid, n in fails) or "none"
             passd = "✓" if not fails else "✗"
-            rows_c.append(f"| {label} — {strat}{mark} | {len(fails)} | {passd} | {detail} |")
+            rows_c.append(
+                f"| {label} — {strat}{mark} | {len(fails)} | {passd} | {detail} |"
+            )
         # Field data (CrUX 28-day). PREFER page-level; use the origin aggregate
         # only if neither device has page-level data — and LABEL it when we do,
         # so a whole-site average is never mistaken for this page's real numbers.
-        les = [(results[(label, url, s)] or {}).get("loadingExperience", {}) for s in ("mobile", "desktop")]
-        page = next((le for le in les if le.get("metrics") and le.get("origin_fallback") is not True), None)
+        les = [
+            (results[(label, url, s)] or {}).get("loadingExperience", {})
+            for s in ("mobile", "desktop")
+        ]
+        page = next(
+            (
+                le
+                for le in les
+                if le.get("metrics") and le.get("origin_fallback") is not True
+            ),
+            None,
+        )
         le = page or next((le for le in les if le.get("metrics")), {})
         fm = le.get("metrics", {})
         tag = " — origin agg." if (fm and le.get("origin_fallback") is True) else ""
@@ -294,9 +344,9 @@ def main():
             oc = le.get("overall_category", "")
             passc = "✓" if oc == "FAST" else ("✗" if oc else "—")
             rows_field.append(
-                f"| {label}{tag} | {field(fm,'LARGEST_CONTENTFUL_PAINT_MS',0.001)} | "
-                f"{field(fm,'INTERACTION_TO_NEXT_PAINT')} | "
-                f"{field(fm,'CUMULATIVE_LAYOUT_SHIFT_SCORE',0.01)} | "
+                f"| {label}{tag} | {field(fm, 'LARGEST_CONTENTFUL_PAINT_MS', 0.001)} | "
+                f"{field(fm, 'INTERACTION_TO_NEXT_PAINT')} | "
+                f"{field(fm, 'CUMULATIVE_LAYOUT_SHIFT_SCORE', 0.01)} | "
                 f"{passc} |"
             )
         else:
@@ -311,8 +361,14 @@ def main():
             sp = spreads.get((label, url, strat))
             if sp:
                 spread_bits.append(f"{label} — {strat} {'/'.join(map(str, sp))}")
-    spread_note = ([f"> Perf-score spread across 3 runs (median kept): {' · '.join(spread_bits)}.", ""]
-                   if spread_bits else [])
+    spread_note = (
+        [
+            f"> Perf-score spread across 3 runs (median kept): {' · '.join(spread_bits)}.",
+            "",
+        ]
+        if spread_bits
+        else []
+    )
 
     stamp = config.stamp()
     L = [
@@ -352,12 +408,15 @@ def main():
         *rows_c,
     ]
     if failed:
-        L += ["", "> ✗ Failed calls (cells show — above): "
-              + ", ".join(f"{lbl} {strat}" for lbl, _u, strat in failed)]
+        L += [
+            "",
+            "> ✗ Failed calls (cells show — above): "
+            + ", ".join(f"{lbl} {strat}" for lbl, _u, strat in failed),
+        ]
     report = "\n".join(L) + "\n"
 
-    print(report)                                   # stdout — baseline.py captures this into the one digest
-    if out:                                          # --out only; no default per-tool file
+    print(report)  # stdout — baseline.py captures this into the one digest
+    if out:  # --out only; no default per-tool file
         out.write_text(report)
         print(f"→ written to {out}", file=sys.stderr)
 

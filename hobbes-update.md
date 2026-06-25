@@ -17,7 +17,7 @@ flowchart TD
         SEO["seo.py (316)<br/>reads: live (HTML)<br/>writes: raw/*.seo.json + prints §E"]:::py
         CRAWL["crawl.py (437)<br/>reads: live (SiteOne crawl)<br/>writes: raw/crawl.json + prints §F"]:::py
         BASELINE["baseline.py (135)<br/>reads: 3 tools' stdout + TEMPLATE.md<br/>writes: 01-baseline.md"]:::py
-        FINDINGS["findings.py (737)<br/>reads: raw/* directly<br/>imports the SAME extractors<br/>writes: 02-evaluation.md"]:::py
+        FINDINGS["evaluation.py (737)<br/>reads: raw/* directly<br/>imports the SAME extractors<br/>writes: 02-evaluation.md"]:::py
         DIFF["diff.py (241) — REVIEW-ONLY<br/>reads: 2 × 01-baseline.md<br/>writes: diff.md, honest by tier"]:::py
     end
 
@@ -131,4 +131,4 @@ flowchart TD
 
 Int he future I'd imagine hobbes works as an MCP or CLI tool that you have your agent operate.
 
-Hobbes has several sections. The first is the configuration system which serves as the single source of truth for the client. `hobbes.toml` is per-client configuration including client info, the golden path web addresses, 
+Hobbes has several sections. The first is the configuration system which serves as the single source of truth for the client. `hobbes.toml` is per-client configuration including client info, the golden path web addresses,

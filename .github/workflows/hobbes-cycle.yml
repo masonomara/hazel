@@ -19,9 +19,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  id-token: write        # claude-code-action fetches an OIDC token → exchanges for the Claude GitHub App token
+  id-token: write # claude-code-action fetches an OIDC token → exchanges for the Claude GitHub App token
 
-concurrency:             # one cycle at a time
+concurrency: # one cycle at a time
   group: hobbes-cycle
   cancel-in-progress: false
 
@@ -55,11 +55,11 @@ jobs:
           [ -z "$EFFORT" ] && EFFORT="$(python3 hobbes/cli.py budget)"
           echo "EFFORT=$EFFORT" >> "$GITHUB_ENV"
 
-      - name: Measure — baseline + findings (deterministic, no LLM)
+      - name: Measure — baseline + evaluation (deterministic, no LLM)
         env:
           PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
         run: |
-          python3 hobbes/cli.py cycle          # baseline + findings only — no diff in a cycle
+          python3 hobbes/cli.py cycle          # baseline + evaluation only — no diff in a cycle
           DATE=$(python3 hobbes/cli.py today)   # pinned tz — must match the folder cli wrote
           echo "CYCLE_DATE=$DATE" >> "$GITHUB_ENV"
           # The before/after is the review phase's job (post-publish), not the cycle's.
@@ -68,7 +68,7 @@ jobs:
       - name: Plan + fix — Claude agent, then ONE PR (data + code)
         uses: anthropics/claude-code-action@v1
         env:
-          GH_TOKEN: ${{ github.token }}        # authenticates the agent's git push + `gh pr create`
+          GH_TOKEN: ${{ github.token }} # authenticates the agent's git push + `gh pr create`
         with:
           # Auth via the Claude Code subscription (Pro/Max), NOT a pay-per-token API key.
           # Generate once with `claude setup-token`, store as the CLAUDE_CODE_OAUTH_TOKEN secret.
@@ -88,11 +88,11 @@ jobs:
             the code changes.
             Open ONE pull request carrying BOTH the cycle data and the fix:
               - create a branch `hobbes-cycle-${{ env.CYCLE_DATE }}`
-              - `git add -A` (stages the scorecard/findings, your plan.md/execution.md, and the
+              - `git add -A` (stages the scorecard/evaluation, your plan.md/execution.md, and the
                 code changes; raw/ is git-ignored, so it's excluded)
               - commit, `git push -u origin`
               - `gh pr create` with title "Hobbes ${{ env.CYCLE_DATE }} — <a short summary of what you
-                shipped this batch>" and a body carrying the current baseline + findings summary, what
+                shipped this batch>" and a body carrying the current baseline + evaluation summary, what
                 shipped, and any human-owned deferrals (content at scale, integration/platform config, sign-off). There
                 is no before/after here — the measured impact lands in the review comment after publish.
             Hard rules: write only to GitHub. Do NOT run any deploy/platform CLI. Do NOT publish. Verification

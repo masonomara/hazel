@@ -61,7 +61,7 @@ The stage table above says *what each stage produces*. This is the other axis �
                           │   baseline.py CAPTURES the three tools' stdout ──►  01-baseline.md
                           │   (§A–F sliced from their printed sections + §G from TEMPLATE.md — the ONE digest)
                           │                                                       │
-   the RAW artifacts ─────┴──────────────────────►  findings.py  ──►  02-evaluation.md   (the problem catalog)
+   the RAW artifacts ─────┴──────────────────────►  evaluation.py  ──►  02-evaluation.md   (the problem catalog)
                                                                                   │   (no diff in a cycle)
      │  ── JUDGMENT: the agent reads the catalog (never the raw) and works against the real code ──
                             02-evaluation.md + MISSION.md ─────────────►  [agent · PLAN-TEMPLATE]  ──►  plan.md
@@ -70,28 +70,28 @@ The stage table above says *what each stage produces*. This is the other axis �
                                               ONE PR  ──►  human review + merge  ──►  publish on your platform  ──►  add `published` label
                                                                                   │
      │  ── VERIFY: the same three tools re-run on the now-LIVE site, then diff'd ──
-                          baseline.py ─► findings.py ─► diff.py  ──►  diff.md  ──►  gh pr comment  (the before/after)
+                          baseline.py ─► evaluation.py ─► diff.py  ──►  diff.md  ──►  gh pr comment  (the before/after)
 ```
 
 **Five handoffs worth understanding — this is the "what each file does along the way":**
 
-1. **Two readers, two different diets — one source, no middle file.** Each tool *prints* its rendered sections to stdout and writes its raw JSON to `raw/`. `baseline.py` runs the three as subprocesses and **captures their stdout**, slicing §A–F straight from the printed sections — there is no per-tool `*-results.md` on disk. `findings.py` eats the **raw** artifacts (`raw/*.psi.json`, `raw/crawl.json`) *directly*. `raw/` is git-ignored. This is why `02-evaluation.md` can't be rebuilt from `01-baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
-2. **The catalog and the scorecard share their parsing logic, not their plumbing.** `findings.py` *imports* the extractors it can — `Page` / `head_ok` / `OG_REQUIRED` from `seo.py`, `table_rows` / `count_for` / `rollup_texts` / `header_set` from `crawl.py`, and the `a11y_audit_failed` predicate from `psi.py` — so where a number depends on "what counts" (a failing axe audit, a missing OG tag, a flagged crawl row), the catalog and the scorecard ride the *same definition* and can't disagree on it. They are still **two scripts reading `raw/` independently**, not one parser: `baseline.py` renders the scorecard from each tool's own stdout, and `findings.py` re-walks the PSI JSON itself to pull node-level evidence the scorecard never keeps. So treat the shared predicates/extractors as the guarantee — not the whole pipeline.
+1. **Two readers, two different diets — one source, no middle file.** Each tool *prints* its rendered sections to stdout and writes its raw JSON to `raw/`. `baseline.py` runs the three as subprocesses and **captures their stdout**, slicing §A–F straight from the printed sections — there is no per-tool `*-results.md` on disk. `evaluation.py` eats the **raw** artifacts (`raw/*.psi.json`, `raw/crawl.json`) *directly*. `raw/` is git-ignored. This is why `02-evaluation.md` can't be rebuilt from `01-baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
+2. **The catalog and the scorecard share their parsing logic, not their plumbing.** `evaluation.py` *imports* the extractors it can — `Page` / `head_ok` / `OG_REQUIRED` from `seo.py`, `table_rows` / `count_for` / `rollup_texts` / `header_set` from `crawl.py`, and the `a11y_audit_failed` predicate from `psi.py` — so where a number depends on "what counts" (a failing axe audit, a missing OG tag, a flagged crawl row), the catalog and the scorecard ride the *same definition* and can't disagree on it. They are still **two scripts reading `raw/` independently**, not one parser: `baseline.py` renders the scorecard from each tool's own stdout, and `evaluation.py` re-walks the PSI JSON itself to pull node-level evidence the scorecard never keeps. So treat the shared predicates/extractors as the guarantee — not the whole pipeline.
 3. **`diff.py` runs only in the review phase — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the diff lives entirely in the post-publish **review**: it reads two `01-baseline.md` files — the pre-publish baseline and the re-baselined live site — re-parses their tables back into numbers, and compares them tier by tier (field / lab / axe / counts). It touches no raw and only a findings *count*. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
 4. **The agent reads `02-evaluation.md`, never `raw/`.** Judgment works off the catalog — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
-5. **The capture tools run in both phases; the diff doesn't.** `baseline.py` + `findings.py` (driving psi/seo/crawl) run in the cycle (pre-fix) **and** in the review (post-publish, on the now-live site). `diff.py` is the one piece that's review-only — the review re-baselines the live site, rebuilds findings, then diffs against the pre-publish baseline, and that diff *is* the PR comment.
+5. **The capture tools run in both phases; the diff doesn't.** `baseline.py` + `evaluation.py` (driving psi/seo/crawl) run in the cycle (pre-fix) **and** in the review (post-publish, on the now-live site). `diff.py` is the one piece that's review-only — the review re-baselines the live site, rebuilds findings, then diffs against the pre-publish baseline, and that diff *is* the PR comment.
 
-**The determinism boundary, restated as authorship:** every **number** and every **comparison** in this flow is emitted by Python (`baseline.py`, `findings.py`, `diff.py`) — reproducible, unspinnable. Only the **fix narrative and the PR prose** are the agent's, and even those ride a fixed template skeleton. The PR comment (`diff.md`) is 100% Python; the PR body is agent prose constrained by `EXECUTE-TEMPLATE.md`.
+**The determinism boundary, restated as authorship:** every **number** and every **comparison** in this flow is emitted by Python (`baseline.py`, `evaluation.py`, `diff.py`) — reproducible, unspinnable. Only the **fix narrative and the PR prose** are the agent's, and even those ride a fixed template skeleton. The PR comment (`diff.md`) is 100% Python; the PR body is agent prose constrained by `EXECUTE-TEMPLATE.md`.
 
 ### Reads → writes → consumed by
 
 | File | Reads | Writes | Consumed by |
 |---|---|---|---|
-| `psi.py` | live site (PSI API) | `raw/*.psi.json` + prints §A–D | `baseline.py` (stdout), `findings.py` (raw) |
-| `seo.py` | live site (HTML) | `raw/*.seo.json` + prints §E | `baseline.py` (stdout), `findings.py` (raw) |
-| `crawl.py` | live site (sitemap crawl) | `raw/crawl.json` + prints §F | `baseline.py` (stdout), `findings.py` (raw) |
+| `psi.py` | live site (PSI API) | `raw/*.psi.json` + prints §A–D | `baseline.py` (stdout), `evaluation.py` (raw) |
+| `seo.py` | live site (HTML) | `raw/*.seo.json` + prints §E | `baseline.py` (stdout), `evaluation.py` (raw) |
+| `crawl.py` | live site (sitemap crawl) | `raw/crawl.json` + prints §F | `baseline.py` (stdout), `evaluation.py` (raw) |
 | `baseline.py` | the three tools' stdout + `TEMPLATE.md` | `01-baseline.md` (the one digest) | the agent, the human, `diff.py` (review only) |
-| `findings.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `02-evaluation.md` | the agent (plan + execute), `diff.py` (count, review only) |
+| `evaluation.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `02-evaluation.md` | the agent (plan + execute), `diff.py` (count, review only) |
 | `diff.py` | two `01-baseline.md` (pre-publish + live re-baseline) | `diff.md` | the **post-publish PR comment** — **review phase only, not a cycle** |
 | agent · `PLAN` | `02-evaluation.md`, `MISSION.md` | `plan.md` | the execute stage |
 | agent · `EXECUTE` | `plan.md`, `02-evaluation.md`, `01-baseline.md`, source | `execution.md`, code, **PR body** | the human (review → publish) |
@@ -124,7 +124,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 | [`tools/seo.py`](tools/seo.py) | 316 | Per-page HTML SEO checklist → prints **§E** (titles, meta, canonical, OG, structured data). |
 | [`tools/crawl.py`](tools/crawl.py) | 437 | SiteOne sitemap crawl (stratified sample) → prints **§F** site-wide SEO/a11y/security counts. |
 | [`tools/baseline.py`](tools/baseline.py) | 135 | Runs psi + seo + crawl into one dated cycle folder and **captures their stdout** into the one digest, `01-baseline.md` (stamped from `TEMPLATE.md`). Honors `--run-dir`. |
-| [`tools/findings.py`](tools/findings.py) | 737 | The **problem catalog**: reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
+| [`tools/evaluation.py`](tools/evaluation.py) | 737 | The **problem catalog**: reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
 | [`tools/diff.py`](tools/diff.py) | 241 | The **review phase's** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated), rendered as before→after tables. `--prior` pins the comparison. |
 
 ### The CLI

@@ -16,13 +16,13 @@ USAGE:
   python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick rerun)
   python3 hobbes/tools/baseline.py --full     # crawl the entire sitemap, not the sample (slow)
 
-CAPTURE then RENDER, in-process. baseline.py imports psi/seo/crawl and calls each
-tool's capture() (the network step, into raw/) then its scorecard_section(s)()
-(rendered straight from raw/). Those are the SAME renderers the tools use
-standalone — so the digest and a standalone tool run can't disagree, and there's
-no stdout to scrape or section markers to slice. Writes the whole cycle into one
-folder: hobbes/cycle/YYYY-MM-DD-<letter>/ — 01-baseline.md beside the raw artifacts (raw/),
-so the baseline and the generated 02-evaluation.md sit beside the data they came from.
+CAPTURE then RENDER, in-process — the shared core lives in capture.py (so this and
+publish-review.py can't drift). It captures psi/seo/crawl into raw/ then renders
+§A–F via the tools' OWN renderers (no stdout to scrape, no markers to slice), and
+writes TWO files into one cycle folder (hobbes/cycle/YYYY-MM-DD-<letter>/):
+01-baseline.md (the human digest, §A–F + the blank §G) and 01-baseline.metrics.json
+(the structured numbers the post-publish review diffs — committed beside the digest
+so the review never re-parses markdown), both alongside the raw artifacts in raw/.
 """
 
 import sys
@@ -33,15 +33,9 @@ HOBBES = TOOLS.parent
 TEMPLATE = HOBBES / "templates" / "01-baseline-template.md"
 
 sys.path.insert(0, str(TOOLS))
-import crawl
-import psi
-import seo
-from psi import DEFAULT_URLS  # single source of truth for the golden path
-
+import capture
 import config
-from config import client_meta
-
-CONFIG = client_meta()  # [client] from hobbes.toml
+from psi import DEFAULT_URLS  # single source of truth for the golden path
 
 
 def after(text, marker):
@@ -72,53 +66,25 @@ def section_g(template_text):
 
 def main():
     args = sys.argv[1:]
-    no_crawl = "--no-crawl" in args
-    full = "--full" in args
-    fresh = "--resume" not in args  # fresh capture by default; --resume reuses cache
-    date = config.today()
-    if "--run-dir" in args:  # honor an explicit folder (cli.py passes the cycle dir)
-        rundir = Path(args[args.index("--run-dir") + 1]).resolve()
-    else:
-        rundir = config.new_cycle_dir(
-            HOBBES / "cycle"
-        )  # a fresh cycle: <date>-<letter>
+    flags = capture.parse_flags(args)
+    rundir = flags["run_dir"] or config.new_cycle_dir(HOBBES / "cycle")  # a fresh cycle
     raw = rundir / "raw"
-    raw.mkdir(parents=True, exist_ok=True)
     urls = DEFAULT_URLS
+    date = config.today()
 
-    # Capture: each tool fetches into raw/ (the network step). psi/seo share the
-    # golden path; crawl is whole-site. --full cascades to the crawl only.
-    psi.capture(raw, urls, fresh)
-    seo.capture(raw, urls, fresh)
-    if not no_crawl:
-        crawl.capture(raw, fresh, full)
+    # Capture psi/seo/crawl into raw/, then render §A–F from it (shared with the
+    # review's publish-review.py via capture.py, so the two can't disagree).
+    abcd, e, f = capture.capture_render(
+        raw, urls, fresh=flags["fresh"], no_crawl=flags["no_crawl"], full=flags["full"]
+    )
+    g = section_g(TEMPLATE.read_text())  # manual a11y — page rows from the golden path
+    if not g:
+        sys.exit("✗ couldn't build Section G from the template.")
 
-    # Render: pull each scorecard section straight from raw/ via the tools' own
-    # renderers — the exact functions a standalone tool run uses — so the digest
-    # and a standalone run can't disagree. No stdout capture, no text slicing.
-    tmpl = TEMPLATE.read_text()
-    abcd = psi.scorecard_sections(raw, urls)  # A, B, C, D (+ failed-call note)
-    e = seo.scorecard_section(raw, urls)  # E + site-level
-    g = section_g(tmpl)  # manual a11y — page rows from the golden path
-    if not (abcd and e and g):
-        sys.exit(
-            "✗ couldn't render sections from raw/ — check the capture step ran and raw/ exists."
-        )
-
-    # F — site-wide grades + counts from the crawl (skipped with --no-crawl).
-    f = crawl.scorecard_section(raw) if not no_crawl else ""
-
-    golden = " · ".join(f"[{lbl}]({u})" for lbl, u in urls)
     doc = (
         "\n".join(
-            [
-                f"# Baseline scorecard — {date}",
-                "",
-                f"Client: {CONFIG['name']} · Site: {CONFIG['site']} · Platform: "
-                f"{CONFIG['platform']} · Run by: {CONFIG['run_by']} · Date: {date}",
-                "",
-                f"Golden path: {golden}",
-                "",
+            capture.header("Baseline scorecard", urls, date)
+            + [
                 "`✓` = pass / present · `✗` = fail / missing · `✗cut` = PSI run truncated "
                 "before network-idle (value is the cutoff) · blank = human sign-off pending.",
                 "",
@@ -136,9 +102,18 @@ def main():
 
     out = rundir / "01-baseline.md"
     out.write_text(doc)
+    # The structured numbers the review diffs — committed beside the digest (NOT in
+    # the git-ignored raw/), so a fresh CI review job still has the "before".
+    metrics_out = rundir / "01-baseline.metrics.json"
+    capture.write_metrics(metrics_out, raw, urls, no_crawl=flags["no_crawl"])
+
     print(f"\n✓ MVP baseline written → {out}", file=sys.stderr)
     print(
         "  A–F filled from the tools; Section G (manual a11y) left for human sign-off.",
+        file=sys.stderr,
+    )
+    print(
+        f"  Metrics sidecar → {metrics_out} (the review diffs this, not the markdown).",
         file=sys.stderr,
     )
     print(

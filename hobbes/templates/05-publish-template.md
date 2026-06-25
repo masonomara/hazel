@@ -33,7 +33,7 @@ If you're unsure whether a step is over the line, it is. Stop and hand it back.
 
 ## Pointers
 
-- `execution.md` / the PR — what's being released.
+- `04-execute.md` / the PR — what's being released.
 - `DEVELOPMENT.md` — the deploy mechanics: the platform CLI, preview first, only the named human publishes, don't break the live site.
 - `CONTEXT.md` — who signs off: the code owner on code, the brand owner on anything brand-visible.
 - `CHANGELOG.md` — the entry publish drafts to close the loop. (`MISSION.md` is human-owned: Hobbes reads it, never writes it.)

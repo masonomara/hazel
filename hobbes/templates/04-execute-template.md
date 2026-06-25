@@ -1,6 +1,6 @@
 # Execution — YYYY-MM-DD
 
-Site: [url] · Cycle: [YYYY-MM-DD] · Branch: [feature-branch] · Driven by Hobbes from `plan.md`.
+Site: [url] · Cycle: [YYYY-MM-DD] · Branch: [feature-branch] · Driven by Hobbes from `03-plan.md`.
 
 This is the doing stage, where the system stops describing and starts building. It takes the plan's ordered systems, picks a batch that fits an effort budget, writes a code-level plan against the real codebase, builds it, then stops and pushes the branch for human review.
 
@@ -15,7 +15,7 @@ It is the most agent-driven stage and the only one that writes to the repo, so i
 The plan already ordered every system by leverage. Execution draws a line on that list where the budget runs out.
 
 - Set a budget `B`, the effort points to spend this cycle. The default lives in `hobbes.toml` (`[cycle] effort_budget`) and a run can override it through the execute workflow input. It is the dial for how much to take on. A small `B` ships one tight PR. A large `B` takes on more. Lean large. A thin batch wastes the run.
-- Walk `plan.md` top-down, adding up each system's effort. Draw the line where the next system won't fit the budget left. The systems above the line are the batch.
+- Walk `03-plan.md` top-down, adding up each system's effort. Draw the line where the next system won't fit the budget left. The systems above the line are the batch.
 - Stay greedy on leverage. The plan ordered by it. Respect that. Don't split a coupled block to squeeze in points. If a later system fits the remainder and stands on its own, pull it up. But don't shoehorn, and don't break a batch that holds together.
 - Record the budget, the systems chosen, the effort spent, and what's left for a later cycle.
 
@@ -25,19 +25,19 @@ The plan already ordered every system by leverage. Execution draws a line on tha
 
 > Study **[selected systems]** closely. Learn how each one works. **[selected systems]** need to be improved. Write a detailed plan for doing it. Research with **web search** and the **context7 MCP**: the stack's framework and library docs through context7 (per `DEVELOPMENT.md`), integration config and current specifics through the web. Include code snippets. **Read the real source files before you propose any change. Base the plan on the codebase, not on guesses.** End with a todo list covering every phase and task the work needs.
 
-Write the plan to `execution.md` in the cycle folder. Each task names the system or finding ID it closes, so the line back to `02-evaluation.md` stays traceable.
+Write the plan to `04-execute.md` in the cycle folder. Each task names the system or finding ID it closes, so the line back to `02-evaluation.md` stays traceable.
 
 ## 3. Implement
 
-> When the plan is done, build all of it. As you finish each task or phase, **mark it done in `execution.md`**. Don't stop until every task and phase in the batch is done. Don't add needless comments or doc-blocks. Hold to the project's type discipline, and run the project's checker as you go so you don't add new problems.
+> When the plan is done, build all of it. As you finish each task or phase, **mark it done in `04-execute.md`**. Don't stop until every task and phase in the batch is done. Don't add needless comments or doc-blocks. Hold to the project's type discipline, and run the project's checker as you go so you don't add new problems.
 
 **Clear the whole batch. Don't quietly ship a part of it.** The budget already bounded the work. Once a system is in the batch, it gets built this run. A clean code change you just didn't reach is not a deferral. Finish it. (Past runs stopped at two systems out of caution and under-delivered. Don't.)
 
 **Write what you can. Defer only what you truly can't. Three buckets, not two:**
 
 1. **Ship it.** Self-contained code you can write and reason about from the source. Write it.
-2. **Write it, flag it for review.** Code you can write from the source but can't verify without a browser: a layout or CSS tweak, a change that moves the DOM, an a11y attribute whose effect needs axe. Don't defer these. The review gate is where browser checks happen. Write the best fix you can and flag it in `execution.md` and the PR as **"needs browser confirmation at review,"** naming what to check (say, confirm the a11y rule reads 0 on the affected page and device, confirm the section doesn't shift). Lean toward writing it. A flagged fix a human checks beats a finding that sits for cycles.
-3. **Hand to a human.** Work a GitHub-only, no-browser run can't do: content at scale (copy, image re-exports, per-item alt), integration and paid-service calls, platform-bound items with no code path, sign-offs, and code that needs the **rendered DOM to even know what to change** (not just to verify it) or that risks real regression if written blind (say, pulling a critical render-path asset off the critical path). Name each in `execution.md` and the PR with its reason **and its owner**.
+2. **Write it, flag it for review.** Code you can write from the source but can't verify without a browser: a layout or CSS tweak, a change that moves the DOM, an a11y attribute whose effect needs axe. Don't defer these. The review gate is where browser checks happen. Write the best fix you can and flag it in `04-execute.md` and the PR as **"needs browser confirmation at review,"** naming what to check (say, confirm the a11y rule reads 0 on the affected page and device, confirm the section doesn't shift). Lean toward writing it. A flagged fix a human checks beats a finding that sits for cycles.
+3. **Hand to a human.** Work a GitHub-only, no-browser run can't do: content at scale (copy, image re-exports, per-item alt), integration and paid-service calls, platform-bound items with no code path, sign-offs, and code that needs the **rendered DOM to even know what to change** (not just to verify it) or that risks real regression if written blind (say, pulling a critical render-path asset off the critical path). Name each in `04-execute.md` and the PR with its reason **and its owner**.
 
 The test between bucket 2 and bucket 3: *can you write a correct, self-contained change from the source alone?* If yes, write it and flag it for a check (2). If you'd be guessing at what to change without seeing the rendered page, hand it off (3). When in doubt, choose 2.
 
@@ -72,9 +72,9 @@ That open PR **is** the handoff to `publish`. Execution is done. The cycle close
 
 ## Pointers
 
-Execution runs mostly off `plan.md`, the ordered batch. The rest is context it reaches for as the work needs it. `raw/` is break-glass only.
+Execution runs mostly off `03-plan.md`, the ordered batch. The rest is context it reaches for as the work needs it. `raw/` is break-glass only.
 
-- `plan.md` — the main input: the ordered systems this batch is drawn from.
+- `03-plan.md` — the main input: the ordered systems this batch is drawn from.
 - `02-evaluation.md` / `01-baseline.md` — what each task closes, and the targets to hold.
 - `MISSION.md` — the priorities plan rated impact against. Hold to them on any judgment call inside a system.
 - `DEVELOPMENT.md` — the stack and the real done-means gates.

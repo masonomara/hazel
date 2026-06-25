@@ -42,7 +42,7 @@ The two scores read from different files. Keep them apart, so a cheap fix can't 
 
 > Why divide, not multiply: impact × effort ranks the hardest work first — a 5×5 monster above a 5×1 quick win — and buries the quick wins worth shipping. Leverage is the ratio.
 
-## Output — the shape of `plan.md`
+## Output — the shape of `03-plan.md`
 
 One block per system, then the ordered table.
 

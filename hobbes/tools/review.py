@@ -2,20 +2,25 @@
 """
 review.py — the post-publish before/after, honest about what's trustworthy.
 
-The before is the cycle's own **pre-publish** scorecard (01-baseline.md — everything
-leading up to the PR). The after is the **live** site re-measured post-publish by
-publish-review.py into raw-review/review-baseline.md. review.py diffs the two, tier by tier:
+The before is the cycle's own pre-publish metrics (01-baseline.metrics.json, written
+beside 01-baseline.md by baseline.py — everything leading up to the PR). The after is
+the live site re-measured post-publish by publish-review.py into
+raw-review/review-baseline.metrics.json. review.py diffs the two STRUCTURED metric
+sets — NOT re-parsed markdown — tier by tier:
 
-  Field data (CrUX, §C)   stable 28-day signal → real regressions/improvements.
-  Lab scores (§A)         volatile (PSI lab swings even at median-of-3) → shown, labelled.
-  §D axe a11y             the failing nodes the agent actually targets.
-  Site-wide counts (§F)   scale with crawl coverage → compared ONLY when the before
-                          and after page counts are close; a collapsed crawl must
-                          never read as a sitewide "improvement".
+  Field data (CrUX)   stable 28-day signal → real regressions/improvements.
+  Lab scores (§A)     volatile (PSI lab swings even at median-of-3) → shown, labelled.
+  §D axe a11y         the failing nodes the agent actually targets.
+  Site-wide counts    scale with crawl coverage → compared ONLY when the before and
+                      after page counts are close; a collapsed crawl must never read
+                      as a sitewide "improvement".
 
-The tier titles, notes, and caveats live in templates/06-review-template.md; review.py
-fills in the computed tables. Writes 06-review.md into the cycle folder; prints a
-one-line summary led by the trustworthy (field) regression count.
+The numbers come from the metrics.json sidecars, emitted by psi.metrics()/crawl.metrics()
+— the SAME extraction the scorecard renders from — so the review can't disagree with the
+scorecard, and a cosmetic change to a markdown table can't silently break the diff. The
+tier titles, notes, and caveats live in templates/06-review-template.md; review.py fills
+in the computed tables. Writes 06-review.md into the cycle folder; prints a one-line
+summary led by the trustworthy (field) regression count.
 
 USAGE:
   python3 hobbes/tools/review.py                 # newest cycle
@@ -23,6 +28,7 @@ USAGE:
   python3 hobbes/tools/review.py --out PATH      # write the review elsewhere
 """
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -37,66 +43,11 @@ TEMPLATE = HOBBES / "templates" / "06-review-template.md"
 COVERAGE_OK = 0.8  # §F counts compared only if min/max crawl-page ratio ≥ this
 BEFORE_COL = "Pre-publish"
 AFTER_COL = "Live"
+BEFORE_METRICS = "01-baseline.metrics.json"  # committed beside 01-baseline.md
+AFTER_METRICS = "review-baseline.metrics.json"  # in the cycle's raw-review/
 
-
-def _section(md, header):
-    i = md.find(header)
-    if i < 0:
-        return ""
-    j = md.find("\n## ", i + 1)
-    return md[i:j] if j > 0 else md[i:]
-
-
-def _num(cell):
-    m = re.search(r"-?\d+(?:\.\d+)?", cell)
-    return float(m.group()) if m else None
-
-
-def scores(md):
-    """§A Lighthouse scores: {(page-device, metric): value}. Higher is better."""
-    out = {}
-    for line in _section(md, "## A.").splitlines():
-        c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) == 5 and "—" in c[0]:
-            for metric, cell in zip(("perf", "a11y", "bp", "seo"), c[1:]):
-                v = _num(cell)
-                if v is not None:
-                    out[(c[0], metric)] = v
-    return out
-
-
-def field(md):
-    """§C CrUX field: {(page, metric): value}. metric ∈ lcp/inp/cls. Lower is better."""
-    out = {}
-    for line in _section(md, "## C.").splitlines():
-        c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) == 5 and c[0] not in ("Page", "") and not c[0].startswith("---"):
-            page = c[0].split("—")[0].strip()  # drop "— origin agg."
-            for metric, cell in zip(("lcp", "inp", "cls"), c[1:4]):
-                v = _num(cell)
-                if v is not None:
-                    out[(page, metric)] = v
-    return out
-
-
-def counts(md):
-    """§F site-wide count rows: {metric: count}. Lower is better."""
-    out = {}
-    for line in _section(md, "## F.").splitlines():
-        c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) == 3 and re.fullmatch(r"\d+", c[1]):
-            out[c[0]] = int(c[1])
-    return out
-
-
-def crawl_pages(md):
-    """The page count the crawl actually analysed, from the §F header."""
-    m = re.search(r"## F\. Site-wide \([^)]*?(\d+)\s*pages?\)", md)
-    return int(m.group(1)) if m else None
-
-
-# Short parse keys → the scorecard's own display labels, so the review speaks the
-# same language 01-baseline.md does (not "perf"/"bp"/"lcp").
+# Short metric keys → the scorecard's own display labels, so the review speaks the
+# same language the baseline does (not "perf"/"bp"/"lcp").
 SCORE_LABELS = {
     "perf": "Performance",
     "a11y": "Accessibility",
@@ -104,6 +55,12 @@ SCORE_LABELS = {
     "seo": "SEO",
 }
 FIELD_LABELS = {"lcp": "LCP (s)", "inp": "INP (ms)", "cls": "CLS"}
+
+
+def _flat(nested):
+    """{'<outer>': {'<metric>': v}} → {('<outer>', '<metric>'): v} so _deltas can key
+    by tuple (the way the markdown parser used to). Tolerates a missing/None section."""
+    return {(outer, m): v for outer, sub in (nested or {}).items() for m, v in sub.items()}
 
 
 def _fmt(v):
@@ -124,20 +81,6 @@ def _deltas(d_after, d_before, worse, label):
     return rows
 
 
-def axe(md):
-    """§D axe accessibility: {rule: total failing nodes across the golden path}. Lower is better.
-    A rule fixed to zero drops out of the §D table entirely, so _axe_deltas works over the union."""
-    out = {}
-    for line in _section(md, "## D.").splitlines():
-        c = [x.strip() for x in line.strip().strip("|").split("|")]
-        if len(c) == 4:  # | page — device | n | pass | rule×nodes, … |
-            for item in c[3].split(","):
-                m = re.match(r"([a-z0-9-]+)\s*×\s*(\d+)", item.strip())
-                if m:
-                    out[m.group(1)] = out.get(m.group(1), 0) + int(m.group(2))
-    return out
-
-
 def _axe_deltas(after, before):
     """axe nodes over the UNION of rules (a rule fixed to 0 leaves §D, so absent = 0).
     Fewer failing nodes = better → [(rule, before, after, improved)]."""
@@ -148,6 +91,20 @@ def _axe_deltas(after, before):
             continue
         rows.append((k, a, b, b < a))
     return rows
+
+
+def render_tier(title, note, rows):
+    """One tier rendered like a baseline section: a before→after table of only the
+    rows that moved — or a single 'no change' line if none did."""
+    out = [f"## {title}", ""]
+    if note:
+        out += [f"*{note}*", ""]
+    if not rows:
+        return out + ["_No change._", ""]
+    out += [f"| Item | {BEFORE_COL} | {AFTER_COL} | |", "|---|---|---|---|"]
+    for label, a, b, improved in rows:
+        out.append(f"| {label} | {_fmt(a)} | {_fmt(b)} | {'▲' if improved else '▼'} |")
+    return out + [""]
 
 
 def parse_template(text):
@@ -165,18 +122,10 @@ def parse_template(text):
     return head, tiers
 
 
-def render_tier(title, note, rows):
-    """One tier rendered like a baseline section: a before→after table of only the
-    rows that moved — or a single 'no change' line if none did."""
-    out = [f"## {title}", ""]
-    if note:
-        out += [f"*{note}*", ""]
-    if not rows:
-        return out + ["_No change._", ""]
-    out += [f"| Item | {BEFORE_COL} | {AFTER_COL} | |", "|---|---|---|---|"]
-    for label, a, b, improved in rows:
-        out.append(f"| {label} | {_fmt(a)} | {_fmt(b)} | {'▲' if improved else '▼'} |")
-    return out + [""]
+def _load(path, fix):
+    if not path.exists():
+        sys.exit(f"✗ no {path} — {fix}")
+    return json.loads(path.read_text())
 
 
 def main():
@@ -186,21 +135,20 @@ def main():
         if "--run-dir" in args
         else config.latest_cycle(CYCLES)
     )
-    if cur is None or not (cur / "01-baseline.md").exists():
-        sys.exit("✗ no cycle with 01-baseline.md to review")
-    after_path = cur / "raw-review" / "review-baseline.md"
-    if not after_path.exists():
-        sys.exit(f"✗ no {after_path} — run publish-review.py first")
+    if cur is None:
+        sys.exit("✗ no cycle to review")
+    before = _load(
+        cur / BEFORE_METRICS,
+        "re-run `hobbes baseline` on this cycle to write the before-metrics",
+    )
+    after = _load(cur / "raw-review" / AFTER_METRICS, "run publish-review.py first")
     out = (
         Path(args[args.index("--out") + 1]) if "--out" in args else cur / "06-review.md"
     )
     stamp = config.stamp()
 
-    before_md = (cur / "01-baseline.md").read_text()  # everything leading up to the PR
-    after_md = after_path.read_text()  # the live site, post-publish
-
-    sa, sb = scores(after_md), scores(before_md)
-    fa, fb = field(after_md), field(before_md)
+    sa, sb = _flat(after.get("scores")), _flat(before.get("scores"))
+    fa, fb = _flat(after.get("field")), _flat(before.get("field"))
     if not (sa.keys() & sb.keys()) and not (fa.keys() & fb.keys()):
         out.write_text(
             f"# Post-publish review — {cur.name}\n\nGenerated {stamp}.\n\n"
@@ -217,14 +165,16 @@ def main():
         "lab": _deltas(
             sa, sb, "lt", lambda k: f"{k[0]} · {SCORE_LABELS[k[1]]}"
         ),  # lab: higher better
-        "axe": _axe_deltas(axe(after_md), axe(before_md)),  # §D axe nodes: lower better
+        "axe": _axe_deltas(after.get("axe", {}), before.get("axe", {})),  # nodes: lower better
         "counts": [],
     }
 
-    cpg, ppg = crawl_pages(after_md), crawl_pages(before_md)
+    cpg, ppg = after.get("crawl_pages"), before.get("crawl_pages")
     coverage_gap = cpg and ppg and min(cpg, ppg) / max(cpg, ppg) < COVERAGE_OK
     if not coverage_gap:
-        rows["counts"] = _deltas(counts(after_md), counts(before_md), "gt", lambda k: k)
+        rows["counts"] = _deltas(
+            after.get("counts", {}), before.get("counts", {}), "gt", lambda k: k
+        )
 
     field_regr = [r for r in rows["field"] if not r[3]]
     axe_impr = [r for r in rows["axe"] if r[3]]

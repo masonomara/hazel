@@ -68,8 +68,8 @@ def cmd_status(rest):
     stages = [
         ("01-baseline.md", "baseline"),
         ("02-evaluation.md", "findings"),
-        ("plan.md", "plan"),
-        ("execution.md", "execute"),
+        ("03-plan.md", "plan"),
+        ("04-execute.md", "execute"),
     ]
     have = [name for f, name in stages if (c / f).exists()]
     nxt = next((name for f, name in stages if not (c / f).exists()), "publish (human)")

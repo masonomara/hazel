@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="{{ 'component-price.css' | asset_url }}" media="print" onload="this.media='all'">
 {%- endif -%}
 {%- if section.settings.menu_type_desktop == 'mega' -%}
+  {%- comment -%} Critical hide state so the mega-menu panel stays hidden during the async load of component-mega-menu.css below — otherwise it flashes open/slides down on first paint. {%- endcomment -%}
+  <style>.js .mega-menu__content{position:absolute;opacity:0;transform:translateY(-1.5rem);}</style>
   <link rel="stylesheet" href="{{ 'component-mega-menu.css' | asset_url }}" media="print" onload="this.media='all'">
   <noscript>{{ 'component-mega-menu.css' | asset_url | stylesheet_tag }}</noscript>
 {%- endif -%}

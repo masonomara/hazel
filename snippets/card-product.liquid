@@ -44,6 +44,7 @@
     class="card-wrapper product-card-wrapper underline-links-hover"
     href="{{ card_product.url }}"
     id="CardLink-{{ section_id }}-{{ card_product.id }}"
+    aria-label="{{ card_product.title | escape }}"
   >
     <div
       class="

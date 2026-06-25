@@ -4043,7 +4043,10 @@ canvas.global-media-settings {
     }
 }
 .masonHeaderModifierTwo {
-    margin-top: calc((var(--header-height)) * -1);
+    /* Fallback (200px) parks this secondary bar off-screen on first paint —
+       --header-height is JS-set, so without it the calc is invalid, margin-top
+       falls back to 0, and the bar flashes into view until JS runs. */
+    margin-top: calc(var(--header-height, 200px) * -1);
 }
 .masonHeaderModifierTwo .header__active-menu-item {
     text-underline-offset: 0.5rem !important;

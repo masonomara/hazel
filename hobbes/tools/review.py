@@ -4,7 +4,7 @@ review.py — the post-publish before/after, honest about what's trustworthy.
 
 The before is the cycle's own **pre-publish** scorecard (01-baseline.md — everything
 leading up to the PR). The after is the **live** site re-measured post-publish by
-publish-review.py into raw-review/baseline.md. review.py diffs the two, tier by tier:
+publish-review.py into raw-review/review-baseline.md. review.py diffs the two, tier by tier:
 
   Field data (CrUX, §C)   stable 28-day signal → real regressions/improvements.
   Lab scores (§A)         volatile (PSI lab swings even at median-of-3) → shown, labelled.
@@ -182,7 +182,7 @@ def main():
     )
     if cur is None or not (cur / "01-baseline.md").exists():
         sys.exit("✗ no cycle with 01-baseline.md to review")
-    after_path = cur / "raw-review" / "baseline.md"
+    after_path = cur / "raw-review" / "review-baseline.md"
     if not after_path.exists():
         sys.exit(f"✗ no {after_path} — run publish-review.py first")
     out = Path(args[args.index("--out") + 1]) if "--out" in args else cur / "06-review.md"

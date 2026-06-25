@@ -5,7 +5,7 @@ publish-review.py — the review phase's capture orchestrator (a twin of baselin
 baseline.py captures the PRE-publish site into <cycle>/raw/. This captures the
 **live** site AFTER a publish into <cycle>/raw-review/ — the same three tools
 (psi/seo/crawl) driven the same way, the same renderers — then writes the rendered
-after-digest to <cycle>/raw-review/baseline.md. So before and after live in one
+after-digest to <cycle>/raw-review/review-baseline.md. So before and after live in one
 cycle folder, side by side. review.py then diffs the cycle's pre-publish
 01-baseline.md (the before — everything leading up to the PR) against this
 after-digest into 06-review.md, honest by tier.
@@ -91,7 +91,7 @@ def main():
         f,
     ]) + "\n"
 
-    out = raw / "baseline.md"
+    out = raw / "review-baseline.md"
     out.write_text(doc)
     print(f"\n✓ post-publish re-baseline written → {out}", file=sys.stderr)
     print(f"  Cycle folder: {rundir} (raw-review/ alongside the pre-publish raw/).", file=sys.stderr)

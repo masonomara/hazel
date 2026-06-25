@@ -49,7 +49,7 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 
 ## Follow the data — what reads what, and who emits the content
 
-The stage table above says *what each stage produces*. This is the other axis — the one that's easy to lose: **what each file reads, what it writes, and who consumes that next.** Follow one cycle's data from the live site all the way to the PR comment.
+The stage table above says *what each stage produces*. This is the other axis — the one that's easy to lose: **what each file reads, what it writes, and who consumes that next.** Follow one cycle's data from the live site all the way to the PR comment — and around the dataflow, the **drivers** that fire each phase (the two workflows + the CLI), the per-client **config and contracts** that feed the stages, and the **orientation docs**, so **every file in the repo appears on this map.**
 
 ```mermaid
 flowchart TD
@@ -110,20 +110,45 @@ flowchart TD
     BMD -- "the before" --> RMD
     RMD --> COMMENT["PR comment — the before/after"]:::pr
 
+    %% ═════════ DRIVERS — how each phase fires (cloud workflow · local CLI) ═════════
+    subgraph RUN["drivers — how the stages fire"]
+        direction TB
+        WCYCLE[".github/workflows/hobbes-cycle.yml<br/>Actions · manual dispatch (budget) → cli.py cycle + claude-code-action"]:::run
+        WREVIEW[".github/workflows/hobbes-review.yml<br/>Actions · 'published' label / PR# dispatch → publish-review.py + review.py"]:::run
+        CLI["tools/cli.py — local driver<br/>cycle · baseline · findings · publish-review · review · status · plan/execute · budget · today"]:::orch
+    end
+    WCYCLE ==> CYCLE
+    WREVIEW ==> REVIEW
+    CLI -. "drives the tools locally" .-> CYCLE
+    CLI -. "publish-review · review" .-> REVIEW
+
     %% ═════════ FEEDERS — read by the stages, never the flow's output ═════════
-    subgraph FEED["per-client truth · contracts · the CLI"]
+    subgraph FEED["per-client truth · contracts"]
         direction TB
         CONFIGPY["config.py ← hobbes.toml<br/>golden path · pinned-tz dates · &lt;date&gt;-&lt;letter&gt; cycle dirs · $PSI_API_KEY"]:::py
         TMPLS["templates/*.md — stage contracts<br/>baseline · evaluation · plan · execute · publish · review"]:::tmpl
         CTXN["standing context — CLAUDE (hard line) · MISSION (impact)<br/>DEVELOPMENT + CONTEXT (effort) · CHANGELOG (prior work)"]:::ctx
-        CLI["cli.py — cycle · baseline · findings · publish-review · review<br/>status · plan/execute · budget"]:::orch
+        GI[".gitignore — keeps raw/ · raw-review/ · __pycache__ · tools/.psi-key out of git"]:::tmpl
     end
     CONFIGPY -. "loaded by every tool" .-> MEASURE
     CONFIGPY -.-> REVIEW
     TMPLS -. "the shape each stage fills" .-> CYCLE
     TMPLS -. "review-template" .-> RMD
     CTXN -. "steers the agent" .-> FIX
-    CLI -. "drives the tools locally" .-> CYCLE
+    GI -. "ignores the intermediates" .-> RAW
+
+    %% ═════════ DOCS — orientation, read by the operator + agent (not in the dataflow) ═════════
+    subgraph DOCS["orientation docs — read, not run"]
+        direction TB
+        README["README.md — start here · the index"]:::guide
+        GSYS["guides/SYSTEM.md — THIS FILE · the whole map"]:::guide
+        GSET["guides/SETUP.md — stand it up, once per client"]:::guide
+        GBASE["guides/BASELINE.md — run a cycle · the operator runbook"]:::guide
+        README --> GSYS
+        README --> GSET
+        README --> GBASE
+    end
+    README -. "how to operate the system" .-> WCYCLE
 
     %% ═════════ LEGEND ═════════
     subgraph LEGEND["legend"]
@@ -137,6 +162,8 @@ flowchart TD
         L5["template / config"]:::tmpl
         L6["standing context"]:::ctx
         L7["CLI / orchestration"]:::orch
+        L9["cloud workflow runner"]:::run
+        L10["orientation doc / guide"]:::guide
         L8["PR / comment → GitHub"]:::pr
     end
 
@@ -150,6 +177,8 @@ flowchart TD
     classDef tmpl fill:#f1f5f9,stroke:#64748b,color:#334155;
     classDef pr fill:#e0e7ff,stroke:#4f46e5,color:#312e81,stroke-width:2px;
     classDef orch fill:#ffe4e6,stroke:#e11d48,color:#881337;
+    classDef run fill:#cffafe,stroke:#0891b2,color:#155e75;
+    classDef guide fill:#e7e5e4,stroke:#78716c,color:#292524;
 ```
 
 **Five handoffs worth understanding — this is the "what each file does along the way":**

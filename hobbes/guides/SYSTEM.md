@@ -1,8 +1,8 @@
-# Hobbes
+# Hobbes — system map
 
 Hobbes is a **web-baseline + agentic-fix system**: it measures a live site, catalogs what's wrong, plans the highest-leverage fixes, writes them as a pull request, and — once a human publishes — re-measures to prove the impact. It runs in GitHub Actions on a Claude Code subscription, and it **writes only to GitHub** (branches, PRs, comments). Every deploy action — preview, publish, go-live — stays human.
 
-This file is the map of the whole system. For *setup*, see [`guides/SETUP.md`](guides/SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../CLAUDE.md).
+This file is the map of the whole system. For *setup*, see [`guides/SETUP.md`](SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../../CLAUDE.md).
 
 ---
 
@@ -105,11 +105,11 @@ The stage table above says *what each stage produces*. This is the other axis �
 
 | File | Role |
 |---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | Hobbes's identity, stance, and **the hard line** (never publish/merge/spend without sign-off). Identical across all clients. |
-| [`context/MISSION.md`](context/MISSION.md) | What this client optimizes for, as **baseline → target** priorities (e.g. a11y, SEO, performance). Points at the scorecard for the numbers. |
-| [`context/DEVELOPMENT.md`](context/DEVELOPMENT.md) | The stack and the build rules — the "done means" gates. |
-| [`context/CONTEXT.md`](context/CONTEXT.md) | The client: goals, users, the people who sign off, where access lives. |
-| [`context/CHANGELOG.md`](context/CHANGELOG.md) | What has shipped, why, and to what result. |
+| [`../CLAUDE.md`](../../CLAUDE.md) | Hobbes's identity, stance, and **the hard line** (never publish/merge/spend without sign-off). Identical across all clients. |
+| [`context/MISSION.md`](../context/MISSION.md) | What this client optimizes for, as **baseline → target** priorities (e.g. a11y, SEO, performance). Points at the scorecard for the numbers. |
+| [`context/DEVELOPMENT.md`](../context/DEVELOPMENT.md) | The stack and the build rules — the "done means" gates. |
+| [`context/CONTEXT.md`](../context/CONTEXT.md) | The client: goals, users, the people who sign off, where access lives. |
+| [`context/CHANGELOG.md`](../context/CHANGELOG.md) | What has shipped, why, and to what result. |
 
 ### Config — the one source of per-client truth
 | File | Lines | Role |
@@ -119,13 +119,13 @@ The stage table above says *what each stage produces*. This is the other axis �
 ### The deterministic engine — `hobbes/tools/`
 | File | Lines | Role |
 |---|---|---|
-| [`tools/config.py`](tools/config.py) | 81 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `sample_path()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
-| [`tools/psi.py`](tools/psi.py) | 358 | PageSpeed Insights / Lighthouse capture → prints scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) to stdout. Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
-| [`tools/seo.py`](tools/seo.py) | 316 | Per-page HTML SEO checklist → prints **§E** (titles, meta, canonical, OG, structured data). |
-| [`tools/crawl.py`](tools/crawl.py) | 437 | SiteOne sitemap crawl (stratified sample) → prints **§F** site-wide SEO/a11y/security counts. |
-| [`tools/baseline.py`](tools/baseline.py) | 135 | Runs psi + seo + crawl into one dated cycle folder and **captures their stdout** into the one digest, `01-baseline.md` (stamped from `TEMPLATE.md`). Honors `--run-dir`. |
-| [`tools/evaluation.py`](tools/evaluation.py) | 737 | The **problem catalog**: reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
-| [`tools/diff.py`](tools/diff.py) | 241 | The **review phase's** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated), rendered as before→after tables. `--prior` pins the comparison. |
+| [`tools/config.py`](../tools/config.py) | 81 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `sample_path()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
+| [`tools/psi.py`](../tools/psi.py) | 358 | PageSpeed Insights / Lighthouse capture → prints scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) to stdout. Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
+| [`tools/seo.py`](../tools/seo.py) | 316 | Per-page HTML SEO checklist → prints **§E** (titles, meta, canonical, OG, structured data). |
+| [`tools/crawl.py`](../tools/crawl.py) | 437 | SiteOne sitemap crawl (stratified sample) → prints **§F** site-wide SEO/a11y/security counts. |
+| [`tools/baseline.py`](../tools/baseline.py) | 135 | Runs psi + seo + crawl into one dated cycle folder and **captures their stdout** into the one digest, `01-baseline.md` (stamped from `TEMPLATE.md`). Honors `--run-dir`. |
+| [`tools/evaluation.py`](../tools/evaluation.py) | 737 | The **problem catalog**: reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
+| [`tools/diff.py`](../tools/diff.py) | 241 | The **review phase's** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated), rendered as before→after tables. `--prior` pins the comparison. |
 
 ### The CLI
 | File | Lines | Role |
@@ -135,11 +135,11 @@ The stage table above says *what each stage produces*. This is the other axis �
 ### Stage contracts — `hobbes/templates/*.md`
 | File | Role |
 |---|---|
-| [`templates/TEMPLATE.md`](templates/TEMPLATE.md) | The baseline scorecard shape — §A–G (A–F tool-filled, G manual a11y for the human). |
-| [`templates/FINDINGS-TEMPLATE.md`](templates/FINDINGS-TEMPLATE.md) | The findings contract — dense, evidence-based, deterministic. |
-| [`templates/PLAN-TEMPLATE.md`](templates/PLAN-TEMPLATE.md) | The plan contract — group findings into systems → estimate effort → estimate impact → **order by leverage (impact ÷ effort)**. |
-| [`templates/EXECUTE-TEMPLATE.md`](templates/EXECUTE-TEMPLATE.md) | The execute contract — select a batch by effort budget, research, implement the **whole** batch, gates ("no *new* checker offenses"), and the PR's before/after. Never publishes. |
-| [`templates/PUBLISH-TEMPLATE.md`](templates/PUBLISH-TEMPLATE.md) | The publish contract — human-owned: PR review → sign-off → merge → go-live → `published` label → review. |
+| [`templates/TEMPLATE.md`](../templates/TEMPLATE.md) | The baseline scorecard shape — §A–G (A–F tool-filled, G manual a11y for the human). |
+| [`templates/FINDINGS-TEMPLATE.md`](../templates/FINDINGS-TEMPLATE.md) | The findings contract — dense, evidence-based, deterministic. |
+| [`templates/PLAN-TEMPLATE.md`](../templates/PLAN-TEMPLATE.md) | The plan contract — group findings into systems → estimate effort → estimate impact → **order by leverage (impact ÷ effort)**. |
+| [`templates/EXECUTE-TEMPLATE.md`](../templates/EXECUTE-TEMPLATE.md) | The execute contract — select a batch by effort budget, research, implement the **whole** batch, gates ("no *new* checker offenses"), and the PR's before/after. Never publishes. |
+| [`templates/PUBLISH-TEMPLATE.md`](../templates/PUBLISH-TEMPLATE.md) | The publish contract — human-owned: PR review → sign-off → merge → go-live → `published` label → review. |
 
 ### The cloud runner — `.github/workflows/`
 | File | Trigger | Role |
@@ -151,8 +151,8 @@ The stage table above says *what each stage produces*. This is the other axis �
 *(Engine-generic — same across clients; read by the agent and the human operator.)*
 | File | Role |
 |---|---|
-| [`guides/SETUP.md`](guides/SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
-| [`guides/BASELINE.md`](guides/BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
+| [`guides/SETUP.md`](SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
+| [`guides/BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 
 ### Cycle data — `hobbes/cycle/<YYYY-MM-DD>/`
 Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `01-baseline.md` → `02-evaluation.md` → `plan.md` → `execution.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediate). The three capture tools print their sections to stdout for `baseline.py` to assemble into the one `01-baseline.md`; they write no per-tool digest of their own. **No `diff.md` lands in a cycle folder** — the diff is the review phase's, written post-publish and posted as a PR comment. Which files exist tells you which stage the cycle reached (`cli.py status`).

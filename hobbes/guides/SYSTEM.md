@@ -26,9 +26,10 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
                        │ label fires
                        ▼
    DETERMINISTIC
-   ┌─────────────────────────────────────────────┐
-   │  review = re-baseline ──► diff ──► PR comment│   ← review workflow (on the label)
-   └─────────────────────────────────────────────┘
+   ┌──────────────────────────────────────────────────────────────┐
+   │  review = publish-review (live → raw-review/) ──► review.py   │   ← review workflow (on the label)
+   │           diff vs pre-publish 01-baseline ──► PR comment      │
+   └──────────────────────────────────────────────────────────────┘
 ```
 
 | Stage | Kind | Produces | Runs in |
@@ -38,7 +39,7 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | **plan** | agent | `plan.md` — systems grouped, rated, ordered by leverage | cycle workflow |
 | **execute** | agent | `execution.md` + code changes | cycle workflow |
 | **publish** | human | the change live on the site | you, on your platform |
-| **review** | tool (`diff.py`) | a **before/after comment** on the PR | review workflow (on `published`) |
+| **review** | tools (`publish-review.py` → `review.py`) | a **before/after comment** on the PR | review workflow (on `published`) |
 
 > The first four stages (baseline, findings, plan, execute) run in **one** `Hobbes cycle` workflow and land in **one PR** — the scorecard/findings (data) beside the code fix. The determinism boundary still holds inside that run: the Python tools measure first (reproducibly, no LLM), then the agent judges and fixes. **There is no diff in a cycle** — a cycle measures the current site and has no "after" to compare (this cycle's fix isn't live yet). The before/after is the **review** stage's job, after a publish.
 
@@ -57,7 +58,7 @@ flowchart TD
     %% ============ CONFIG ============
     subgraph CONFIG["config — one source of per-client truth"]
         TOML["hobbes.toml (29)<br/>golden path · client meta · timezone<br/>effort_budget · branch_prefix · sample_path<br/>NO secrets — PSI key via $PSI_API_KEY"]:::tmpl
-        CONFIGPY["config.py (81)<br/>golden_path() · client_meta() · psi_key()<br/>effort_budget() · sample_path()<br/>today()/stamp() — pinned tz"]:::py
+        CONFIGPY["config.py<br/>golden_path() · client_meta() · psi_key()<br/>effort_budget() · sample_path() · today()/stamp() — pinned tz<br/>new_cycle_dir()/latest_cycle()/cycle_dirs()/default_run_dir() — &lt;date&gt;-&lt;letter&gt;"]:::py
         TOML --> CONFIGPY
     end
 
@@ -68,7 +69,8 @@ flowchart TD
         CRAWL["crawl.py (468)<br/>reads: live (SiteOne stratified sample)<br/>writes: raw/crawl.json · renders §F from raw/"]:::py
         BASELINE["baseline.py (133)<br/>imports psi/seo/crawl: drives capture() → raw/,<br/>then renders §A–F from raw/ via their own renderers<br/>(+ §G from baseline-template.md) — no stdout scraped"]:::py
         EVAL["evaluation.py (1009)<br/>reads: raw/* directly · re-walks for node evidence<br/>imports the SAME extractors (psi/seo/crawl)<br/>writes: 02-evaluation.md"]:::py
-        DIFF["diff.py (241) — REVIEW-ONLY<br/>reads: 2 × 01-baseline.md (+ 02-eval count)<br/>writes: diff.md, honest by tier"]:::py
+        PUBREV["publish-review.py — REVIEW-ONLY<br/>twin of baseline.py: drives psi/seo/crawl<br/>capture() → raw-review/, renders the after-digest<br/>raw-review/baseline.md (the live, post-publish site)"]:::py
+        REVIEW["review.py — REVIEW-ONLY<br/>reads: 01-baseline.md (before) + raw-review/baseline.md (after)<br/>fills review-template.md · writes 06-review.md, honest by tier"]:::py
     end
 
     LIVE --> PSI
@@ -87,13 +89,16 @@ flowchart TD
     %% ============ DATA DOCS ============
     BMD["01-baseline.md<br/>the ONE digest · the scorecard"]:::doc
     EMD["02-evaluation.md<br/>the problem catalog"]:::doc
-    DMD["diff.md<br/>the before/after"]:::doc
+    RREV["raw-review/baseline.md<br/>the live, post-publish after-digest"]:::raw
+    DMD["06-review.md<br/>the before/after"]:::doc
 
     BASELINE --> BMD
     EVAL --> EMD
-    DIFF --> DMD
-    BMD -- "this + prior" --> DIFF
-    EMD -. count only .-> DIFF
+    LIVE --> PUBREV
+    PUBREV --> RREV
+    REVIEW --> DMD
+    BMD -- "before" --> REVIEW
+    RREV -- "after" --> REVIEW
 
     %% ============ TEMPLATES ============
     subgraph TEMPLATES["stage contracts — hobbes/templates/*.md"]
@@ -102,9 +107,11 @@ flowchart TD
         PTMPL["plan-template.md<br/>group → rate effort/impact → order by leverage"]:::tmpl
         ETMPL["execute-template.md<br/>batch by budget · gates · never publish"]:::tmpl
         PUBTMPL["publish-template.md<br/>human-owned go-live contract"]:::tmpl
+        REVTMPL["review-template.md<br/>before/after shape · 4 honest tiers"]:::tmpl
     end
     TTMPL -. "scorecard shape §A–G" .-> BASELINE
     FTMPL -. shape .-> EVAL
+    REVTMPL -. fills .-> REVIEW
 
     %% ============ STANDING CONTEXT ============
     subgraph CTX["standing context — hobbes/*.md, prose, read by the agent"]
@@ -150,14 +157,13 @@ flowchart TD
     %% ============ ORCHESTRATION ============
     subgraph ORCH["the cloud runner + CLI"]
         CYCLEYML["hobbes-cycle.yml — workflow_dispatch<br/>measure (no LLM) → agent (opus-4-8) fixes → ONE PR<br/>budget = input override else hobbes.toml"]:::orch
-        REVIEWYML["hobbes-review.yml — on published label (or dispatch)<br/>re-baseline LIVE → diff vs pre-publish → PR comment<br/>(no Claude)"]:::orch
-        CLI["tools/cli.py (133)<br/>cycle · baseline · findings · diff<br/>status · plan · execute · budget · today<br/>(cycle = baseline + evaluation, no diff)"]:::py
+        REVIEWYML["hobbes-review.yml — on published label (or dispatch)<br/>publish-review LIVE → raw-review/ → review.py diff → PR comment<br/>(no Claude)"]:::orch
+        CLI["tools/cli.py<br/>cycle · baseline · findings · publish-review · review<br/>status · plan · execute · budget · today<br/>(cycle = baseline + evaluation, no review)"]:::py
     end
     CYCLEYML -. runs .-> TOOLS
     CYCLEYML -. then runs .-> AGENT
     HUMAN -- "published label fires" --> REVIEWYML
-    REVIEWYML -. "re-runs baseline + evaluation" .-> TOOLS
-    REVIEWYML -. then .-> DIFF
+    REVIEWYML -. "runs publish-review then review" .-> TOOLS
     DMD --> COMMENT["gh pr comment — the before/after"]:::pr
     CLI -. drives locally .-> TOOLS
     CLI -. prints stage prompts .-> AGENT
@@ -201,11 +207,11 @@ flowchart TD
 
 1. **Two readers, one source — no middle file.** Each capture tool writes its raw JSON to `raw/` (and, run standalone, also prints a human-readable digest to stdout). `baseline.py` **imports the three tools and renders §A–F straight from `raw/`** — calling each tool's own `scorecard_section(s)()` — then stamps them into `01-baseline.md` with §G from `baseline-template.md`. No stdout is scraped and no per-tool `*-results.md` lands on disk. `evaluation.py` reads the **same** `raw/` artifacts (`raw/*.psi.json`, `raw/crawl.json`) directly for its node-level detail. `raw/` is git-ignored. This is why `02-evaluation.md` can't be rebuilt from `01-baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
 2. **The catalog and the scorecard share their renderers, and both rebuild from `raw/`.** `baseline.py` renders each scorecard section by calling the *same function* the standalone tool uses (`psi.scorecard_sections`, `seo.scorecard_section`, `crawl.scorecard_section`), so the digest and a standalone tool run can't disagree — and the scorecard re-renders from cache with no re-fetch. `evaluation.py` then *imports* the extractors it needs — `Page` / `head_ok` / `OG_REQUIRED` from `seo.py`, `table_rows` / `count_for` / `rollup_texts` / `header_set` from `crawl.py`, and the `a11y_audit_failed` predicate from `psi.py` — so where a number depends on "what counts" (a failing axe audit, a missing OG tag, a flagged crawl row), the catalog and the scorecard ride the *same definition*. The two are still **separate scripts** — the scorecard renders compact section tables, the catalog re-walks the PSI JSON for per-node evidence the scorecard never keeps — but neither scrapes the other's output, and both read only `raw/`.
-3. **`diff.py` runs only in the review phase — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the diff lives entirely in the post-publish **review**: it reads two `01-baseline.md` files — the pre-publish baseline and the re-baselined live site — re-parses their tables back into numbers, and compares them tier by tier (field / lab / axe / counts). It touches no raw and only a findings *count*. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
+3. **The review runs only post-publish — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the before/after lives entirely in the post-publish **review**, split across two review-only tools, both writing inside the PR's own cycle folder: `publish-review.py` (a twin of `baseline.py`) re-captures the **live** site into `raw-review/` and renders the after-digest `raw-review/baseline.md`; `review.py` then diffs the cycle's pre-publish `01-baseline.md` (the before — everything leading up to the PR) against that after-digest, re-parsing both tables back into numbers and comparing them tier by tier (field / lab / axe / counts) through `review-template.md`. No findings re-run — the review needs the measured before/after, not a rebuilt catalog. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
 4. **The agent's primary input is the catalog, not `raw/`.** Judgment works off `02-evaluation.md` — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. `raw/` stays a **break-glass** fallback: plan or execute may drop to it when the catalog's extract isn't enough to group, cost, or author a fix — but it's the exception, never the default, because routing judgment through raw re-derives findings non-deterministically and erodes the determinism boundary. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
-5. **The capture tools run in both phases; the diff doesn't.** `baseline.py` + `evaluation.py` (driving psi/seo/crawl) run in the cycle (pre-fix) **and** in the review (post-publish, on the now-live site). `diff.py` is the one piece that's review-only — the review re-baselines the live site, rebuilds findings, then diffs against the pre-publish baseline, and that diff *is* the PR comment.
+5. **The capture tools run in both phases; the review tools don't.** psi/seo/crawl run in the cycle (driven by `baseline.py`, into `raw/`, pre-fix) **and** in the review (driven by `publish-review.py`, into `raw-review/`, on the now-live site). `publish-review.py` and `review.py` are the two pieces that are review-only — `publish-review.py` re-captures the live site into the cycle's `raw-review/`, `review.py` diffs it against the pre-publish `01-baseline.md`, and that diff (`06-review.md`) *is* the PR comment.
 
-**The determinism boundary, restated as authorship:** every **number** and every **comparison** in this flow is emitted by Python (`baseline.py`, `evaluation.py`, `diff.py`) — reproducible, unspinnable. Only the **fix narrative and the PR prose** are the agent's, and even those ride a fixed template skeleton. The PR comment (`diff.md`) is 100% Python; the PR body is agent prose constrained by `execute-template.md`.
+**The determinism boundary, restated as authorship:** every **number** and every **comparison** in this flow is emitted by Python (`baseline.py`, `evaluation.py`, `publish-review.py`, `review.py`) — reproducible, unspinnable. Only the **fix narrative and the PR prose** are the agent's, and even those ride a fixed template skeleton. The PR comment (`06-review.md`) is 100% Python; the PR body is agent prose constrained by `execute-template.md`.
 
 ### Reads → writes → consumed by
 
@@ -214,9 +220,10 @@ flowchart TD
 | `psi.py` | live site (PSI API) | `raw/*.psi.json` (standalone: §A–D digest) | `baseline.py` & `evaluation.py` (both read `raw/`) |
 | `seo.py` | live site (HTML) | `raw/*.seo.json` (standalone: §E digest) | `baseline.py` & `evaluation.py` (both read `raw/`) |
 | `crawl.py` | live site (sitemap crawl) | `raw/crawl.json` (standalone: §F digest) | `baseline.py` & `evaluation.py` (both read `raw/`) |
-| `baseline.py` | `raw/` (via the tools' renderers) + `baseline-template.md` | `01-baseline.md` (the one digest) | the agent, the human, `diff.py` (review only) |
-| `evaluation.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `02-evaluation.md` | the agent (plan + execute), `diff.py` (count, review only) |
-| `diff.py` | two `01-baseline.md` (pre-publish + live re-baseline) | `diff.md` | the **post-publish PR comment** — **review phase only, not a cycle** |
+| `baseline.py` | `raw/` (via the tools' renderers) + `baseline-template.md` | `01-baseline.md` (the one digest) | the agent, the human, `review.py` (the before, review only) |
+| `evaluation.py` | `raw/*.psi.json`, `raw/*.seo.json`, `raw/crawl.json` | `02-evaluation.md` | the agent (plan + execute) |
+| `publish-review.py` | live site (psi/seo/crawl) → `raw-review/` | `raw-review/baseline.md` (the after-digest) | `review.py` (the after) — **review phase only** |
+| `review.py` | `01-baseline.md` (before) + `raw-review/baseline.md` (after) + `review-template.md` | `06-review.md` | the **post-publish PR comment** — **review phase only, not a cycle** |
 | agent · `PLAN` | `02-evaluation.md`, `01-baseline.md`, `MISSION.md` (impact), `DEVELOPMENT.md` + `CONTEXT.md` (effort) · `raw/` break-glass | `plan.md` | the execute stage |
 | agent · `EXECUTE` | `plan.md` (primary), `02-evaluation.md`, `01-baseline.md`, `MISSION.md`, `DEVELOPMENT.md`, `CONTEXT.md`, source · `raw/` break-glass | `execution.md`, code, **PR body** | the human (review → publish) |
 
@@ -243,18 +250,19 @@ flowchart TD
 ### The deterministic engine — `hobbes/tools/`
 | File | Lines | Role |
 |---|---|---|
-| [`tools/config.py`](../tools/config.py) | 81 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `sample_path()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
+| [`tools/config.py`](../tools/config.py) | — | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `sample_path()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree), and the cycle-folder helpers `new_cycle_dir()` / `latest_cycle()` / `cycle_dirs()` / `default_run_dir()` (the `<date>-<letter>` naming, one source so local + CI agree). |
 | [`tools/psi.py`](../tools/psi.py) | 403 | PageSpeed Insights / Lighthouse capture → `raw/*.psi.json`; renders scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) from raw/ (`scorecard_sections`). Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
 | [`tools/seo.py`](../tools/seo.py) | 372 | Per-page HTML SEO checklist → `raw/*.seo.json`; renders **§E** from raw/ (`scorecard_section`) — titles, meta, canonical, OG, structured data. |
 | [`tools/crawl.py`](../tools/crawl.py) | 468 | SiteOne sitemap crawl (stratified sample) → `raw/crawl.json`; renders **§F** from raw/ (`scorecard_section`) — site-wide SEO/a11y/security counts. |
-| [`tools/baseline.py`](../tools/baseline.py) | 133 | Imports psi + seo + crawl: runs each `capture()` into one dated cycle folder, then **renders §A–F from `raw/`** via the tools' own renderers into the one digest, `01-baseline.md` (stamped from `baseline-template.md`). Honors `--run-dir`. |
+| [`tools/baseline.py`](../tools/baseline.py) | 133 | Imports psi + seo + crawl: runs each `capture()` into `raw/` of one dated cycle folder (`<date>-<letter>`), then **renders §A–F from `raw/`** via the tools' own renderers into the one digest, `01-baseline.md` (stamped from `baseline-template.md`). Honors `--run-dir`. |
 | [`tools/evaluation.py`](../tools/evaluation.py) | 1009 | The **problem catalog**: reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
-| [`tools/diff.py`](../tools/diff.py) | 241 | The **review phase's** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated), rendered as before→after tables. `--prior` pins the comparison. |
+| [`tools/publish-review.py`](../tools/publish-review.py) | — | **REVIEW-ONLY**, a twin of `baseline.py`: drives psi/seo/crawl `capture()` of the **live** site into the cycle's `raw-review/` (beside the pre-publish `raw/`) and renders the after-digest `raw-review/baseline.md`. Honors `--run-dir`; defaults to the latest cycle. |
+| [`tools/review.py`](../tools/review.py) | — | **REVIEW-ONLY** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated). Diffs the cycle's `01-baseline.md` (before) vs `raw-review/baseline.md` (after) through `review-template.md` → `06-review.md`. |
 
 ### The CLI
 | File | Lines | Role |
 |---|---|---|
-| [`tools/cli.py`](../tools/cli.py) | 133 | `cycle` (baseline→findings), the individual steps (incl. `diff` as a manual drift check), `status`, `plan`/`execute` (print the stage prompt), `budget`, `today`. Run as `python3 hobbes/tools/cli.py <cmd>`. |
+| [`tools/cli.py`](../tools/cli.py) | — | `cycle` (baseline→findings), the individual steps, `publish-review` + `review` (the post-publish before/after), `status`, `plan`/`execute` (print the stage prompt), `budget`, `today`. Run as `python3 hobbes/tools/cli.py <cmd>`. |
 
 ### Stage contracts — `hobbes/templates/*.md`
 | File | Role |
@@ -264,12 +272,13 @@ flowchart TD
 | [`templates/plan-template.md`](../templates/plan-template.md) | The plan contract — group findings into systems → estimate effort → estimate impact → **order by leverage (impact ÷ effort)**. |
 | [`templates/execute-template.md`](../templates/execute-template.md) | The execute contract — select a batch by effort budget, research, implement the **whole** batch, gates ("no *new* checker offenses"), and the PR's before/after. Never publishes. |
 | [`templates/publish-template.md`](../templates/publish-template.md) | The publish contract — human-owned: PR review → sign-off → merge → go-live → `published` label → review. |
+| [`templates/review-template.md`](../templates/review-template.md) | The review contract — the post-publish before/after shape: the latency caveat + the four honest-by-tier sections (field / lab / axe / counts). `review.py` fills in the computed tables. |
 
 ### The cloud runner — `.github/workflows/`
 | File | Trigger | Role |
 |---|---|---|
 | [`../.github/workflows/hobbes-cycle.yml`](../../.github/workflows/hobbes-cycle.yml) | dispatch (budget input) | The work cycle: `cli.py cycle` measures (deterministic, no LLM), then `claude-code-action` plans + writes the fix → **one PR** carrying the scorecard/findings *and* the code. (No diff — that's the review.) |
-| [`../.github/workflows/hobbes-review.yml`](../../.github/workflows/hobbes-review.yml) | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
+| [`../.github/workflows/hobbes-review.yml`](../../.github/workflows/hobbes-review.yml) | `published` label + dispatch (PR #) | Post-publish: `publish-review.py` re-captures the **live** site into the PR cycle's `raw-review/`, `review.py` diffs vs the pre-publish `01-baseline.md` → `06-review.md`, commented on the PR. No Claude. |
 
 ### Operator guides — `hobbes/guides/`
 *(Engine-generic — same across clients; read by the agent and the human operator.)*
@@ -279,8 +288,8 @@ flowchart TD
 | [`guides/SETUP.md`](SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
 | [`guides/BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 
-### Cycle data — `hobbes/cycle/<YYYY-MM-DD>/`
-Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `01-baseline.md` → `02-evaluation.md` → `plan.md` → `execution.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediate). The three capture tools write their raw JSON to `raw/`; `baseline.py` renders §A–F from `raw/` (via each tool's own renderer) into the one `01-baseline.md`, with no per-tool digest of their own. **No `diff.md` lands in a cycle folder** — the diff is the review phase's, written post-publish and posted as a PR comment. Which files exist tells you which stage the cycle reached (`cli.py status`).
+### Cycle data — `hobbes/cycle/<YYYY-MM-DD>-<letter>/`
+Each cycle is a folder — the **filesystem is the state machine**. The folder name is the cycle date plus a letter (`2026-06-26-A`, `-B`, …), assigned upstream so more than one cycle can run on the same day. A folder accumulates, in order: `01-baseline.md` → `02-evaluation.md` → `plan.md` → `execution.md` (the cycle, beside `raw/`), then post-publish `raw-review/` → `06-review.md` (the review). `raw/` and `raw-review/` hold the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediates. The three capture tools write their raw JSON to `raw/` (cycle) or `raw-review/` (review); `baseline.py` and `publish-review.py` render §A–F from those via each tool's own renderer. So the before (`01-baseline.md`) and after (`raw-review/baseline.md`) of a fix live in **one** cycle folder. Which files exist tells you which stage the cycle reached (`cli.py status`).
 
 ---
 
@@ -304,8 +313,8 @@ GitHub emails you when a PR opens or a comment posts — that's the notification
 - **Claude Code, not the API.** The agent stage (plan + fix) authenticates with a **Claude Code subscription token** (`claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`), never a pay-per-token API key. The deterministic stages use no Claude at all.
 - **The determinism boundary.** Tools measure and compare (reproducible); the agent judges and builds (creative); the human publishes (irreversible). Each thing lives where it belongs.
 - **Measure and fix fire together, into one PR.** A CI cycle always runs the deterministic measure *and* the agent fix on one trigger, landing the scorecard/findings beside the code change in a single PR — so the fix is always planned against fresh measurements, never a stale cycle folder. There's no measure-only cron; a data-only run is the local `cli.py cycle`.
-- **The diff is the review's, not the cycle's.** A cycle measures the current site and has no "after" — this cycle's fix isn't live yet — so it writes no diff. The before/after lives entirely in the **review** phase (post-publish), where `diff.py` re-baselines the live site and compares it to the pre-publish baseline. This also gives the 28-day CrUX field signal time to move, which an at-publish comparison can't.
-- **The diff doesn't lie.** When it does run (in review), it separates the trustworthy field signal from volatile lab noise, gates site-wide counts on crawl coverage (a collapsed crawl can't read as "improvement"), and surfaces the §D a11y findings the agent actually targets — distinguishing a real win from noise from an *unfulfilled claim*.
+- **The before/after is the review's, not the cycle's.** A cycle measures the current site and has no "after" — this cycle's fix isn't live yet — so it writes no review. The before/after lives entirely in the **review** phase (post-publish): `publish-review.py` re-captures the live site into the cycle's `raw-review/`, and `review.py` compares it to the same cycle's pre-publish `01-baseline.md` (the before — everything leading up to the PR). This also gives the 28-day CrUX field signal time to move, which an at-publish comparison can't.
+- **The review doesn't lie.** When it runs (post-publish), `review.py` separates the trustworthy field signal from volatile lab noise, gates site-wide counts on crawl coverage (a collapsed crawl can't read as "improvement"), and surfaces the §D a11y findings the agent actually targets — distinguishing a real win from noise from an *unfulfilled claim*.
 - **`published` is an explicit signal.** The review fires on a human-added label, not on merge — because "merged" doesn't mean "live," and every client's hosting/deploy is wired differently.
 - **Pinned-timezone dates.** Cycle folders are stamped in `[cycle].timezone`, so a local run and a UTC CI runner always land on the same calendar day.
 - **Effort budget is a ceiling, not a quota.** Execute fills it with leverage-ordered work and won't shoehorn; a high budget only produces a big PR when there's that much worthwhile work queued.

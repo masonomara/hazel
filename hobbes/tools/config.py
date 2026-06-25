@@ -7,6 +7,7 @@ the CONFIG dict (baseline.py) with one `hobbes.toml`. Secrets never live in the
 toml — psi_key() reads $PSI_API_KEY (a repo secret in CI).
 """
 
+import re
 import tomllib
 from datetime import datetime
 from functools import lru_cache
@@ -34,6 +35,49 @@ def today():
 def stamp():
     """Human timestamp for digests — pinned timezone, labelled (e.g. 'CDT'), one source."""
     return datetime.now(_tz()).strftime("%Y-%m-%d %H:%M %Z")
+
+
+# ── Cycle folders: <date>-<letter>, e.g. 2026-06-26-A ────────────────────────
+# The letter is assigned upstream so more than one cycle can run on the same day
+# (2026-06-26-A, -B, …). Every tool resolves cycle folders through these helpers
+# so local and CI agree on the name and the glob.
+_CYCLE_GLOB = "[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]-[A-Z]"
+_CYCLE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})-([A-Z])$")
+
+
+def cycle_dirs(root):
+    """Every cycle folder under `root`, oldest→newest (name sort is chronological:
+    fixed-width date dominates, then the letter)."""
+    root = Path(root)
+    return sorted(
+        (d for d in root.glob(_CYCLE_GLOB) if d.is_dir()), key=lambda d: d.name
+    )
+
+
+def latest_cycle(root):
+    """The newest cycle folder, or None when there are none yet."""
+    ds = cycle_dirs(root)
+    return ds[-1] if ds else None
+
+
+def new_cycle_dir(root, date=None):
+    """The next unused cycle folder for `date` (today if omitted): the lowest free
+    letter (A, then B, …). Returns a Path; does not create it."""
+    date = date or today()
+    used = [
+        m.group(2)
+        for d in cycle_dirs(root)
+        for m in [_CYCLE_RE.match(d.name)]
+        if m and m.group(1) == date
+    ]
+    nxt = chr(ord(max(used)) + 1) if used else "A"
+    return Path(root) / f"{date}-{nxt}"
+
+
+def default_run_dir(root):
+    """The folder a standalone tool attaches to: the latest existing cycle, or a
+    fresh one when none exist. (Cycle-creating entry points use new_cycle_dir.)"""
+    return latest_cycle(root) or new_cycle_dir(root)
 
 
 @lru_cache(maxsize=1)

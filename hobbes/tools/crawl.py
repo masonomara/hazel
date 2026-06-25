@@ -94,13 +94,13 @@ def select_pages(pages, full):
 
 
 def resolve_run_dir(args):
-    """Per-cycle output folder: hobbes/cycle/<date>/. crawl.json lives in
+    """Per-cycle output folder: hobbes/cycle/<date>-<letter>/. crawl.json lives in
     raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle folder;
-    standalone defaults to today's."""
+    standalone attaches to the latest cycle (or a fresh one)."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "cycle" / config.today()
+        d = config.default_run_dir(HOBBES / "cycle")
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 

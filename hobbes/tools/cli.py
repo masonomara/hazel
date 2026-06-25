@@ -3,15 +3,16 @@
 hobbes CLI — runs the cycle stages and reads the filesystem state machine.
 
   cycle      baseline (--fresh) -> findings            (the deterministic patrol)
-  baseline / findings / diff                          (individual steps)
+  baseline / findings                                 (individual cycle steps)
   status     report which stage the newest cycle is at
   plan / execute   print the stage prompt + inputs for an agent (Claude Code)
+  publish-review   re-baseline the LIVE site into the cycle's raw-review/ (post-publish)
+  review           diff the cycle's pre-publish 01-baseline.md vs raw-review/ -> 06-review.md
 
-  diff is NOT part of the cycle — a cycle measures the current site; it has no
-  "after" to compare (this cycle's fix isn't live yet). The before/after lives in
-  the REVIEW phase (hobbes-review.yml), which re-baselines the live site after a
-  publish and diffs against the pre-publish baseline. `cli.py diff` stays as a
-  manual escape hatch for an ad-hoc cross-cycle drift check.
+  publish-review + review are NOT part of the cycle — a cycle measures the current
+  site; it has no "after" to compare (this cycle's fix isn't live yet). The
+  before/after lives in the REVIEW phase (hobbes-review.yml), which re-baselines
+  the live site after a publish and diffs against the cycle's pre-publish baseline.
 
 USAGE: python3 hobbes/tools/cli.py <command> [args passed through to the tool]
 """
@@ -32,17 +33,14 @@ def _run(tool, *args):
 
 
 def _latest_cycle():
-    ds = sorted(
-        d for d in CYCLES.glob("[0-9]" * 4 + "-[0-9][0-9]-[0-9][0-9]") if d.is_dir()
-    )
-    return ds[-1] if ds else None
+    return config.latest_cycle(CYCLES)
 
 
 def cmd_cycle(rest):
-    rd = str(CYCLES / config.today())
+    rd = str(config.new_cycle_dir(CYCLES))   # a fresh <date>-<letter> folder
     _run("baseline.py", "--fresh", "--run-dir", rd, *rest)
     _run("evaluation.py", "--run-dir", rd)
-    # No diff here — the cycle only measures the current site. The before/after is
+    # No review here — the cycle only measures the current site. The before/after is
     # the review phase's job (re-baseline live post-publish, diff vs pre-publish).
 
 
@@ -54,8 +52,12 @@ def cmd_findings(rest):
     _run("evaluation.py", *rest)
 
 
-def cmd_diff(rest):
-    _run("diff.py", *rest)
+def cmd_publish_review(rest):
+    _run("publish-review.py", *rest)
+
+
+def cmd_review(rest):
+    _run("review.py", *rest)
 
 
 def cmd_status(rest):
@@ -112,7 +114,8 @@ COMMANDS = {
     "cycle": cmd_cycle,
     "baseline": cmd_baseline,
     "findings": cmd_findings,
-    "diff": cmd_diff,
+    "publish-review": cmd_publish_review,
+    "review": cmd_review,
     "status": cmd_status,
     "plan": cmd_plan,
     "execute": cmd_execute,
@@ -124,7 +127,7 @@ COMMANDS = {
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         sys.exit(
-            "usage: hobbes <cycle|baseline|findings|diff|status|plan|execute|budget|today>"
+            "usage: hobbes <cycle|baseline|findings|publish-review|review|status|plan|execute|budget|today>"
         )
     COMMANDS[sys.argv[1]](sys.argv[2:])
 

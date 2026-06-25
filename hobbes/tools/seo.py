@@ -52,13 +52,13 @@ CHECKS = ["Unique, descriptive title", "Meta description present", "Canonical co
 
 
 def resolve_run_dir(args):
-    """Per-cycle output folder: hobbes/cycle/<date>/. Raw *.seo.json caches
+    """Per-cycle output folder: hobbes/cycle/<date>-<letter>/. Raw *.seo.json caches
     live in raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle
-    folder; a standalone run defaults to today's."""
+    folder; a standalone run attaches to the latest cycle (or a fresh one)."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
-        d = HOBBES / "cycle" / config.today()
+        d = config.default_run_dir(HOBBES / "cycle")
     (d / "raw").mkdir(parents=True, exist_ok=True)
     return d
 

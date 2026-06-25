@@ -21,7 +21,7 @@ tool's capture() (the network step, into raw/) then its scorecard_section(s)()
 (rendered straight from raw/). Those are the SAME renderers the tools use
 standalone — so the digest and a standalone tool run can't disagree, and there's
 no stdout to scrape or section markers to slice. Writes the whole cycle into one
-folder: hobbes/cycle/YYYY-MM-DD/ — 01-baseline.md beside the raw artifacts (raw/),
+folder: hobbes/cycle/YYYY-MM-DD-<letter>/ — 01-baseline.md beside the raw artifacts (raw/),
 so the baseline and the generated 02-evaluation.md sit beside the data they came from.
 """
 
@@ -70,10 +70,10 @@ def main():
     full = "--full" in args
     fresh = "--resume" not in args                 # fresh capture by default; --resume reuses cache
     date = config.today()
-    if "--run-dir" in args:                        # honor an explicit folder (e.g. the review's post-publish)
+    if "--run-dir" in args:                        # honor an explicit folder (cli.py passes the cycle dir)
         rundir = Path(args[args.index("--run-dir") + 1]).resolve()
     else:
-        rundir = HOBBES / "cycle" / date           # default: one dated folder per cycle
+        rundir = config.new_cycle_dir(HOBBES / "cycle")   # a fresh cycle: <date>-<letter>
     raw = rundir / "raw"
     raw.mkdir(parents=True, exist_ok=True)
     urls = DEFAULT_URLS

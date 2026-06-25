@@ -119,7 +119,7 @@ The stage table above says *what each stage produces*. This is the other axis �
 ### The deterministic engine — `hobbes/tools/`
 | File | Lines | Role |
 |---|---|---|
-| [`tools/config.py`](tools/config.py) | 70 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` (env→file), `effort_budget()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
+| [`tools/config.py`](tools/config.py) | 70 | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree). |
 | [`tools/psi.py`](tools/psi.py) | 358 | PageSpeed Insights / Lighthouse capture → prints scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) to stdout. Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
 | [`tools/seo.py`](tools/seo.py) | 316 | Per-page HTML SEO checklist → prints **§E** (titles, meta, canonical, OG, structured data). |
 | [`tools/crawl.py`](tools/crawl.py) | 437 | SiteOne sitemap crawl (stratified sample) → prints **§F** site-wide SEO/a11y/security counts. |

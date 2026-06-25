@@ -10,7 +10,7 @@ Each page×device is measured 3× and the MEDIAN run is kept — single-run lab
 scores swing too much to compare cycle-to-cycle (a page drew perf 89 then 73
 an hour apart). CrUX field data is 28-day, so the median doesn't touch it.
 
-KEY: read from $PSI_API_KEY, else from hobbes/tools/.psi-key (alongside this script).
+KEY: read from $PSI_API_KEY (a repo secret in CI; export it for local runs).
 USAGE:
   python3 hobbes/tools/psi.py                 # default golden path
   python3 hobbes/tools/psi.py URL [URL ...]   # custom URLs
@@ -103,7 +103,7 @@ def median_run(runs):
 def load_key():
     key = psi_key()
     if not key:
-        sys.exit("No PSI key: set $PSI_API_KEY or create hobbes/tools/.psi-key")
+        sys.exit("No PSI key: set $PSI_API_KEY")
     return key
 
 

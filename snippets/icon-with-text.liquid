@@ -52,8 +52,8 @@
           {% else %}
             role="presentation"
           {% endif %}
-          height="auto"
-          width="auto"
+          width="{{ block.settings.image_1.width }}"
+          height="{{ block.settings.image_1.height }}"
           loading="lazy"
         >
       {%- endif -%}
@@ -74,8 +74,8 @@
           {% else %}
             role="presentation"
           {% endif %}
-          height="auto"
-          width="auto"
+          width="{{ block.settings.image_2.width }}"
+          height="{{ block.settings.image_2.height }}"
           loading="lazy"
         >
       {%- endif -%}
@@ -96,8 +96,8 @@
           {% else %}
             role="presentation"
           {% endif %}
-          height="auto"
-          width="auto"
+          width="{{ block.settings.image_3.width }}"
+          height="{{ block.settings.image_3.height }}"
           loading="lazy"
         >
       {%- endif -%}

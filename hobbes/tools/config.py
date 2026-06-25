@@ -4,7 +4,7 @@ config.py — the single source of per-client config for every tool.
 
 Replaces the hardcoded DEFAULT_URLS (psi.py + the old duplicate in seo.py) and
 the CONFIG dict (baseline.py) with one `hobbes.toml`. Secrets never live in the
-toml — it names where to find them, and psi_key() resolves env var, then file.
+toml — psi_key() reads $PSI_API_KEY (a repo secret in CI).
 """
 
 import tomllib
@@ -15,7 +15,6 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 HOBBES = Path(__file__).resolve().parent.parent   # .../<repo>/hobbes
-REPO = HOBBES.parent                                # .../<repo>
 _TOML = HOBBES / "hobbes.toml"
 _DEFAULT_TZ = "America/Chicago"
 
@@ -58,13 +57,6 @@ def effort_budget():
 
 
 def psi_key():
-    """The PageSpeed key from the named env var, else the repo-relative file, else None."""
-    s = cfg()["secrets"]
-    key = environ.get(s["psi_key_env"], "").strip()
-    if key:
-        return key
-    f = REPO / s["psi_key_file"]
-    if f.exists():
-        raw = f.read_text().strip()
-        return raw.split("=", 1)[1].strip() if "=" in raw else raw
+    """The PageSpeed key from $PSI_API_KEY, else None. CI injects it from the repo secret."""
+    return environ.get("PSI_API_KEY", "").strip() or None
     return None

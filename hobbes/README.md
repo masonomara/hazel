@@ -2,7 +2,7 @@
 
 Hobbes is a **web-baseline + agentic-fix system**: it measures a live site, catalogs what's wrong, plans the highest-leverage fixes, writes them as a pull request, and — once a human publishes — re-measures to prove the impact. It runs in GitHub Actions on a Claude Code subscription, and it **writes only to GitHub** (branches, PRs, comments). Every deploy action — preview, publish, go-live — stays human.
 
-This file is the map of the whole system. For *setup*, see [`SETUP.md`](SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../CLAUDE.md).
+This file is the map of the whole system. For *setup*, see [`guides/SETUP.md`](guides/SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../CLAUDE.md).
 
 ---
 
@@ -147,12 +147,12 @@ The stage table above says *what each stage produces*. This is the other axis �
 | [`../.github/workflows/hobbes-cycle.yml`](../.github/workflows/hobbes-cycle.yml) | dispatch (budget input) | The work cycle: `cli.py cycle` measures (deterministic, no LLM), then `claude-code-action` plans + writes the fix → **one PR** carrying the scorecard/findings *and* the code. (No diff — that's the review.) |
 | [`../.github/workflows/hobbes-review.yml`](../.github/workflows/hobbes-review.yml) | `published` label + dispatch (PR #) | Post-publish: re-baseline the **live** site, diff vs the pre-publish baseline, comment on the PR. No Claude. |
 
-### Operator guides — `hobbes/`
+### Operator guides — `hobbes/guides/`
 *(Engine-generic — same across clients; read by the agent and the human operator.)*
 | File | Role |
 |---|---|
-| [`SETUP.md`](SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
-| [`BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
+| [`guides/SETUP.md`](guides/SETUP.md) | **Setup, once per client** — local (Python + SiteOne + PSI key + first cycle) and cloud (two secrets, the Claude GitHub App, the "allow Actions to create PRs" toggle, the `published` label, workflows-on-default-branch), each annotated with the error it prevents. |
+| [`guides/BASELINE.md`](guides/BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 
 ### Cycle data — `hobbes/cycle/<YYYY-MM-DD>/`
 Each cycle is a folder — the **filesystem is the state machine**. A folder accumulates: `01-baseline.md` → `02-evaluation.md` → `plan.md` → `execution.md`, beside `raw/` (the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediate). The three capture tools print their sections to stdout for `baseline.py` to assemble into the one `01-baseline.md`; they write no per-tool digest of their own. **No `diff.md` lands in a cycle folder** — the diff is the review phase's, written post-publish and posted as a PR comment. Which files exist tells you which stage the cycle reached (`cli.py status`).

@@ -20,7 +20,7 @@ This repo carries a `hobbes/` folder. That folder is your standing context and t
 
 - `hobbes/context/CONTEXT.md` — who the client is. Their goals. Their users. Their people. Where access lives. The constraints that bind.
 - `hobbes/context/CHANGELOG.md` — what has shipped and why and to what result. Read it before you build so you do not build a thing twice.
-- `hobbes/BASELINE.md` — the operator's runbook for a baseline cycle. A human drives it. You run what can be run and you own the writing up — the scorecard and the evaluation and the priorities in `MISSION.md` and the line in the changelog. Read it when a baseline is in play.
+- `hobbes/guides/BASELINE.md` — the operator's runbook for a baseline cycle. A human drives it. You run what can be run and you own the writing up — the scorecard and the evaluation and the priorities in `MISSION.md` and the line in the changelog. Read it when a baseline is in play.
 
 You read these files yourself and in the session and only when they bear on the work. You do not `@import` them. See **Maintenance** at the foot of this file for why.
 

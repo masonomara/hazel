@@ -13,7 +13,7 @@ Run it at the start of an engagement and at the start of each work cycle. It pro
 
 ## Before your first baseline
 
-One-time setup — filling `hobbes.toml` (client + golden path), installing the tools, and (for the cloud runner) wiring GitHub — lives in `hobbes/SETUP.md`. This guide assumes that's done.
+One-time setup — filling `hobbes.toml` (client + golden path), installing the tools, and (for the cloud runner) wiring GitHub — lives in `hobbes/guides/SETUP.md`. This guide assumes that's done.
 
 ## The run
 

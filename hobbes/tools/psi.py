@@ -262,6 +262,15 @@ def _load_results(raw, urls):
     return results, spreads
 
 
+def _page_field(results, label, url):
+    """The CrUX field 'loadingExperience' for a page: prefer page-level data over the
+    origin aggregate, and over an empty one. Shared by scorecard_sections (render §C)
+    and metrics (structured), so the digest and the review diff the SAME selection."""
+    les = [(results[(label, url, s)] or {}).get("loadingExperience", {}) for s in ("mobile", "desktop")]
+    page = next((le for le in les if le.get("metrics") and le.get("origin_fallback") is not True), None)
+    return page or next((le for le in les if le.get("metrics")), {})
+
+
 def scorecard_sections(raw, urls):
     """Scorecard sections A–D (+ the failed-calls note), rendered from raw/.
     This is the exact block baseline.py drops into 01-baseline.md AND the block
@@ -301,9 +310,7 @@ def scorecard_sections(raw, urls):
         # Field data (CrUX 28-day). PREFER page-level; use the origin aggregate
         # only if neither device has page-level data — and LABEL it when we do,
         # so a whole-site average is never mistaken for this page's real numbers.
-        les = [(results[(label, url, s)] or {}).get("loadingExperience", {}) for s in ("mobile", "desktop")]
-        page = next((le for le in les if le.get("metrics") and le.get("origin_fallback") is not True), None)
-        le = page or next((le for le in les if le.get("metrics")), {})
+        le = _page_field(results, label, url)
         fm = le.get("metrics", {})
         tag = " — origin agg." if (fm and le.get("origin_fallback") is True) else ""
         if fm:
@@ -360,6 +367,38 @@ def scorecard_sections(raw, urls):
         L += ["", "> ✗ Failed calls (cells show — above): "
               + ", ".join(f"{lbl} {strat}" for lbl, _u, strat in failed)]
     return "\n".join(L).rstrip()
+
+
+def metrics(raw, urls):
+    """The structured §A/§C/§D numbers the post-publish review diffs — extracted from
+    raw/ with the SAME helpers scorecard_sections() renders from (score, a11y_fails,
+    _page_field, field), so the review can never disagree with the scorecard. The
+    review diffs these (a JSON sidecar), not re-parsed markdown. JSON-friendly:
+      scores: {'<label> — <device>': {perf, a11y, bp, seo}}   numeric cells only
+      field:  {'<label>': {lcp, inp, cls}}                     the page-level CrUX row
+      axe:    {<rule>: <failing nodes summed over the golden path>}
+    """
+    results, _ = _load_results(raw, urls)
+    scores, fields, axe = {}, {}, {}
+    for label, url in urls:
+        for strat in ("mobile", "desktop"):
+            lh = (results[(label, url, strat)] or {}).get("lighthouseResult", {})
+            row = {m: v for m, cat in (("perf", "performance"), ("a11y", "accessibility"),
+                                       ("bp", "best-practices"), ("seo", "seo"))
+                   for v in [score(lh, cat)] if isinstance(v, (int, float))}
+            if row:
+                scores[f"{label} — {strat}"] = row
+            for aid, n in a11y_fails(lh):
+                axe[aid] = axe.get(aid, 0) + n
+        fm = _page_field(results, label, url).get("metrics", {})
+        if fm:
+            row = {m: v for m, mkey, scale in (("lcp", "LARGEST_CONTENTFUL_PAINT_MS", 0.001),
+                                               ("inp", "INTERACTION_TO_NEXT_PAINT", 1.0),
+                                               ("cls", "CUMULATIVE_LAYOUT_SHIFT_SCORE", 0.01))
+                   for v in [field(fm, mkey, scale)] if isinstance(v, (int, float))}
+            if row:
+                fields[label] = row
+    return {"scores": scores, "field": fields, "axe": axe}
 
 
 def main():

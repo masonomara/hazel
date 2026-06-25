@@ -82,13 +82,13 @@ jobs:
             This cycle's deterministic measurements are already in the working tree at
             hobbes/cycle/${{ env.CYCLE_DATE }}/ (01-baseline.md, 02-evaluation.md), uncommitted.
             Run the Hobbes plan + execute stages against them.
-            Read hobbes/templates/PLAN-TEMPLATE.md and hobbes/templates/EXECUTE-TEMPLATE.md and
+            Read hobbes/templates/03-plan-template.md and hobbes/templates/04-execute-template.md and
             follow them exactly. Effort budget: ${{ env.EFFORT }}.
-            Write plan.md and execution.md into hobbes/cycle/${{ env.CYCLE_DATE }}/, then make
+            Write 03-plan.md and 04-execute.md into hobbes/cycle/${{ env.CYCLE_DATE }}/, then make
             the code changes.
             Open ONE pull request carrying BOTH the cycle data and the fix:
               - create a branch `hobbes-cycle-${{ env.CYCLE_DATE }}`
-              - `git add -A` (stages the scorecard/evaluation, your plan.md/execution.md, and the
+              - `git add -A` (stages the scorecard/evaluation, your 03-plan.md/04-execute.md, and the
                 code changes; raw/ is git-ignored, so it's excluded)
               - commit, `git push -u origin`
               - `gh pr create` with title "Hobbes ${{ env.CYCLE_DATE }} — <a short summary of what you

@@ -12,7 +12,7 @@ tools/.psi-key
 # post-publish re-capture, incl. its rendered after-digest baseline.md) are the
 # machine source the tools write and evaluation.py / review.py parse. Neither is a
 # durable deliverable, so both stay out of git to keep the repo from ballooning.
-# The durable record is 01-baseline.md, 02-evaluation.md, plan.md, execution.md,
+# The durable record is 01-baseline.md, 02-evaluation.md, 03-plan.md, 04-execute.md,
 # 06-review.md.
 cycle/*/raw/
 cycle/*/raw-review/

@@ -313,6 +313,49 @@ def coverage_line(data, html_pages):
     return " · ".join(parts), (throttled > 0 or shortfall)
 
 
+def _site_counts(data):
+    """The site-wide count rows as an ordered {label: int}, plus the analysed page
+    count — computed in ONE place so Section F (rendered below) and metrics() (the
+    numbers the review diffs) can't disagree. The per-URL tables give broken/redirect/
+    title/description counts; the page-level counts ('52 page(s) with …') come from
+    SiteOne's own rollup (rollup_texts), which the per-URL tables don't carry."""
+    tables = data.get("tables", {})
+    texts = rollup_texts(data)
+    seo = table_rows(tables, "seo")
+    n = len(seo)
+    missing_title = [r for r in seo if not (r.get("title") or "").strip()]
+    missing_desc = [r for r in seo if not (r.get("description") or "").strip()]
+    dup_title = [r for r in table_rows(tables, "non-unique-titles") if (r.get("title") or "").strip()]
+    invalid_html = count_for(texts, "invalid html")
+    counts = {
+        "Broken links (4xx)": len(table_rows(tables, "404")),
+        "Redirects": len(table_rows(tables, "redirects")),
+        "Missing titles": len(missing_title),
+        "Duplicate titles": len(dup_title),
+        "Missing meta descriptions": len(missing_desc),
+        "Pages with multiple H1": count_for(texts, "multiple <h1>"),
+        "Pages with skipped heading levels": count_for(texts, "skipped heading"),
+        "Pages missing image alt": count_for(texts, "without image alt"),
+        "Pages missing aria-labels": count_for(texts, "without aria"),
+        "Pages missing roles": count_for(texts, "without role"),
+        "Pages missing html lang": count_for(texts, "missing html lang") or count_for(texts, "without html lang"),
+        "Pages with invalid inline SVG": count_for(texts, "invalid inline svg"),
+        "Pages with duplicate inline SVG": count_for(texts, "duplicated inline svg"),
+        "Pages with non-clickable phone numbers": count_for(texts, "non-clickable"),
+        "Valid HTML": n - invalid_html,
+    }
+    return counts, n
+
+
+def metrics(raw):
+    """The structured §F numbers the post-publish review diffs: {'counts': {label: int},
+    'crawl_pages': n}. Same source as scorecard_section (via _site_counts), so the
+    review diffs a JSON sidecar that can't disagree with the rendered scorecard."""
+    data = json.loads((raw / "crawl.json").read_text())
+    counts, n = _site_counts(data)
+    return {"counts": counts, "crawl_pages": n}
+
+
 def scorecard_section(raw):
     """Scorecard Section F (site-wide grades + counts), rendered from
     raw/crawl.json — the exact block baseline.py drops into the digest and crawl.py
@@ -322,27 +365,8 @@ def scorecard_section(raw):
     tables = data.get("tables", {})
     qs = quality_scores(data)
     texts = rollup_texts(data)
-
-    seo = table_rows(tables, "seo")
-    n = len(seo)
-    broken = table_rows(tables, "404")
-    redirects = table_rows(tables, "redirects")
-    missing_title = [r for r in seo if not (r.get("title") or "").strip()]
-    missing_desc = [r for r in seo if not (r.get("description") or "").strip()]
-    dup_title = [r for r in table_rows(tables, "non-unique-titles") if (r.get("title") or "").strip()]
-
-    # Page-level counts — SiteOne's own rollup (not derivable from the per-URL tables).
-    multi_h1 = count_for(texts, "multiple <h1>")
-    skipped_h = count_for(texts, "skipped heading")
-    no_alt = count_for(texts, "without image alt")
-    no_aria = count_for(texts, "without aria")
-    no_roles = count_for(texts, "without role")
-    no_lang = count_for(texts, "missing html lang") or count_for(texts, "without html lang")
-    invalid_svg = count_for(texts, "invalid inline svg")
-    dup_svg = count_for(texts, "duplicated inline svg")
-    phone = count_for(texts, "non-clickable")
+    cnts, n = _site_counts(data)
     no_brotli = count_for(texts, "brotli")
-    invalid_html = count_for(texts, "invalid html")
     tls_ok = any("certificate is valid" in t.lower() for t in texts) or site_root().startswith("https")
 
     def p(ok):
@@ -351,6 +375,9 @@ def scorecard_section(raw):
     def qsv(name):
         s = qs.get(name)
         return f"{s:.1f}" if isinstance(s, (int, float)) else "—"
+
+    def crow(label):   # a count row whose pass mark is simply "zero is clean"
+        return f"| {label} | {cnts[label]} | {p(cnts[label] == 0)} |"
 
     L = [
         f"## F. Site-wide ({'whole-site' if full else 'sitemap sample'} crawl — {n} pages)",
@@ -365,27 +392,27 @@ def scorecard_section(raw):
         "",
         "| SEO / structure | Count | Pass |",
         "|---|---|---|",
-        f"| Broken links (4xx) | {len(broken)} | {p(len(broken) == 0)} |",
-        f"| Redirects | {len(redirects)} | {p(len(redirects) == 0)} |",
-        f"| Missing titles | {len(missing_title)} | {p(len(missing_title) == 0)} |",
-        f"| Duplicate titles | {len(dup_title)} | {p(len(dup_title) == 0)} |",
-        f"| Missing meta descriptions | {len(missing_desc)} | {p(len(missing_desc) == 0)} |",
-        f"| Pages with multiple H1 | {multi_h1} | {p(multi_h1 == 0)} |",
-        f"| Pages with skipped heading levels | {skipped_h} | {p(skipped_h == 0)} |",
+        crow("Broken links (4xx)"),
+        crow("Redirects"),
+        crow("Missing titles"),
+        crow("Duplicate titles"),
+        crow("Missing meta descriptions"),
+        crow("Pages with multiple H1"),
+        crow("Pages with skipped heading levels"),
         "",
         "| Accessibility | Count | Pass |",
         "|---|---|---|",
-        f"| Pages missing image alt | {no_alt} | {p(no_alt == 0)} |",
-        f"| Pages missing aria-labels | {no_aria} | {p(no_aria == 0)} |",
-        f"| Pages missing roles | {no_roles} | {p(no_roles == 0)} |",
-        f"| Pages missing html lang | {no_lang} | {p(no_lang == 0)} |",
+        crow("Pages missing image alt"),
+        crow("Pages missing aria-labels"),
+        crow("Pages missing roles"),
+        crow("Pages missing html lang"),
         "",
         "| Best practices | Count | Pass |",
         "|---|---|---|",
-        f"| Pages with invalid inline SVG | {invalid_svg} | {p(invalid_svg == 0)} |",
-        f"| Pages with duplicate inline SVG | {dup_svg} | {p(dup_svg == 0)} |",
-        f"| Pages with non-clickable phone numbers | {phone} | {p(phone == 0)} |",
-        f"| Valid HTML | {n - invalid_html} | {p(invalid_html == 0)} |",
+        crow("Pages with invalid inline SVG"),
+        crow("Pages with duplicate inline SVG"),
+        crow("Pages with non-clickable phone numbers"),
+        f"| Valid HTML | {cnts['Valid HTML']} | {p(cnts['Valid HTML'] == n)} |",
         "",
         "| Security | Pass |",
         "|---|---|",

@@ -7,7 +7,7 @@ This is the plan, where the system goes from deterministic extraction to judgmen
 - `02-evaluation.md` is the problem catalog: every problem, deterministic, no fix and no weighting. The plan groups those problems into systems and rates them.
 - Execution, the next stage, does the work top-down through the order the plan sets. The plan doesn't write the fix line by line. It understands each system well enough to estimate effort and impact and tell execution where to start.
 
-Two runs of the plan may differ. Judgment isn't deterministic, and that's right. The one hard rule: invent nothing. Every system maps to real finding IDs from this cycle. The facts (the findings) stay apart from the calls (your effort and impact ratings), and you own the calls.
+Two runs of the plan may differ. Judgment isn't deterministic. The one hard rule: invent nothing. Every system maps to real finding IDs from this cycle. The facts (the findings) stay apart from the calls (your effort and impact ratings), and you own the calls.
 
 ## Inputs — read all, in depth, before grouping
 
@@ -15,7 +15,7 @@ Two runs of the plan may differ. Judgment isn't deterministic, and that's right.
 - `01-baseline.md` — the numbers, the targets, and the field-vs-lab reality (§C CrUX may already pass where the lab fails, and that changes impact).
 - `raw/` *(break-glass)* — go deeper on a finding when grouping or effort needs more than the catalog shows. Default to the catalog. Drop to raw only when it falls short.
 - `MISSION.md` — what impact is rated against: the priorities in their stated order, the mission line, and "Needs work". This file decides what matters.
-- `DEVELOPMENT.md` — what effort and feasibility are rated against on the stack side: whether a fix is even authorable in the code we control or lives in content, third-party, or platform the cycle can't reach; how hard it is given the stack's constraints (core-file risk, generated config, the browser gate, any upgrade-safety rule); and the done-means bar each system must clear.
+- `DEVELOPMENT.md` — the stack side of effort and feasibility. Is the fix authorable in the code we control, or does it live in content, a third party, or a platform the cycle can't reach. How hard against the stack's constraints — core-file risk, generated config, the browser gate, any upgrade-safety rule. And the done-means bar each system must clear.
 - `CONTEXT.md` — what effort and feasibility are rated against on the people side: which kind of work each fix needs (code, content/admin, integration or platform config, sign-off) and who `CONTEXT.md` names for it, plus the hard constraints that gate it (platform limits, the brand bar and whose sign-off brand-visible work needs, accessibility as a standing requirement). This is what "the resources we have" means.
 
 > The three files map onto the two scores. Impact ← `MISSION.md` (what matters). Effort and feasibility ← `DEVELOPMENT.md` + `CONTEXT.md` (what it costs: the stack's reality and the people behind it). Read all three. A plan that rates impact without the mission, or effort without the stack and the people, is guessing.
@@ -26,7 +26,7 @@ Read findings, raw, and baseline in depth first. Understand each problem, what i
 
 1. **Group.** Cluster the findings into systems, by same problem, similar problem, cascading dependency, or coupled cause. A system is the set of findings one body of work would handle together. Systems cut across the finding domains. A missing-alt system spans A11Y and SEO. A heading system spans A11Y and SEO with one cascading root. Understand each system: the shared root cause, and what one fix would clear. Cite the finding IDs.
 
-2. **Effort.** For each system, estimate the effort to fix it, a 1–5 call against `DEVELOPMENT.md` (the stack) and `CONTEXT.md` (the people). Weigh: whether it's authorable in the code we control or lives in content, third-party, or platform the cycle can't reach (`DEVELOPMENT.md`); how hard it is given the stack's constraints, core-file risk, generated config, the browser gate, any upgrade-safety rule (`DEVELOPMENT.md`); which kind of work it needs and who owns it, code, content/admin, integration or platform config, sign-off, each mapped to the person `CONTEXT.md` names (`CONTEXT.md`); how complicated it is; and how much we already know against how much we still have to dig into. When a hard constraint gates a system, not code-authorable, breaks an upgrade-safety rule, needs brand sign-off, name it. It sets the owner and can sink the system to won't-chase whatever its raw score.
+2. **Effort.** Estimate what each system costs to fix, a 1–5 call against `DEVELOPMENT.md` (the stack) and `CONTEXT.md` (the people). Weigh: is it authorable in the code we control, or does it live in content, a third party, or a platform the cycle can't reach (`DEVELOPMENT.md`). How hard against the stack's constraints — core-file risk, generated config, the browser gate, any upgrade-safety rule (`DEVELOPMENT.md`). Which kind of work it needs and who owns it — code, content/admin, integration or platform config, sign-off — each mapped to the person `CONTEXT.md` names. How complicated it is, and how much we already know against how much we still have to dig into. When a hard constraint gates a system — not code-authorable, breaks an upgrade-safety rule, needs brand sign-off — name it. It sets the owner and can sink the system to won't-chase whatever its raw score.
 
 3. **Impact.** For each system, estimate the impact of fixing it, a 1–5 call against `MISSION.md`: which priority it advances, whether it serves the mission directly, and how many findings and pages one fix clears. Weigh the field-vs-lab reality. A perf fix matters less to real users where CrUX already passes.
 
@@ -40,7 +40,7 @@ The two scores read from different files. Keep them apart, so a cheap fix can't 
 - **Effort (1–5, cost)**, against `DEVELOPMENT.md` (the stack: code-authorable? how hard given the constraints? browser-gated?) and `CONTEXT.md` (which kind of work, who owns it, what access, whose sign-off). `5` = long, complex, and needs scarce resources (client content at scale, an integration removal plus coordination, or a risky core change). `1` = a token tweak or one self-contained change shipped in minutes. Name the resource. A system that needs *the client to write dozens of product descriptions* is a different cost than one a developer fixes in code.
 - **Priority = Impact ÷ Effort**, the leverage. High impact, low cost, first.
 
-> Formula note: the brief said *impact × effort*. Taken straight, that ranks the hardest work first, a 5×5 monster above a 5×1 quick win, which buries the quick wins you'd want to ship first. So this scores leverage as Impact ÷ Effort. If you really want the product, it's a one-character flip. The recommendation is leverage.
+> Why divide, not multiply: impact × effort ranks the hardest work first — a 5×5 monster above a 5×1 quick win — and buries the quick wins worth shipping. Leverage is the ratio.
 
 ## Output — the shape of `plan.md`
 
@@ -70,7 +70,7 @@ Every finding in the cycle lands in exactly one system, none dropped, none inven
 
 ## The handoff
 
-The ordered table is what execution consumes. It works the systems top-down, proving each one against the BASELINE targets and the `DEVELOPMENT.md` done-means bar before moving on. After publish, the review re-baselines the live site and diffs it against this cycle's baseline. Closed findings and any regressions tell you whether the plan worked.
+The ordered table is what execution consumes. It works the systems top-down, proving each one against the `hobbes/guides/BASELINE.md` targets and the `DEVELOPMENT.md` done-means bar before moving on. After publish, the review re-baselines the live site and diffs it against this cycle's baseline. Closed findings and any regressions tell you whether the plan worked.
 
 ## Pointers
 

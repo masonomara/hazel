@@ -85,6 +85,7 @@
                 id="Search-In-Template"
                 type="search"
                 name="q"
+                aria-label="{{ 'general.search.search' | t }}"
                 value="{{ search.terms | escape }}"
                 placeholder="{{ 'general.search.search' | t }}"
                 {%- if settings.predictive_search_enabled -%}

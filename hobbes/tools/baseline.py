@@ -2,13 +2,13 @@
 """
 baseline.py — one-command MVP baseline runner.
 
-Runs psi.py (A–D), seo.py (E), and crawl.py (site-wide F), then stamps a dated
-scorecard from 01-baseline-template.md with the header populated and sections A–F pasted in.
+Runs psi.py (A–D), seo.py (E), and crawl.py (site-wide F). Then stamps a dated
+scorecard from 01-baseline-template.md with the header filled and sections A–F pasted in.
 Section G (manual a11y) is left blank for the human — the above-and-beyond pass.
 
-A baseline should reflect the CURRENT site, so this fetches fresh by default.
-If a fresh run stalls partway, every successful call is still cached, so
-`--resume` picks up the cached ones and only re-fetches what's missing.
+A baseline reflects the CURRENT site, so this fetches fresh by default.
+A stalled run still caches every good call. `--resume` reuses those and only
+re-fetches what is missing.
 
 USAGE:
   python3 hobbes/tools/baseline.py            # fresh capture (correct baseline)
@@ -16,13 +16,13 @@ USAGE:
   python3 hobbes/tools/baseline.py --no-crawl # skip the site-wide crawl (quick rerun)
   python3 hobbes/tools/baseline.py --full     # crawl the entire sitemap, not the sample (slow)
 
-CAPTURE then RENDER, in-process — the shared core lives in capture.py (so this and
-publish-review.py can't drift). It captures psi/seo/crawl into raw/ then renders
-§A–F via the tools' OWN renderers (no stdout to scrape, no markers to slice), and
+CAPTURE then RENDER, in-process. The shared core lives in capture.py so this and
+publish-review.py can't drift. It captures psi/seo/crawl into raw/ then renders
+§A–F via the tools' OWN renderers — no stdout to scrape, no markers to slice. It
 writes TWO files into one cycle folder (hobbes/cycle/YYYY-MM-DD-<letter>/):
 01-baseline.md (the human digest, §A–F + the blank §G) and 01-baseline.metrics.json
 (the structured numbers the post-publish review diffs — committed beside the digest
-so the review never re-parses markdown), both alongside the raw artifacts in raw/.
+so the review never re-parses markdown). Both sit alongside the raw artifacts in raw/.
 """
 
 import sys
@@ -47,8 +47,8 @@ def after(text, marker):
 
 
 def section_g(template_text):
-    """Section G (manual a11y) — intro + column header come from 01-baseline-template.md; the
-    page rows are generated from the golden path so G speaks the same URL-derived
+    """Section G (manual a11y). The intro and column header come from 01-baseline-template.md.
+    The page rows are generated from the golden path so G speaks the same URL-derived
     labels as A–F. The template's own rows are illustrative and dropped."""
     g = after(template_text, "## G.")
     head = []
@@ -75,12 +75,12 @@ def main():
     urls = DEFAULT_URLS
     date = config.today()
 
-    # Capture psi/seo/crawl into raw/, then render §A–F from it (shared with the
-    # review's publish-review.py via capture.py, so the two can't disagree).
+    # capture psi/seo/crawl into raw/ then render §A–F from it. shared with the
+    # review's publish-review.py via capture.py so the two can't disagree.
     abcd, e, f = capture.capture_render(
         raw, urls, fresh=flags["fresh"], no_crawl=flags["no_crawl"], full=flags["full"]
     )
-    g = section_g(TEMPLATE.read_text())  # manual a11y — page rows from the golden path
+    g = section_g(TEMPLATE.read_text())  # manual a11y. page rows from the golden path
     if not g:
         sys.exit("✗ couldn't build Section G from the template.")
 
@@ -105,8 +105,8 @@ def main():
 
     out = rundir / "01-baseline.md"
     out.write_text(doc)
-    # The structured numbers the review diffs — committed beside the digest (NOT in
-    # the git-ignored raw/), so a fresh CI review job still has the "before".
+    # the structured numbers the review diffs. committed beside the digest, NOT in
+    # the git-ignored raw/, so a fresh CI review job still has the "before".
     metrics_out = rundir / "01-baseline.metrics.json"
     capture.write_metrics(metrics_out, raw, urls, no_crawl=flags["no_crawl"])
 

@@ -6,8 +6,8 @@ publish-review.py.
 Both run the SAME three tools (psi/seo/crawl) into a raw dir, render §A–F from it
 via the tools' own renderers, and collect the structured metrics the post-publish
 review diffs. They differ ONLY in where raw lands (raw/ vs raw-review/), the digest
-header/intro, and whether §G is appended — so that lives in the two entry points,
-and everything they share lives here, once, where the two can't drift apart.
+header/intro, and whether §G is appended. That lives in the two entry points.
+Everything they share lives here, once, where the two can't drift apart.
 """
 
 import json
@@ -27,11 +27,11 @@ CONFIG = client_meta()  # [client] from hobbes.toml
 
 def parse_flags(args):
     """The capture flags baseline.py and publish-review.py share. --run-dir comes back
-    as a resolved Path or None; the caller picks the default (new cycle vs latest)."""
+    as a resolved Path or None. The caller picks the default (new cycle vs latest)."""
     return {
         "no_crawl": "--no-crawl" in args,
         "full": "--full" in args,
-        "fresh": "--resume" not in args,   # fresh capture by default; --resume reuses cache
+        "fresh": "--resume" not in args,   # fresh capture by default. --resume reuses cache
         "run_dir": (Path(args[args.index("--run-dir") + 1]).resolve()
                     if "--run-dir" in args else None),
     }
@@ -40,8 +40,8 @@ def parse_flags(args):
 def capture_render(raw, urls, *, fresh, no_crawl, full):
     """Capture psi/seo/crawl into `raw` (the network step), then render §A–F straight
     from it via each tool's OWN renderer — the exact functions a standalone tool run
-    uses, so the digest and a standalone run can't disagree. Returns (abcd, e, f);
-    exits if §A–E come back empty (the capture didn't land)."""
+    uses, so the digest and a standalone run can't disagree. Returns (abcd, e, f).
+    Exits if §A–E come back empty (the capture didn't land)."""
     raw.mkdir(parents=True, exist_ok=True)
     psi.capture(raw, urls, fresh)
     seo.capture(raw, urls, fresh)
@@ -57,7 +57,7 @@ def capture_render(raw, urls, *, fresh, no_crawl, full):
 
 def collect_metrics(raw, urls, *, no_crawl):
     """The structured numbers the review diffs, from the SAME raw the digest rendered
-    from: psi gives §A/§C/§D, crawl gives §F. JSON-serializable — written beside the
+    from. psi gives §A/§C/§D, crawl gives §F. JSON-serializable, written beside the
     digest so review.py compares numbers, not re-parsed markdown tables."""
     m = psi.metrics(raw, urls)
     m.update(crawl.metrics(raw) if not no_crawl else {"counts": {}, "crawl_pages": None})
@@ -71,8 +71,8 @@ def write_metrics(path, raw, urls, *, no_crawl):
 
 def header(title, urls, date):
     """The shared digest header — the client line + golden path — identical for the
-    pre-publish baseline and the post-publish re-baseline. Returns the header lines
-    (caller appends its own intro/legend, sections, and §G)."""
+    pre-publish baseline and the post-publish re-baseline. Returns the header lines.
+    The caller appends its own intro/legend, sections, and §G."""
     golden = " · ".join(f"[{lbl}]({u})" for lbl, u in urls)
     return [
         f"# {title} — {date}",

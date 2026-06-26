@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
 psi.py — fetch PageSpeed Insights scores for the golden path and print
-scorecard-ready markdown. Hobbes runs this; the human signs the manual rows.
+scorecard-ready markdown. Hobbes runs this. The human signs the manual rows.
 
 WHY THIS EXISTS: run-1 numbers were transcribed by hand and field data got
 mixed into lab rows (see hobbes-baseline.md 2.3/2.4/2.8). This pulls lab and
 field SEPARATELY from the PSI API and labels them, so the mix can't happen.
-Each page×device is measured 3× and the MEDIAN run is kept — single-run lab
+Each page×device is measured 3× and the MEDIAN run is kept. Single-run lab
 scores swing too much to compare cycle-to-cycle (a page drew perf 89 then 73
 an hour apart). CrUX field data is 28-day, so the median doesn't touch it.
 
-CAPTURE vs RENDER: capture() fetches into raw/; scorecard_sections() renders
+CAPTURE vs RENDER: capture() fetches into raw/. scorecard_sections() renders
 §A–D straight from raw/. main() does both for a standalone run. baseline.py
 calls the same two — capture once, then render — so the digest and a standalone
 run share one renderer and can't disagree, and a re-render needs no re-fetch.
@@ -25,7 +25,7 @@ USAGE:
 Prints the scorecard tables to stdout. Raw *.psi.json caches go in raw/. No
 per-tool file is written unless --out is given.
 The keyless PSI API is rate-capped to a shared pool
-that is usually exhausted (HTTP 429) — a key is required, not optional.
+that is usually exhausted (HTTP 429). A key is required, not optional.
 """
 
 import http.client
@@ -42,24 +42,24 @@ from config import golden_path, psi_key
 DEFAULT_URLS = golden_path()
 ENDPOINT = "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed"
 CATEGORIES = ["performance", "accessibility", "best-practices", "seo"]
-# PSI runs Lighthouse server-side; a heavy mobile page takes ~60s. Firing all
+# PSI runs Lighthouse server-side. A heavy mobile page takes ~60s. Firing all
 # calls at once makes Google QUEUE them, so each call's wall-clock becomes
-# queue-wait + run-time and blows the timeout — that was the real stall. Cap
+# queue-wait + run-time and blows the timeout. That was the real stall. Cap
 # concurrency low so calls actually run when sent, not after a queue.
 MAX_CONCURRENCY = 3
 # Lab scores swing run-to-run (a heavy page measured twice an hour apart drew
-# perf 89 then 73 while CrUX sat still) — single-run lab numbers aren't comparable
+# perf 89 then 73 while CrUX sat still). Single-run lab numbers aren't comparable
 # cycle-to-cycle. So each page×strategy is measured RUNS times and the median run
 # (by performance score) is kept. CrUX field data is 28-day and identical across
 # runs, so it isn't affected.
 RUNS = 3
 # A runWarning containing this = PSI cut the run at its time limit (the page never
-# reached network-idle). It does NOT void the run: metrics that resolved before
+# reached network-idle). It does NOT void the run. Metrics that resolved before
 # the cut (FCP, CLS, TBT, Speed Index, and the a11y/SEO/Best-Practices scores) are
 # trustworthy. Only a truncated LCP and the LCP-weighted Performance score are not.
 INCOMPLETE_SIG = "loaded too slowly"
-# An LCP this large on an incomplete run is the cutoff artifact, not a real paint
-# (real-but-slow LCPs sit well under this; our truncated ones were 13–21s).
+# An LCP this large on an incomplete run is the cutoff artifact, not a real paint.
+# Real-but-slow LCPs sit well under this. Our truncated ones were 13–21s.
 LCP_ARTIFACT_S = 8.0
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
@@ -68,7 +68,7 @@ HOBBES = TOOLS.parent
 def resolve_run_dir(args):
     """Per-cycle output folder: hobbes/cycle/<date>-<letter>/. Big raw JSON caches
     live in raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle
-    folder; a standalone run attaches to the latest cycle (or a fresh one)."""
+    folder. A standalone run attaches to the latest cycle (or a fresh one)."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
@@ -97,7 +97,7 @@ def perf_score(d):
 
 
 def median_run(runs):
-    """The median PSI doc by performance score — Lighthouse's own guidance for a
+    """The median PSI doc by performance score. Lighthouse's own guidance for a
     stable number is the median *run*, not per-metric medians (which would build an
     incoherent frankenstein doc). Returns one real, internally-consistent run."""
     ordered = sorted(runs, key=perf_score)
@@ -113,12 +113,12 @@ def load_key():
 
 def fetch(url, strategy, key, tries=8, timeout=75):
     """Returns parsed JSON, or None if all retries are exhausted (one bad
-    cell must NOT kill the whole run). Auth/quota errors abort immediately —
-    they share the same fault on every call, so retrying is pointless.
+    cell must NOT kill the whole run). Auth/quota errors abort immediately.
+    They share the same fault on every call, so retrying is pointless.
 
-    Timeout is short on purpose: a solo PSI call finishes in ~30-60s, but
+    Timeout is short on purpose. A solo PSI call finishes in ~30-60s, but
     concurrent calls on one key intermittently HANG dead forever. A hung
-    connection never recovers, so we cut it at 75s and retry FRESH — a fresh
+    connection never recovers, so we cut it at 75s and retry FRESH. A fresh
     request usually goes straight through. Waiting 180s on a dead socket is
     the slowest possible move."""
     params = [("url", url), ("strategy", strategy), ("key", key)]
@@ -132,13 +132,13 @@ def fetch(url, strategy, key, tries=8, timeout=75):
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", "replace")
             msg = json.loads(body).get("error", {}).get("message", body[:200]) if body else str(e)
-            if e.code in (401, 403, 429):  # bad key / quota — fatal for every call
+            if e.code in (401, 403, 429):  # bad key / quota. fatal for every call
                 sys.exit(f"PSI API fatal {e.code}: {msg}")
-            last = f"HTTP {e.code}: {msg}"  # 5xx and the like are transient — retry
+            last = f"HTTP {e.code}: {msg}"  # 5xx and the like are transient. retry
         except (urllib.error.URLError, OSError, http.client.HTTPException, ValueError) as e:
             # Transient transport/parse faults: timeouts, dropped sockets, and the big one —
             # IncompleteRead (HTTPException) + the chunk-size ValueError from a truncated PSI
-            # response read inside json.load. Retry FRESH; one bad read must not kill the run.
+            # response read inside json.load. Retry FRESH. One bad read must not kill the run.
             last = str(e) or type(e).__name__
         print(f"  retry {attempt}/{tries} ({strategy} {url}): {last}", file=sys.stderr, flush=True)
     print(f"  ✗ GAVE UP {strategy} {url}: {last}", file=sys.stderr, flush=True)
@@ -177,13 +177,13 @@ def a11y_audit_failed(audit):
     axe-core check that scored 0. The scorecard's §D count (a11y_fails, below)
     and evaluation.py's A11Y catalog BOTH ride this, so the two can't disagree on
     what counts as a failure. Manual checks (keyboard, screen reader, focus) come
-    back as 'manual' scoreDisplayMode and are intentionally excluded — those stay
+    back as 'manual' scoreDisplayMode and are intentionally excluded. Those stay
     human. Change the definition of a failure here, in one place, and both follow."""
     return audit.get("scoreDisplayMode") == "binary" and audit.get("score") == 0
 
 
 def a11y_fails(lh):
-    """Failing accessibility audits from PSI's Lighthouse run — these ARE
+    """Failing accessibility audits from PSI's Lighthouse run. These ARE
     axe-core checks, so no separate axe run is needed. Returns a list of
     (audit_id, failing_node_count) for the binary a11y audits that scored 0."""
     cat = lh.get("categories", {}).get("accessibility", {})
@@ -199,21 +199,21 @@ def a11y_fails(lh):
 
 def capture(raw, urls, fresh):
     """Fetch every page×device into raw/ — the median-of-3 to cache_path() and the
-    per-run checkpoints to run_cache_path(). Network side-effects ONLY: the
+    per-run checkpoints to run_cache_path(). Network side-effects ONLY. The
     scorecard is rendered separately, straight from raw/, by scorecard_sections().
-    So baseline.py captures once then renders the same way psi.py does standalone —
-    no stdout to scrape, and re-rendering needs no re-fetch."""
+    So baseline.py captures once then renders the same way psi.py does standalone.
+    No stdout to scrape, and re-rendering needs no re-fetch."""
     key = load_key()
-    # Fire all page×strategy calls at once — wall-clock = slowest call, not the sum.
+    # Fire all page×strategy calls at once. Wall-clock = slowest call, not the sum.
     # Cached (already-succeeded) calls return instantly, so a re-run only hits the
-    # network for what's still missing — which also means lower concurrency and
+    # network for what's still missing. That also means lower concurrency and
     # far fewer of the stalls that concurrency triggers.
     jobs = [(label, url, strat) for label, url in urls for strat in ("mobile", "desktop")]
 
     def run(job):
         label, url, strat = job
         cf = cache_path(raw, url, strat)
-        if not fresh and cf.exists():   # canonical median already chosen — reuse
+        if not fresh and cf.exists():   # canonical median already chosen. reuse
             print(f"  ⤿ cached {label} {strat}", file=sys.stderr, flush=True)
             return
         runs = []
@@ -225,7 +225,7 @@ def capture(raw, urls, fresh):
             print(f"… fetching {label} {strat} (run {i+1}/{RUNS})", file=sys.stderr, flush=True)
             d = fetch(url, strat, key)
             if d is not None:
-                rf.write_text(json.dumps(d))   # checkpoint each run — never re-pay
+                rf.write_text(json.dumps(d))   # checkpoint each run. never re-pay
                 runs.append(d)
         if not runs:
             return
@@ -244,7 +244,7 @@ def _load_results(raw, urls):
     """Rebuild the median docs and the per-cell perf spread from raw/ — the exact
     files capture() wrote. Pure over raw/, so the scorecard renders identically
     whether psi.py runs standalone or baseline.py calls it, and re-renders from
-    cache with no re-fetch. A cell with no median file on disk reads as failed; the
+    cache with no re-fetch. A cell with no median file on disk reads as failed. The
     spread is reconstructed from whatever per-run files are present."""
     results, spreads = {}, {}
     for label, url in urls:
@@ -274,7 +274,7 @@ def _page_field(results, label, url):
 def scorecard_sections(raw, urls):
     """Scorecard sections A–D (+ the failed-calls note), rendered from raw/.
     This is the exact block baseline.py drops into 01-baseline.md AND the block
-    psi.py prints under its standalone header — one renderer, two callers, so the
+    psi.py prints under its standalone header. One renderer, two callers, so the
     digest and a standalone run can never disagree on a number."""
     results, spreads = _load_results(raw, urls)
     rows_a, rows_lab, rows_field, rows_c = [], [], [], []
@@ -285,10 +285,10 @@ def scorecard_sections(raw, urls):
             lh = (results[(label, url, strat)] or {}).get("lighthouseResult", {})
             warns = lh.get("runWarnings") or []
             incomplete = any(INCOMPLETE_SIG in w.lower() for w in warns)  # classify, don't lump
-            mark = ""   # truncated values are flagged per-cell with ✗cut; no row-level ⚠
+            mark = ""   # truncated values are flagged per-cell with ✗cut. no row-level ⚠
 
             lcp = audit_s(lh, "largest-contentful-paint")
-            # Trust an early LCP even on an incomplete run; flag ONLY a truncated one.
+            # Trust an early LCP even on an incomplete run. Flag ONLY a truncated one.
             cut = incomplete and isinstance(lcp, (int, float)) and lcp > LCP_ARTIFACT_S
             lcp_cell = f"{lcp} ✗cut" if cut else f"{lcp}"
             perf_cell = f"{score(lh,'performance')} ✗cut" if cut else f"{score(lh,'performance')}"
@@ -307,8 +307,8 @@ def scorecard_sections(raw, urls):
             detail = ", ".join(f"{aid}×{n}" for aid, n in fails) or "none"
             passd = "✓" if not fails else "✗"
             rows_c.append(f"| {label} — {strat}{mark} | {len(fails)} | {passd} | {detail} |")
-        # Field data (CrUX 28-day). PREFER page-level; use the origin aggregate
-        # only if neither device has page-level data — and LABEL it when we do,
+        # Field data (CrUX 28-day). PREFER page-level. Use the origin aggregate
+        # only if neither device has page-level data, and LABEL it when we do,
         # so a whole-site average is never mistaken for this page's real numbers.
         le = _page_field(results, label, url)
         fm = le.get("metrics", {})
@@ -325,7 +325,7 @@ def scorecard_sections(raw, urls):
         else:
             rows_field.append(f"| {label} | — | — | — | — |")
 
-    # Per-page×device perf-score spread across the 3 runs — shows the volatility the
+    # Per-page×device perf-score spread across the 3 runs. Shows the volatility the
     # median smooths over, so the human can judge how shaky a cell is. Shown for
     # every cell whose per-run files are on disk (reconstructed from raw/).
     spread_bits = []
@@ -406,7 +406,7 @@ def main():
     fresh = "--fresh" in args  # ignore cache, re-fetch everything
     rd = resolve_run_dir(args)
     raw = rd / "raw"
-    out = None                                    # no default file: --out opts in
+    out = None                                    # no default file. --out opts in
     for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
         if flag in args:
             i = args.index(flag)
@@ -433,7 +433,7 @@ def main():
     ]) + "\n"
 
     print(report)                                   # stdout — human-readable standalone digest
-    if out:                                          # --out only; no default per-tool file
+    if out:                                          # --out only. no default per-tool file
         out.write_text(report)
         print(f"→ written to {out}", file=sys.stderr)
 

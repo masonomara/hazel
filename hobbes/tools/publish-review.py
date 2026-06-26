@@ -4,17 +4,17 @@ publish-review.py — the review phase's capture orchestrator (a twin of baselin
 
 baseline.py captures the PRE-publish site into <cycle>/raw/. This captures the
 **live** site AFTER a publish into <cycle>/raw-review/ — the same three tools
-(psi/seo/crawl), driven by the same shared core (capture.py), the same renderers —
-then writes the after-digest <cycle>/raw-review/review-baseline.md AND its structured
+(psi/seo/crawl), driven by the same shared core (capture.py), the same renderers.
+Then it writes the after-digest <cycle>/raw-review/review-baseline.md AND its structured
 sidecar review-baseline.metrics.json. So before and after live in one cycle folder,
 side by side. review.py then diffs the cycle's pre-publish 01-baseline.metrics.json
 (the before — everything leading up to the PR) against this after-metrics into
 06-review.md, honest by tier.
 
-No evaluation here: the review only needs the measured before/after, not a rebuilt
+No evaluation here. The review only needs the measured before/after, not a rebuilt
 problem catalog.
 
-CAPTURE then RENDER, in-process — exactly baseline.py's contract via capture.py, but
+CAPTURE then RENDER, in-process. Exactly baseline.py's contract via capture.py, but
 pointed at raw-review/ instead of raw/, so the after-digest can't disagree with a
 standalone tool run, and the metrics sidecar is the SAME numbers the digest renders.
 
@@ -50,7 +50,7 @@ def main():
     urls = DEFAULT_URLS
     date = config.today()
 
-    # Capture the LIVE site into raw-review/ and render §A–F — the shared core, so the
+    # capture the LIVE site into raw-review/ and render §A–F. the shared core, so the
     # after-digest matches what baseline.py would emit for the same site.
     abcd, e, f = capture.capture_render(
         raw, urls, fresh=flags["fresh"], no_crawl=flags["no_crawl"], full=flags["full"]

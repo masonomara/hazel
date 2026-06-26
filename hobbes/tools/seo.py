@@ -8,14 +8,14 @@ Eight checks per page (BASELINE.md Group D), all parseable from HTML or a header
   structured data (JSON-LD) · Open Graph/Twitter · image alt COVERAGE · indexable
 Plus Section E: sitemap.xml + robots.txt load (once per site).
 
-The ONE thing it can't own is alt-text QUALITY — it reports how many images
-lack alt; a human judges whether the alt that exists is meaningful. Same
+The ONE thing it can't own is alt-text QUALITY. It reports how many images
+lack alt. A human judges whether the alt that exists is meaningful. Same
 AI-vs-human split as the manual a11y pass.
 
 No API key needed (plain HTML fetch). Mirrors psi.py: retry, per-page cache
-(git-ignored *.seo.json), and the same capture/render split — capture() fetches
-the pages (and the two site-level files) into raw/; scorecard_section() renders §E
-straight from raw/. main() does both; baseline.py calls the same two, so the
+(git-ignored *.seo.json), and the same capture/render split. capture() fetches
+the pages (and the two site-level files) into raw/. scorecard_section() renders §E
+straight from raw/. main() does both. baseline.py calls the same two, so the
 digest and a standalone run share one renderer.
 
 USAGE:
@@ -44,7 +44,7 @@ MAX_CONCURRENCY = 4
 OG_REQUIRED = ["og:title", "og:image", "og:url", "og:type"]
 LD_KNOWN = {"Product", "BreadcrumbList", "Organization", "WebSite", "WebPage",
             "ItemList", "CollectionPage", "Article", "FAQPage"}
-# The 8 per-page checks, in scorecard row order — the single source for both the
+# The 8 per-page checks, in scorecard row order. The single source for both the
 # analyze() cell keys and the §E table rows.
 CHECKS = ["Unique, descriptive title", "Meta description present", "Canonical correct",
           "Single H1 + ordered headings", "Valid structured data",
@@ -54,7 +54,7 @@ CHECKS = ["Unique, descriptive title", "Meta description present", "Canonical co
 def resolve_run_dir(args):
     """Per-cycle output folder: hobbes/cycle/<date>-<letter>/. Raw *.seo.json caches
     live in raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle
-    folder; a standalone run attaches to the latest cycle (or a fresh one)."""
+    folder. A standalone run attaches to the latest cycle (or a fresh one)."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
@@ -70,7 +70,7 @@ def cache_path(raw, url):
 
 def site_cache(raw):
     """Cache for the two once-per-site checks (sitemap.xml / robots.txt presence),
-    so scorecard_section() renders §E offline from raw/ — no live fetch at render."""
+    so scorecard_section() renders §E offline from raw/. No live fetch at render."""
     return raw / "site.seo.json"
 
 
@@ -164,7 +164,7 @@ def fetch(url, fresh, raw, tries=4, timeout=30):
 
 
 def head_ok(levels):
-    """No skipped level going deeper (h2 -> h4 fails); going back up is fine."""
+    """No skipped level going deeper (h2 -> h4 fails). Going back up is fine."""
     prev = 0
     for lvl in levels:
         if prev and lvl > prev + 1:
@@ -257,7 +257,7 @@ def _root(urls):
 def capture(raw, urls, fresh):
     """Fetch each golden page's HTML into raw/*.seo.json and the two site-level
     files (sitemap.xml, robots.txt presence) into raw/site.seo.json. Network
-    side-effects ONLY: §E is rendered separately from raw/ by scorecard_section(),
+    side-effects ONLY. §E is rendered separately from raw/ by scorecard_section(),
     so baseline.py captures once then renders the same way seo.py does standalone."""
     with ThreadPoolExecutor(max_workers=min(MAX_CONCURRENCY, len(urls))) as ex:
         list(ex.map(lambda lu: fetch(lu[1], fresh, raw), urls))
@@ -298,7 +298,7 @@ def _site_rows(raw, urls):
 def scorecard_section(raw, urls):
     """Scorecard Section E (SEO checklist + site-level), rendered from raw/.
     The exact block baseline.py drops into the digest and seo.py prints under its
-    standalone header — one renderer, two callers."""
+    standalone header. One renderer, two callers."""
     results = _load_pages(raw, urls)
     labels = [lbl for lbl, _ in urls]
 
@@ -327,7 +327,7 @@ def main():
     fresh = "--fresh" in args
     rd = resolve_run_dir(args)
     raw = rd / "raw"
-    out = None                                    # no default file: --out opts in
+    out = None                                    # no default file. --out opts in
     for flag in ("--run-dir", "--out"):           # strip value-bearing flags before positional parse
         if flag in args:
             i = args.index(flag)
@@ -363,7 +363,7 @@ def main():
     report = "\n".join(L) + "\n"
 
     print(report)                                 # stdout — human-readable standalone digest
-    if out:                                        # --out only; no default per-tool file
+    if out:                                        # --out only. no default per-tool file
         out.write_text(report)
         print(f"→ written to {out}", file=sys.stderr)
 

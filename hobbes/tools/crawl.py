@@ -207,18 +207,20 @@ def run_crawl(fresh, cache, full=False):
     httpd, seed = serve_flat_sitemap(pages)
     print(f"… crawling {len(pages)} pages (1 req/s, 1 worker, images off) — be patient",
           file=sys.stderr, flush=True)
-    # JSON → raw/ is the only durable output: the machine source evaluation.py
-    # reads, and scorecard_section() renders §F from it. The SiteOne HTML report
-    # (~1 MB/cycle, regenerable, read by nobody in the pipeline) is deliberately
-    # NOT emitted. The default tmp/ text dump is off too. Seed from the localhost
-    # flat sitemap. Pin pages to the chosen set. Allow crawling/asset-loading on
-    # the real domain.
+    # Two durable outputs in raw/: the JSON (scorecard §F + the metrics the review
+    # diffs) and the HTML report. The JSON drops all per-analysis detail, so we ALSO
+    # emit the HTML report — the only place SiteOne writes the offending element,
+    # its occurrence count, and the affected URLs — and parse it into _detail below.
+    # The default tmp/ text dump stays off. Seed from the localhost flat sitemap.
+    # Pin pages to the chosen set. Allow crawling/asset-loading on the real domain.
+    report = cache.parent / "crawl-report.html"
     cmd = [BIN, f"--url={seed}",
            f"--allowed-domain-for-crawling={host}",
            "--allowed-domain-for-external-files=*",
            f"--include-regex={pin_regex(pages)}",
            f"--max-visited-urls={len(pages) * 2 + 1000}",
            "--output=json", f"--output-json-file={cache}",
+           f"--output-html-report={report}",
            "--output-text-file=",
            "--hide-progress-bar", "--no-color"] + LIMITS
     try:
@@ -228,6 +230,11 @@ def run_crawl(fresh, cache, full=False):
     if r.returncode != 0 or not cache.exists():
         sys.exit(f"✗ crawl failed (exit {r.returncode}).")
     data = json.loads(cache.read_text())
+    try:                                     # parse the report detail into the JSON
+        data["_detail"] = parse_html_report(report.read_text(errors="replace"))
+    except Exception as e:                   # detail is a bonus — never sink the crawl
+        print(f"  ⚠ could not parse HTML report detail ({e})", file=sys.stderr, flush=True)
+        data["_detail"] = {}
     data["_sitemapPages"] = len(sitemap)     # carried into coverage reporting
     data["_sampledPages"] = len(pages)
     data["_sampleNote"] = sample_note
@@ -246,6 +253,87 @@ def capture(raw, fresh, full):
 
 def table_rows(tables, name):
     return (tables.get(name) or {}).get("rows") or []
+
+
+# ── HTML-report detail ────────────────────────────────────────────────────────
+# SiteOne's JSON drops the per-analysis detail: results[].extras is empty, and
+# tables.accessibility (etc.) carry only critical/warning counts. The element-level
+# detail — the offending markup, its occurrence count, and the affected URLs —
+# lives ONLY in the HTML report. So we emit the report, parse it, and fold the
+# detail into crawl.json. Each analyzer (accessibility, best-practices, security)
+# renders a detail table of Severity · Occurs · Detail (element markup) · Affected
+# URLs. One parser pulls them all.
+_DETAIL_DOMAINS = ("accessibility", "best-practices", "security", "seo")
+_GENERIC_TBL = {"table", "table-bordered", "table-hover", "table-sortable",
+                "table-with-show-more", "table-compact"}
+
+
+def _cell_text(td):
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(td))).strip()
+
+
+def _cell_value(td):
+    """The detail cell stores the raw element markup in data-value (it survives
+    HTML-encoding cleanly). SiteOne writes the sentinel 'complex-data' when the
+    value is too complex for the attribute — fall back to the cell text then."""
+    m = re.search(r"data-value='([^']*)'", td)
+    v = html.unescape(m.group(1)).strip() if m else ""
+    return v if v and v != "complex-data" else _cell_text(td)
+
+
+def parse_html_report(report_html):
+    """Every SiteOne analyzer detail table → {domain: [row]}, where a row is
+    {analysis, severity, occurs, detail, urls}. Only the severity-based detail
+    tables are pulled (Severity + Affected URLs columns); per-URL metadata tables
+    are left to the JSON. A table is attributed to the nearest preceding domain
+    summary table. Best-effort — a parse failure returns whatever was read."""
+    out = {}
+    for tm in re.finditer(r"<table id='[^']*'[^>]*class='([^']*)'[^>]*>(.*?)</table>",
+                          report_html, re.S):
+        classes, body = tm.group(1), tm.group(2)
+        analysis = next((c for c in classes.split() if c not in _GENERIC_TBL), None)
+        if not analysis:
+            continue
+        ths = [_cell_text(t).lower() for t in re.findall(r"<th[^>]*>(.*?)</th>", body, re.S)]
+        if "severity" not in ths or not any("affected url" in t for t in ths):
+            continue
+        pre = report_html[: tm.start()]
+        at, dom = -1, "other"
+        for d in _DETAIL_DOMAINS:
+            for sm in re.finditer(r"<table id='[^']*'[^>]*class='[^']*\b" + re.escape(d)
+                                  + r"\b[^']*'", pre):
+                if sm.start() > at:
+                    at, dom = sm.start(), d
+        for r in re.findall(r"<tr[^>]*>(.*?)</tr>", body, re.S):
+            tds = re.findall(r"<td[^>]*>.*?</td>", r, re.S)
+            if len(tds) < 4:
+                continue
+            sev = _cell_text(tds[0]).lower()
+            if sev not in ("critical", "warning", "notice", "ok"):
+                continue
+            out.setdefault(dom, []).append({
+                "analysis": analysis,
+                "severity": sev,
+                "occurs": int(re.sub(r"\D", "", _cell_text(tds[1])) or 0),
+                "detail": _cell_value(tds[2]),
+                "urls": re.findall(r'href="([^"]+)"', tds[3]),
+            })
+    return out
+
+
+def detail_rows(data, *, analysis=None, domain=None):
+    """Parsed HTML-report detail rows, filtered by analysis class (e.g.
+    'missing-aria-labels') or domain ('accessibility'). Empty if the report
+    wasn't parsed (an old cache) — callers fall back to the count tables."""
+    rows = []
+    for dom, drows in (data.get("_detail") or {}).items():
+        if domain and dom != domain:
+            continue
+        for r in drows:
+            if analysis and r.get("analysis") != analysis:
+                continue
+            rows.append(r)
+    return rows
 
 
 def quality_scores(data):

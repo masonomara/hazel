@@ -30,7 +30,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 HOBBES = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
-from crawl import count_for, header_set, rollup_texts, table_rows
+from crawl import count_for, detail_rows, header_set, rollup_texts, table_rows
 
 # Reuse the capture tools' logic so findings can't drift from the scorecard.
 from psi import DEFAULT_URLS, a11y_audit_failed
@@ -72,6 +72,35 @@ A11Y_KNOW = {
     "heading-order": (
         "Headings skip a level (e.g. h3 with no h2).",
         "Breaks the document outline a screen reader navigates by. A common cause: card/sub titles (h3/h5) under a section with no h2.",
+    ),
+}
+# SiteOne's whole-site a11y analyses (HTML-report detail), keyed by table class:
+# (display name, why it matters, the summary-rollup needle for the page count).
+CRAWL_A11Y_KNOW = {
+    "missing-aria-labels": (
+        "Missing aria labels",
+        "An interactive element has no accessible name (aria-label / aria-labelledby). A screen reader announces it by role alone — 'button', 'link', 'textbox'. This hits icon-only controls and unlabeled inputs like the search box.",
+        "without aria",
+    ),
+    "missing-roles": (
+        "Missing roles",
+        "A landmark or interactive element has no role, so assistive tech can't place it in the page structure or navigate to it.",
+        "without role",
+    ),
+    "missing-image-alt-attributes": (
+        "Missing image alt",
+        "An <img> has no alt attribute. A screen reader skips it or reads the filename. These are content/card images; alt comes from the admin image field or the template <img>.",
+        "without image alt",
+    ),
+    "missing-html-lang-attribute": (
+        "Missing html lang",
+        "The page's <html> has no lang attribute, so a screen reader can't choose the right pronunciation.",
+        "without html lang",
+    ),
+    "missing-labels": (
+        "Missing form labels",
+        "A form control has no associated <label>. The field is announced with no name, so its purpose is unclear.",
+        "without form label",
     ),
 }
 BP_KNOW = {
@@ -123,6 +152,28 @@ def short_url(u):
     p = urllib.parse.urlparse(u)
     tail = (p.path or "/").split("/")[-1] or p.path
     return trunc((tail + (("?" + p.query) if p.query else "")) or u, 60)
+
+
+_SEV_RANK = {"critical": 0, "warning": 1, "notice": 2, "ok": 3}
+
+
+def detail_evidence(rows, cap=6):
+    """Turn HTML-report detail rows into catalog evidence: the offending element,
+    its occurrence count and severity, and the affected URLs (paths). Critical
+    first, then heaviest by occurrence, capped with an explicit +N — never
+    silently trimmed."""
+    rows = sorted(rows, key=lambda r: (_SEV_RANK.get(r.get("severity"), 9), -r.get("occurs", 0)))
+    ev = []
+    for r in rows[:cap]:
+        urls = [urllib.parse.urlparse(u).path or u for u in r.get("urls", [])[:3]]
+        more = len(r.get("urls", [])) - len(urls)
+        loc = ", ".join(urls) + (f" (+{more} more)" if more > 0 else "")
+        mark = trunc(r.get("detail", ""), 110)
+        head = f"[{r['severity']}] ×{r['occurs']}"
+        ev.append(f"{head} · `{mark}`" + (f" · {loc}" if loc else ""))
+    if len(rows) > cap:
+        ev.append(f"(+{len(rows) - cap} more pattern(s) — see raw/crawl-report.html)")
+    return ev
 
 
 # ── loaders ──────────────────────────────────────────────────────────────────
@@ -249,40 +300,73 @@ def a11y_findings(psi, crawl):
                 ev,
             )
         )
-    # sitewide prevalence. the crawl's per-analysis element counts (critical/warning),
-    # far richer than the one-flag-per-page rollup. PSI rules above stay authoritative
-    # for the golden path. this is the scale beyond it.
+    # sitewide a11y from the crawl. one finding per SiteOne analysis, carrying the
+    # offending element, its occurrence count, and the affected URLs from the HTML
+    # report. PSI rules above stay authoritative for the golden path. this is the
+    # scale AND the specifics beyond it.
     tables = crawl.get("tables", {})
     n = len(table_rows(tables, "seo"))
-    acc = [
-        r
-        for r in table_rows(tables, "accessibility")
-        if int(r.get("critical") or 0) + int(r.get("warning") or 0) > 0
-    ]
-    if acc:
-        acc.sort(
-            key=lambda r: -(int(r.get("critical") or 0) + int(r.get("warning") or 0))
-        )
-        total = sum(
-            int(r.get("critical") or 0) + int(r.get("warning") or 0) for r in acc
-        )
-        out.append(
-            F(
-                "Sitewide a11y prevalence",
-                "How widespread the a11y gaps are across the whole site — element-level counts.",
-                "SiteOne's per-analysis totals over every crawled page: real element counts, not the blunt one-flag-per-page rollup. The PSI rules above are authoritative for the golden path; this shows the scale beyond it.",
-                "SiteOne crawl · accessibility table",
-                "0 issues (BASELINE §F)",
-                f"{total} flagged element(s) across {n} pages",
-                "",
-                f"{n} pages crawled",
-                [
-                    f"{r.get('analysisName')}: {int(r.get('critical') or 0)} critical, "
-                    f"{int(r.get('warning') or 0)} warning"
-                    for r in acc
-                ],
+    texts = rollup_texts(crawl)
+    by_analysis = {}
+    for r in detail_rows(crawl, domain="accessibility"):
+        by_analysis.setdefault(r["analysis"], []).append(r)
+    if by_analysis:
+        for analysis in sorted(
+            by_analysis, key=lambda a: -sum(x["occurs"] for x in by_analysis[a])
+        ):
+            rows = by_analysis[analysis]
+            name, why, needle = CRAWL_A11Y_KNOW.get(
+                analysis,
+                (analysis.replace("-", " ").capitalize(),
+                 "Accessibility issue SiteOne flagged across the site.", ""),
             )
-        )
+            crit = sum(1 for x in rows if x["severity"] == "critical")
+            occ = sum(x["occurs"] for x in rows)
+            pages = count_for(texts, needle) if needle else 0
+            measured = f"{occ} element(s) across {len(rows)} pattern(s)"
+            if crit:
+                measured += f" · {crit} critical"
+            out.append(
+                F(
+                    f"{name} (sitewide)",
+                    f"{name} — flagged across the crawl.",
+                    why,
+                    "SiteOne crawl · accessibility detail",
+                    "0 issues (BASELINE §F)",
+                    measured,
+                    "",
+                    f"{pages} page(s)" if pages else f"{n} pages crawled",
+                    detail_evidence(rows),
+                )
+            )
+    else:
+        # fallback for an old cache crawled before the HTML report was parsed:
+        # the blunt per-analysis counts from the JSON table.
+        acc = [
+            r
+            for r in table_rows(tables, "accessibility")
+            if int(r.get("critical") or 0) + int(r.get("warning") or 0) > 0
+        ]
+        if acc:
+            acc.sort(key=lambda r: -(int(r.get("critical") or 0) + int(r.get("warning") or 0)))
+            total = sum(int(r.get("critical") or 0) + int(r.get("warning") or 0) for r in acc)
+            out.append(
+                F(
+                    "Sitewide a11y prevalence",
+                    "How widespread the a11y gaps are across the whole site — element-level counts.",
+                    "SiteOne's per-analysis totals over every crawled page. The PSI rules above are authoritative for the golden path; this shows the scale beyond it.",
+                    "SiteOne crawl · accessibility table",
+                    "0 issues (BASELINE §F)",
+                    f"{total} flagged element(s) across {n} pages",
+                    "",
+                    f"{n} pages crawled",
+                    [
+                        f"{r.get('analysisName')}: {int(r.get('critical') or 0)} critical, "
+                        f"{int(r.get('warning') or 0)} warning"
+                        for r in acc
+                    ],
+                )
+            )
     return out
 
 
@@ -763,11 +847,14 @@ def sec_findings(crawl):
         ("Permissions-Policy", "Permissions-Policy"),
     ]
     recs = {r.get("header"): r for r in table_rows(tables, "security")}
+    sec_detail = detail_rows(crawl, domain="security")
     ev = []
     for hdr, short in want:
         if not header_set(tables, hdr):
             r = recs.get(hdr, {})
-            ev.append(f"{short}: not set — {trunc(r.get('recommendation', ''), 110)}")
+            occ = sum(d["occurs"] for d in sec_detail if d.get("detail", "").startswith(hdr))
+            scale = f" ({occ} responses)" if occ else ""
+            ev.append(f"{short}: not set{scale} — {trunc(r.get('recommendation', ''), 110)}")
     if ev:
         out.append(
             F(
@@ -898,19 +985,32 @@ def bp_findings(psi, crawl):
         crit, warn = int(r.get("critical") or 0), int(r.get("warning") or 0)
         why = BP_CRAWL_WHY.get(
             name,
-            "Structural/best-practice issue SiteOne flagged across the site. Open raw/crawl.json for the per-URL list.",
+            "Structural/best-practice issue SiteOne flagged across the site.",
         )
+        drows = detail_rows(crawl, analysis=name.lower().replace(" ", "-"))
+        if drows:
+            # the report detail is the truth for severity AND evidence — the JSON
+            # count table can disagree, so report both from the same source.
+            dcrit = sum(1 for d in drows if d["severity"] == "critical")
+            occ = sum(d["occurs"] for d in drows)
+            measured = f"{occ} element(s) across {len(drows)} pattern(s)"
+            if dcrit:
+                measured += f" · {dcrit} critical"
+            ev = detail_evidence(drows)
+        else:
+            measured = f"{crit} critical, {warn} warning"
+            ev = [f"{crit} critical, {warn} warning — see raw/crawl-report.html"]
         out.append(
             F(
                 name,
                 f"{name} — flagged sitewide by the crawl.",
                 why,
-                "SiteOne crawl · best-practices table",
+                "SiteOne crawl · best-practices detail",
                 "0 issues (BASELINE §F)",
-                f"{crit} critical, {warn} warning",
+                measured,
                 "",
                 f"of {n} pages",
-                [f"{crit} critical, {warn} warning — see raw/crawl.json"],
+                ev,
             )
         )
     return out

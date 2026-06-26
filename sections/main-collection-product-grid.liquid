@@ -124,8 +124,12 @@
             >
               {%- for product in collection.products -%}
                 {% assign lazy_load = false %}
+                {% assign preload = false %}
                 {%- if forloop.index > 2 -%}
                   {%- assign lazy_load = true -%}
+                {%- endif -%}
+                {%- if forloop.index == 1 -%}
+                  {%- assign preload = true -%}
                 {%- endif -%}
                 <li
                   class="grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
@@ -142,6 +146,7 @@
                     show_vendor: section.settings.show_vendor,
                     show_rating: section.settings.show_rating,
                     lazy_load: lazy_load,
+                    preload: preload,
                     show_quick_add: section.settings.enable_quick_add,
                     section_id: section.id,
                     card_heading_tag: 'h2'

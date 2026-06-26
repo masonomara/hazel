@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 crawl.py — whole-site SiteOne crawl. Emits scorecard Section F (site-wide
-grades + counts); the per-URL detail feeds the findings doc.
+grades + counts). The per-URL detail feeds the findings doc.
 
 Covers what the golden-path tools can't: every URL on the site. Section F holds
 SiteOne's 0–10 quality grades plus site-wide counts — broken links, redirects,
@@ -9,17 +9,17 @@ missing/duplicate titles, missing meta descriptions, multiple/skipped headings,
 missing alt/aria/roles/lang, invalid/duplicate SVGs, and the security headers.
 
 DRIVEN BY THE SITEMAP, for a reproducible page set. Earlier cycles seeded a
-link-discovery crawl from the homepage with a hard URL cap; the sample wandered
+link-discovery crawl from the homepage with a hard URL cap. The sample wandered
 (200→164 pages) because the host throttled a different random subset each run and
-the cap truncated the rest — so cycle-over-cycle counts were noise. Now we expand
+the cap truncated the rest, so cycle-over-cycle counts were noise. Now we expand
 the sitemap to the authoritative page list (SiteOne does NOT recurse a nested
 sitemap *index*, so we expand it here), serve it as one flat sitemap on localhost,
 and crawl exactly that set: pinned with --include-regex, gentle pace so 429s stay
 near zero, no truncation. Same sitemap → same pages → comparable numbers.
 
 Mirrors psi.py / seo.py: gentle live crawl, a cached crawl.json, and the same
-capture/render split — capture() crawls into raw/crawl.json; scorecard_section()
-renders §F straight from that JSON. main() does both; baseline.py calls the same
+capture/render split. capture() crawls into raw/crawl.json. scorecard_section()
+renders §F straight from that JSON. main() does both. baseline.py calls the same
 two, so the digest and a standalone run share one renderer.
 
 USAGE:
@@ -54,10 +54,10 @@ UA = "hobbes-baseline/1.0 (+SiteOne sitemap crawl)"
 # Pace: hosts often rate-limit site HTML hard (a leaky bucket — a burst of ~33
 # pages then 429 for the rest), and SiteOne has no 429 retry, so a throttled page
 # is a lost page and the sample wanders again. We stay UNDER the limit: 1 req/s,
-# 1 worker, serialized. Images are skipped — alt/heading/SEO/security are HTML/
-# header checks that don't need the bytes (and pulling hundreds of images would
-# both crawl for hours and, ironically, was the only thing diluting the origin
-# hit-rate; we replace that dilution with a low rate instead). Image weight/format
+# 1 worker, serialized. Images are skipped. alt/heading/SEO/security are HTML/
+# header checks that don't need the bytes. Pulling hundreds of images would both
+# crawl for hours and, ironically, was the only thing diluting the origin
+# hit-rate. We replace that dilution with a low rate instead. Image weight/format
 # is judged on the golden path by PSI.
 LIMITS = ["--max-reqs-per-sec=1", "--workers=1", "--timeout=15",
           "--disable-images", "--regex-filtering-only-for-pages"]
@@ -66,9 +66,9 @@ LIMITS = ["--max-reqs-per-sec=1", "--workers=1", "--timeout=15",
 # low-volume page type every cycle, plus a fixed deterministic slice of the one
 # high-volume type (named by [cycle].sample_path, e.g. "/products/"). That type is
 # template-driven, so a slice reveals the same template-level issues (missing
-# description, heading order, missing alt) as the whole would — without hammering
+# description, heading order, missing alt) as the whole would, without hammering
 # the host past its throttle. With no sample_path set, every page is crawled.
-# --full overrides this and crawls the entire sitemap (slow; for an occasional
+# --full overrides this and crawls the entire sitemap (slow, for an occasional
 # complete audit). The sample is deterministic, so the page set — and the counts —
 # are identical every cycle.
 SAMPLE_SIZE = 100   # how many of the high-volume page type to keep when subsampling
@@ -76,7 +76,7 @@ SAMPLE_SIZE = 100   # how many of the high-volume page type to keep when subsamp
 
 def select_pages(pages, full):
     """Choose the crawl set from the full sitemap. Returns (chosen, note).
-    Subsamples the one high-volume page type named by [cycle].sample_path; with no
+    Subsamples the one high-volume page type named by [cycle].sample_path. With no
     sample_path set (or --full), takes every page."""
     pat = config.sample_path()
     if full or not pat:
@@ -95,8 +95,8 @@ def select_pages(pages, full):
 
 def resolve_run_dir(args):
     """Per-cycle output folder: hobbes/cycle/<date>-<letter>/. crawl.json lives in
-    raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle folder;
-    standalone attaches to the latest cycle (or a fresh one)."""
+    raw/. baseline.py passes --run-dir so psi/seo/crawl share one cycle folder.
+    Standalone attaches to the latest cycle (or a fresh one)."""
     if "--run-dir" in args:
         d = Path(args[args.index("--run-dir") + 1])
     else:
@@ -121,7 +121,7 @@ def _locs(xml):
 
 def _is_page(url):
     """A crawlable HTML page — a clean path with no file extension. Page URLs are
-    extensionless paths; this drops child sitemaps (.xml) and non-HTML sitemap
+    extensionless paths. This drops child sitemaps (.xml) and non-HTML sitemap
     entries like /agents.md or /robots.txt."""
     last = urllib.parse.urlparse(url).path.rstrip("/").rsplit("/", 1)[-1]
     return "." not in last
@@ -130,7 +130,7 @@ def _is_page(url):
 def expand_sitemap(root):
     """The authoritative page list. SiteOne crawls a *flat* sitemap but does NOT
     recurse a sitemap *index* (many hosts serve `sitemap.xml` as an index of
-    child sitemaps), so we expand it here: fetch the index, follow each child,
+    child sitemaps), so we expand it here. Fetch the index, follow each child,
     collect every non-sitemap <loc>. Returns (sorted unique pages, note)."""
     idx = _fetch(root + "sitemap.xml")
     top = _locs(idx)
@@ -152,7 +152,7 @@ def expand_sitemap(root):
 def serve_flat_sitemap(pages):
     """Serve the expanded page list as one flat sitemap on an ephemeral localhost
     port. SiteOne is seeded here, then crawls the real (external) page URLs via
-    --allowed-domain-for-crawling. Returns (httpd, seed_url); caller shuts it down."""
+    --allowed-domain-for-crawling. Returns (httpd, seed_url). The caller shuts it down."""
     body = ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "".join(f"<url><loc>{html.escape(u)}</loc></url>\n" for u in pages)
@@ -207,11 +207,11 @@ def run_crawl(fresh, cache, full=False):
     httpd, seed = serve_flat_sitemap(pages)
     print(f"… crawling {len(pages)} pages (1 req/s, 1 worker, images off) — be patient",
           file=sys.stderr, flush=True)
-    # JSON → raw/ is the only durable output: it's the machine source evaluation.py
+    # JSON → raw/ is the only durable output: the machine source evaluation.py
     # reads, and scorecard_section() renders §F from it. The SiteOne HTML report
     # (~1 MB/cycle, regenerable, read by nobody in the pipeline) is deliberately
-    # NOT emitted; the default tmp/ text dump is off too. Seed from the localhost
-    # flat sitemap; pin pages to the chosen set; allow crawling/asset-loading on
+    # NOT emitted. The default tmp/ text dump is off too. Seed from the localhost
+    # flat sitemap. Pin pages to the chosen set. Allow crawling/asset-loading on
     # the real domain.
     cmd = [BIN, f"--url={seed}",
            f"--allowed-domain-for-crawling={host}",
@@ -239,7 +239,7 @@ def run_crawl(fresh, cache, full=False):
 
 def capture(raw, fresh, full):
     """Crawl the whole site into raw/crawl.json (or reuse the cache). Network
-    side-effects only; §F is rendered from the JSON by scorecard_section(), so
+    side-effects only. §F is rendered from the JSON by scorecard_section(), so
     baseline.py captures once then renders the same way crawl.py does standalone."""
     return run_crawl(fresh, raw / "crawl.json", full)
 
@@ -267,7 +267,7 @@ def rollup_texts(data):
 
 def count_for(texts, needle):
     """First integer in the first rollup line that mentions `needle` (case-
-    insensitive), else 0 — e.g. count_for(t, 'skipped heading') -> 52."""
+    insensitive), else 0. E.g. count_for(t, 'skipped heading') -> 52."""
     nl = needle.lower()
     for t in texts:
         if nl in t.lower():
@@ -279,7 +279,7 @@ def count_for(texts, needle):
 
 def header_set(tables, name):
     """A security header counts as 'set' only if the crawl flagged no critical/
-    warning responses for it; if it's absent from the table, nothing flagged it."""
+    warning responses for it. If it's absent from the table, nothing flagged it."""
     for r in table_rows(tables, "security"):
         if (r.get("header") or "").lower() == name.lower():
             return int(r.get("critical") or 0) == 0 and int(r.get("warning") or 0) == 0
@@ -289,7 +289,7 @@ def header_set(tables, name):
 def coverage_line(data, html_pages):
     """One honest line on what the crawl actually reached, so a partial run can't
     pass for the whole site. The default crawl SAMPLES the sitemap, so a gap below
-    the full count is intentional — but analysing fewer pages than we *chose* to
+    the full count is intentional. But analysing fewer pages than we *chose* to
     crawl, or any 429, is a real shortfall and is flagged."""
     sm = data.get("_sitemapPages")
     sampled = data.get("_sampledPages") or sm
@@ -317,7 +317,7 @@ def _site_counts(data):
     """The site-wide count rows as an ordered {label: int}, plus the analysed page
     count — computed in ONE place so Section F (rendered below) and metrics() (the
     numbers the review diffs) can't disagree. The per-URL tables give broken/redirect/
-    title/description counts; the page-level counts ('52 page(s) with …') come from
+    title/description counts. The page-level counts ('52 page(s) with …') come from
     SiteOne's own rollup (rollup_texts), which the per-URL tables don't carry."""
     tables = data.get("tables", {})
     texts = rollup_texts(data)
@@ -359,7 +359,7 @@ def metrics(raw):
 def scorecard_section(raw):
     """Scorecard Section F (site-wide grades + counts), rendered from
     raw/crawl.json — the exact block baseline.py drops into the digest and crawl.py
-    prints under its standalone header — one renderer, two callers."""
+    prints under its standalone header. One renderer, two callers."""
     data = json.loads((raw / "crawl.json").read_text())
     full = bool(data.get("_full"))
     tables = data.get("tables", {})
@@ -432,7 +432,7 @@ def main():
     full = "--full" in args
     rd = resolve_run_dir(args)
     raw = rd / "raw"
-    out = None                                    # no default file: --out opts in
+    out = None                                    # no default file. --out opts in
     if "--out" in args:
         out = Path(args[args.index("--out") + 1])
 
@@ -486,7 +486,7 @@ def main():
     ]
     report = "\n".join(L) + "\n"
     print(report)                                 # stdout — human-readable standalone digest
-    if out:                                        # --out only; no default per-tool file
+    if out:                                        # --out only. no default per-tool file
         out.write_text(report)
         print(f"→ written to {out}", file=sys.stderr)
 

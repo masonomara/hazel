@@ -85,6 +85,7 @@
                 id="Search-In-Template"
                 type="search"
                 name="q"
+                aria-label="{{ 'general.search.search' | t }}"
                 value="{{ search.terms | escape }}"
                 placeholder="{{ 'general.search.search' | t }}"
                 {%- if settings.predictive_search_enabled -%}
@@ -117,12 +118,12 @@
                 aria-label="{{ 'general.search.reset' | t }}"
               >
                 <svg class="icon icon-close" aria-hidden="true" focusable="false">
-                  <use xlink:href="#icon-reset">
+                  <use xlink:href="#icon-reset" />
                 </svg>
               </button>
               <button type="submit" class="search__button field__button" aria-label="{{ 'general.search.search' | t }}">
                 <svg class="icon icon-search" aria-hidden="true" focusable="false">
-                  <use xlink:href="#icon-search">
+                  <use xlink:href="#icon-search" />
                 </svg>
               </button>
             </div>

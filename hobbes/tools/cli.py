@@ -9,8 +9,8 @@ hobbes CLI — runs the cycle stages and reads the filesystem state machine.
   publish-review   re-baseline the LIVE site into the cycle's raw-review/ (post-publish)
   review           diff the cycle's pre-publish 01-baseline.md vs raw-review/ -> 06-review.md
 
-  publish-review + review are NOT part of the cycle — a cycle measures the current
-  site; it has no "after" to compare (this cycle's fix isn't live yet). The
+  publish-review + review are NOT part of the cycle. A cycle measures the current
+  site. It has no "after" to compare — this cycle's fix isn't live yet. The
   before/after lives in the REVIEW phase (hobbes-review.yml), which re-baselines
   the live site after a publish and diffs against the cycle's pre-publish baseline.
 
@@ -40,8 +40,8 @@ def cmd_cycle(rest):
     rd = str(config.new_cycle_dir(CYCLES))  # a fresh <date>-<letter> folder
     _run("baseline.py", "--fresh", "--run-dir", rd, *rest)
     _run("evaluation.py", "--run-dir", rd)
-    # No review here — the cycle only measures the current site. The before/after is
-    # the review phase's job (re-baseline live post-publish, diff vs pre-publish).
+    # no review here. the cycle only measures the current site. the before/after is
+    # the review phase's job. re-baseline live post-publish and diff vs pre-publish.
 
 
 def cmd_baseline(rest):

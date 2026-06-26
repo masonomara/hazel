@@ -8,7 +8,7 @@ fixes, and rates effort/impact). See hobbes/templates/02-evaluation-template.md.
 WHY DETERMINISTIC: findings get rebuilt every cycle. Same raw → same findings,
 IDs and all. Everything here is extracted and sorted, never written fresh per
 run. The fix, the effort, the impact, and the source-file root cause are NOT
-here on purpose — those are judgment, and judgment lives in the plan.
+here on purpose. Those are judgment, and judgment lives in the plan.
 
 Sources, all under the cycle's raw/:
   raw/*.psi.json   — PSI/Lighthouse per golden page × mobile/desktop (A11Y, PERF, BP)
@@ -43,7 +43,7 @@ GOLDEN = {url: label for label, url in DEFAULT_URLS}
 STRATS = ("mobile", "desktop")
 
 # ── static knowledge overlay: id -> (what it is, why it matters / where it lives) ──
-# The deterministic "how it works deeply". Site-specific root cause stays for the plan.
+# the deterministic "how it works deeply". site-specific root cause stays for the plan.
 A11Y_KNOW = {
     "button-name": (
         "A <button> has no accessible name.",
@@ -211,7 +211,7 @@ def a11y_findings(psi, crawl):
             a = au.get(ref["id"], {})
             if a11y_audit_failed(
                 a
-            ):  # shared predicate with psi.py — scorecard §D and this catalog can't disagree
+            ):  # shared predicate with psi.py. scorecard §D and this catalog can't disagree
                 e = agg.setdefault(
                     ref["id"],
                     {"pages": set(), "nodes": {}, "title": a.get("title", "")},
@@ -249,9 +249,9 @@ def a11y_findings(psi, crawl):
                 ev,
             )
         )
-    # sitewide prevalence — the crawl's per-analysis element counts (critical/warning),
+    # sitewide prevalence. the crawl's per-analysis element counts (critical/warning),
     # far richer than the one-flag-per-page rollup. PSI rules above stay authoritative
-    # for the golden path; this is the scale beyond it.
+    # for the golden path. this is the scale beyond it.
     tables = crawl.get("tables", {})
     n = len(table_rows(tables, "seo"))
     acc = [
@@ -499,10 +499,10 @@ def seo_findings(seo_html, crawl):
     return out
 
 
-# The bare timing metrics — these ARE the numbers in scorecard §A/§B, not
+# The bare timing metrics. These ARE the numbers in scorecard §A/§B, not
 # resource-level opportunities, so they ride the overview finding, not their own
-# block. Everything else in the performance category is enumerated (no allowlist):
-# a hand-keyed list of audit ids silently drops audits the moment Lighthouse
+# block. Everything else in the performance category is enumerated (no allowlist).
+# A hand-keyed list of audit ids silently drops audits the moment Lighthouse
 # renames one (it renamed most to the `*-insight` family), which is exactly the
 # rot this rewrite removes.
 PERF_METRIC_AUDITS = {
@@ -520,7 +520,7 @@ PERF_METRIC_AUDITS = {
 def lh_text(audit):
     """Lighthouse's own title + description, cleaned of markdown links. Using the
     tool's own copy means a new/renamed audit can never land here blank or be
-    dropped — there is no id we have to recognise first."""
+    dropped. There is no id we have to recognise first."""
     title = (audit.get("title") or "").strip()
     desc = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", (audit.get("description") or ""))
     desc = re.sub(r"\s+", " ", desc).strip()
@@ -537,8 +537,8 @@ def _item_url(it):
 def _item_label(it):
     """A printable identity for any Lighthouse details item, however shaped:
     a URL, else a DOM node (label/selector/snippet), else a reason/cause string.
-    Returns None when nothing usable is present (the item is then skipped and the
-    audit falls back to its Lighthouse displayValue — never dropped)."""
+    Returns None when nothing usable is present. The item is then skipped and the
+    audit falls back to its Lighthouse displayValue — never dropped."""
     if not isinstance(it, dict):
         return trunc(str(it), 90)
     s = it.get("source")
@@ -577,8 +577,8 @@ def _item_ms(it):
 
 def _flatten_items(items):
     """Yield leaf detail items. The `*-insight` audits wrap a sub-table or
-    checklist one level down (details.items → [{type:table/checklist, items:…}]);
-    flatten those so the real rows (a source URL, a failing check, a culprit node)
+    checklist one level down (details.items → [{type:table/checklist, items:…}]).
+    Flatten those so the real rows (a source URL, a failing check, a culprit node)
     surface instead of an opaque wrapper."""
     if isinstance(items, dict):  # checklist {key:{label,value}}
         for v in items.values():
@@ -603,7 +603,7 @@ def _flatten_items(items):
 def perf_findings(psi, crawl):
     out = []
     # ── overview: lab perf + the metrics behind it, per page × device ──
-    # The score range is computed from the runs, not hand-typed, so it can't drift.
+    # the score range is computed from the runs, not hand-typed, so it can't drift.
     ev, scores = [], []
     for label, url in DEFAULT_URLS:
         for strat in STRATS:
@@ -645,9 +645,9 @@ def perf_findings(psi, crawl):
     )
 
     # ── every other failing perf audit, enumerated — NO allowlist ──
-    # Each audit's items are merged across the mobile runs (where perf fails). When
+    # each audit's items are merged across the mobile runs (where perf fails). when
     # an audit carries no clean resource list, its Lighthouse displayValue stands in
-    # as evidence — so a finding is emitted either way and nothing is silently lost.
+    # as evidence, so a finding is emitted either way and nothing is silently lost.
     agg = {}  # aid -> {runs:set, title, desc, merged:{label:(bytes,ms)}, disp:set}
     for label, url in DEFAULT_URLS:
         lh = psi.get((label, "mobile"))
@@ -864,9 +864,9 @@ def bp_findings(psi, crawl):
                 ev or ["(see raw/*.psi.json)"],
             )
         )
-    # crawl structural — enumerate every flagged row of the best-practices table,
-    # so a new SiteOne check can't fall through a hardcoded needle list. Curated
-    # context where we have it; the analysis name itself otherwise.
+    # crawl structural. enumerate every flagged row of the best-practices table,
+    # so a new SiteOne check can't fall through a hardcoded needle list. curated
+    # context where we have it. the analysis name itself otherwise.
     BP_CRAWL_WHY = {
         "Invalid inline SVGs": "Malformed inline SVG markup — can render wrong or bloat the DOM. Usually a template partial or a third-party-injected icon.",
         "Duplicate inline SVGs": "The same SVG inlined many times instead of defined once and referenced (<use>). Minor HTML bloat; common where an icon set is inlined per use — low priority.",
@@ -874,7 +874,7 @@ def bp_findings(psi, crawl):
         "Large inline SVGs": "Oversized inline SVGs bloat the HTML payload — consider an external asset or <use> reference.",
         "DOM depth": "Deeply nested DOM raises style/layout cost and memory. Usually a section/snippet nesting issue.",
     }
-    # SiteOne's best-practices table folds in checks other domains already own —
+    # SiteOne's best-practices table folds in checks other domains already own.
     # skip them here so a problem is reported once, in its home section.
     BP_CRAWL_SKIP = {
         "Heading structure",

@@ -18,8 +18,8 @@ sets — NOT re-parsed markdown — tier by tier:
 The numbers come from the metrics.json sidecars, emitted by psi.metrics()/crawl.metrics()
 — the SAME extraction the scorecard renders from — so the review can't disagree with the
 scorecard, and a cosmetic change to a markdown table can't silently break the diff. The
-tier titles, notes, and caveats live in templates/06-review-template.md; review.py fills
-in the computed tables. Writes 06-review.md into the cycle folder; prints a one-line
+tier titles, notes, and caveats live in templates/06-review-template.md. review.py fills
+in the computed tables. Writes 06-review.md into the cycle folder. Prints a one-line
 summary led by the trustworthy (field) regression count.
 
 USAGE:
@@ -46,7 +46,7 @@ AFTER_COL = "Live"
 BEFORE_METRICS = "01-baseline.metrics.json"  # committed beside 01-baseline.md
 AFTER_METRICS = "review-baseline.metrics.json"  # in the cycle's raw-review/
 
-# Short metric keys → the scorecard's own display labels, so the review speaks the
+# short metric keys → the scorecard's own display labels, so the review speaks the
 # same language the baseline does (not "perf"/"bp"/"lcp").
 SCORE_LABELS = {
     "perf": "Performance",
@@ -95,7 +95,7 @@ def _axe_deltas(after, before):
 
 def render_tier(title, note, rows):
     """One tier rendered like a baseline section: a before→after table of only the
-    rows that moved — or a single 'no change' line if none did."""
+    rows that moved, or a single 'no change' line if none did."""
     out = [f"## {title}", ""]
     if note:
         out += [f"*{note}*", ""]

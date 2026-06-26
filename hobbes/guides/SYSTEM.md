@@ -1,14 +1,23 @@
 # Hobbes — system map
 
+**Start here.** This is the map of the whole system.
+
 Hobbes is a **web-baseline + agentic-fix system**: it measures a live site, catalogs what's wrong, plans the highest-leverage fixes, writes them as a pull request, and — once a human publishes — re-measures to prove the impact. It runs in GitHub Actions on a Claude Code subscription, and it **writes only to GitHub** (branches, PRs, comments). Every deploy action — preview, publish, go-live — stays human.
 
-This file is the map of the whole system. For *setup*, see [`guides/SETUP.md`](SETUP.md). For *what Hobbes is and how it behaves*, see [`../CLAUDE.md`](../../CLAUDE.md).
+| Read | When |
+|---|---|
+| **This file** | The map — the pipeline, the dataflow, every file's role, the design calls. |
+| [`SETUP.md`](SETUP.md) | Stand it up — per-client config + local and cloud wiring. Once per client. |
+| [`BASELINE.md`](BASELINE.md) | Run a cycle — the tools, the run, the targets, the deliverables. Every cycle. |
+| [`../../CLAUDE.md`](../../CLAUDE.md) | Who Hobbes is — identity, stance, the hard line. Identical across clients. |
+
+**Standing context** (per-client, read on demand): [`MISSION.md`](../MISSION.md) · [`DEVELOPMENT.md`](../DEVELOPMENT.md) · [`CONTEXT.md`](../CONTEXT.md) · [`CHANGELOG.md`](../CHANGELOG.md). Config lives in [`hobbes.toml`](../hobbes.toml).
 
 ---
 
 ## The pipeline
 
-Six stages, split across a hard **determinism boundary**: deterministic tools do the measuring and comparing; a Claude agent does the judgment (plan + fix); a human owns going live.
+Six stages, split across a hard **determinism boundary**. Deterministic tools measure and compare. A Claude agent does the judgment — plan and fix. A human owns going live.
 
 ```
    ON-DEMAND — one trigger fires measure + fix together, into ONE PR
@@ -41,15 +50,15 @@ Six stages, split across a hard **determinism boundary**: deterministic tools do
 | **publish** | human | the change live on the site | you, on your platform |
 | **review** | tools (`publish-review.py` → `review.py`) | a **before/after comment** on the PR | review workflow (on `published`) |
 
-> The first four stages (baseline, findings, plan, execute) run in **one** `Hobbes cycle` workflow and land in **one PR** — the scorecard/findings (data) beside the code fix. The determinism boundary still holds inside that run: the Python tools measure first (reproducibly, no LLM), then the agent judges and fixes. **There is no diff in a cycle** — a cycle measures the current site and has no "after" to compare (this cycle's fix isn't live yet). The before/after is the **review** stage's job, after a publish.
+> The first four stages (baseline, findings, plan, execute) run in **one** `Hobbes cycle` workflow and land in **one PR** — the scorecard/findings (data) beside the code fix. The determinism boundary still holds inside that run. The Python tools measure first — reproducibly, no LLM — then the agent judges and fixes. **There is no diff in a cycle.** A cycle measures the current site and has no "after" to compare — this cycle's fix isn't live yet. The before/after is the **review** stage's job, after a publish.
 
-**Why the boundary matters:** measurement must be reproducible (same raw → same findings, IDs and all), so it's deterministic and rebuilt every cycle. Fixing is judgment (what to group, what it costs, what it's worth, what the root cause is), so it's the agent's. Going live is irreversible and outward-facing, so it's the human's.
+**Why the boundary matters:** measurement must be reproducible — same raw, same findings, IDs and all — so it's deterministic and rebuilt every cycle. Fixing is judgment — what to group, what it costs, what it's worth, what the root cause is — so it's the agent's. Going live is irreversible and outward-facing, so it's the human's.
 
 ---
 
 ## Follow the data — what reads what, and who emits the content
 
-The stage table above says *what each stage produces*. This is the other axis — the one that's easy to lose: **what each file reads, what it writes, and who consumes that next.** Follow one cycle's data from the live site all the way to the PR comment — and around the dataflow, the **drivers** that fire each phase (the two workflows + the CLI), the per-client **config and contracts** that feed the stages, and the **orientation docs**, so **every file in the repo appears on this map.**
+The stage table above says *what each stage produces*. This is the other axis — the one that's easy to lose: **what each file reads, what it writes, and who consumes that next.** Follow one cycle's data from the live site all the way to the PR comment. Around the dataflow sit the **drivers** that fire each phase (the two workflows + the CLI), the per-client **config and contracts** that feed the stages, and the **orientation docs** — so **every file in the repo appears on this map.**
 
 ```mermaid
 flowchart TD
@@ -140,15 +149,13 @@ flowchart TD
     %% ═════════ DOCS — orientation, read by the operator + agent (not in the dataflow) ═════════
     subgraph DOCS["orientation docs — read, not run"]
         direction TB
-        README["README.md — start here · the index"]:::guide
-        GSYS["guides/SYSTEM.md — THIS FILE · the whole map"]:::guide
+        GSYS["guides/SYSTEM.md — THIS FILE · start here · the whole map + index"]:::guide
         GSET["guides/SETUP.md — stand it up, once per client"]:::guide
         GBASE["guides/BASELINE.md — run a cycle · the operator runbook"]:::guide
-        README --> GSYS
-        README --> GSET
-        README --> GBASE
+        GSYS --> GSET
+        GSYS --> GBASE
     end
-    README -. "how to operate the system" .-> WCYCLE
+    GSYS -. "how to operate the system" .-> WCYCLE
 
     %% ═════════ LEGEND ═════════
     subgraph LEGEND["legend"]
@@ -181,15 +188,13 @@ flowchart TD
     classDef guide fill:#e7e5e4,stroke:#78716c,color:#292524;
 ```
 
-**Five handoffs worth understanding — this is the "what each file does along the way":**
+**What the diagram doesn't show — the five load-bearing handoffs:**
 
-1. **Two readers, one source — no middle file.** Each capture tool writes its raw JSON to `raw/` (and, run standalone, also prints a human-readable digest to stdout). `baseline.py` **imports the three tools and renders §A–F straight from `raw/`** — calling each tool's own `scorecard_section(s)()` — then stamps them into `01-baseline.md` with §G from `01-baseline-template.md`. No stdout is scraped and no per-tool `*-results.md` lands on disk. `evaluation.py` reads the **same** `raw/` artifacts (`raw/*.psi.json`, `raw/crawl.json`) directly for its node-level detail. `raw/` is git-ignored. This is why `02-evaluation.md` can't be rebuilt from `01-baseline.md`: the catalog needs node-level evidence the scorecard's summary tables threw away.
-2. **The catalog and the scorecard share their renderers, and both rebuild from `raw/`.** `baseline.py` renders each scorecard section by calling the *same function* the standalone tool uses (`psi.scorecard_sections`, `seo.scorecard_section`, `crawl.scorecard_section`), so the digest and a standalone tool run can't disagree — and the scorecard re-renders from cache with no re-fetch. `evaluation.py` then *imports* the extractors it needs — `Page` / `head_ok` / `OG_REQUIRED` from `seo.py`, `table_rows` / `count_for` / `rollup_texts` / `header_set` from `crawl.py`, and the `a11y_audit_failed` predicate from `psi.py` — so where a number depends on "what counts" (a failing axe audit, a missing OG tag, a flagged crawl row), the catalog and the scorecard ride the *same definition*. The two are still **separate scripts** — the scorecard renders compact section tables, the catalog re-walks the PSI JSON for per-node evidence the scorecard never keeps — but neither scrapes the other's output, and both read only `raw/`.
-3. **The review runs only post-publish — never in a cycle.** A cycle measures the current site; it has no "after" to compare (this cycle's fix isn't even live yet). So the before/after lives entirely in the post-publish **review**, split across two review-only tools, both writing inside the PR's own cycle folder: `publish-review.py` (a twin of `baseline.py`, sharing the `capture.py` core) re-captures the **live** site into `raw-review/`, renders the after-digest `raw-review/review-baseline.md`, and writes its structured sidecar `review-baseline.metrics.json`; `review.py` then diffs the cycle's pre-publish `01-baseline.metrics.json` (the before — everything leading up to the PR) against that after-metrics, tier by tier (field / lab / axe / counts) through `06-review-template.md`. **It diffs the structured JSON sidecars, not re-parsed markdown** — `psi.metrics()`/`crawl.metrics()` emit the same numbers the scorecard renders, so a cosmetic change to a scorecard table can't silently break the diff. No findings re-run — the review needs the measured before/after, not a rebuilt catalog. (This is also where the **28-day CrUX field** impact of a fix finally shows — the review fires too soon after publish for field to move, so it's the *next* review/cycle that confirms it.)
-4. **The agent's primary input is the catalog, not `raw/`.** Judgment works off `02-evaluation.md` — an already-fixed, deterministic list of problems — not the megabytes of Lighthouse JSON. `raw/` stays a **break-glass** fallback: plan or execute may drop to it when the catalog's extract isn't enough to group, cost, or author a fix — but it's the exception, never the default, because routing judgment through raw re-derives findings non-deterministically and erodes the determinism boundary. The templates (`PLAN`, `EXECUTE`) are the skeleton it must fill; the codebase is what it reads to write the actual fix.
-5. **The capture tools run in both phases; the review tools don't.** psi/seo/crawl run in the cycle (driven by `baseline.py`, into `raw/`, pre-fix) **and** in the review (driven by `publish-review.py`, into `raw-review/`, on the now-live site). `publish-review.py` and `review.py` are the two pieces that are review-only — `publish-review.py` re-captures the live site into the cycle's `raw-review/`, `review.py` diffs it against the pre-publish `01-baseline.md`, and that diff (`06-review.md`) *is* the PR comment.
-
-**The determinism boundary, restated as authorship:** every **number** and every **comparison** in this flow is emitted by Python (`baseline.py`, `evaluation.py`, `publish-review.py`, `review.py`) — reproducible, unspinnable. Only the **fix narrative and the PR prose** are the agent's, and even those ride a fixed template skeleton. The PR comment (`06-review.md`) is 100% Python; the PR body is agent prose constrained by `04-execute-template.md`.
+1. **One source, two readers, no middle file.** Each capture tool writes raw JSON to `raw/` (git-ignored). `baseline.py` renders §A–F from `raw/` by calling each tool's *own* `scorecard_section(s)()`; `evaluation.py` re-walks the same `raw/` for node-level evidence. Nothing scrapes stdout. So `02-evaluation.md` can't rebuild from `01-baseline.md` — the catalog needs node detail the scorecard threw away.
+2. **Catalog and scorecard share definitions.** Where a number depends on "what counts" — a failing axe audit, a missing OG tag, a flagged crawl row — `evaluation.py` imports the same predicate the scorecard uses (`a11y_audit_failed`, `OG_REQUIRED`, the crawl extractors). Separate scripts, one definition, both read only `raw/`. They can't disagree.
+3. **The review runs only post-publish, never in a cycle.** A cycle has no "after" — its fix isn't live yet. So `publish-review.py` (a twin of `baseline.py` over the `capture.py` core) re-captures the live site into `raw-review/`, and `review.py` diffs the **structured JSON sidecars** — `01-baseline.metrics.json` vs `review-baseline.metrics.json`, the same numbers the scorecard renders — tier by tier. A cosmetic table change can't break the diff. This delay is also what lets the 28-day CrUX field signal move.
+4. **The agent reads the catalog, not `raw/`.** Judgment works off `02-evaluation.md` — a fixed, deterministic problem list — not megabytes of Lighthouse JSON. `raw/` is **break-glass**: dropped to only when the catalog can't group, cost, or author a fix, because routing judgment through raw re-derives findings non-deterministically.
+5. **Authorship is the boundary.** Every number and comparison is Python (`baseline`/`evaluation`/`publish-review`/`review`) — reproducible, unspinnable. The PR comment (`06-review.md`) is 100% Python. Only the fix and the PR body are the agent's, and both ride a fixed template.
 
 ### Reads → writes → consumed by
 
@@ -211,14 +216,14 @@ flowchart TD
 ## Every file in the system
 
 ### Standing context — who Hobbes is and what it's steering by
-*(Read by the agent; prose, not code.)*
+*(Read by the agent. Prose, not code.)*
 
 | File | Role |
 |---|---|
 | [`../CLAUDE.md`](../../CLAUDE.md) | Hobbes's identity, stance, and **the hard line** (never publish/merge/spend without sign-off). Identical across all clients. |
 | [`MISSION.md`](../MISSION.md) | What this client optimizes for, as **baseline → target** priorities (e.g. a11y, SEO, performance). Points at the scorecard for the numbers. |
 | [`DEVELOPMENT.md`](../DEVELOPMENT.md) | The stack and the build rules — the "done means" gates. |
-| [`CONTEXT.md`](../CONTEXT.md) | The client: goals, users, the people who sign off, where access lives. |
+| [`CONTEXT.md`](../CONTEXT.md) | The client — goals, users, who signs off, where access lives. |
 | [`CHANGELOG.md`](../CHANGELOG.md) | What has shipped, why, and to what result. |
 
 ### Config — the one source of per-client truth
@@ -230,14 +235,14 @@ flowchart TD
 | File | Lines | Role |
 |---|---|---|
 | [`tools/config.py`](../tools/config.py) | — | Single source loaded from `hobbes.toml`: `golden_path()`, `client_meta()`, `psi_key()` ($PSI_API_KEY), `effort_budget()`, `sample_path()`, `today()`/`stamp()` (pinned-tz dates so local + CI never disagree), and the cycle-folder helpers `new_cycle_dir()` / `latest_cycle()` / `cycle_dirs()` / `default_run_dir()` (the `<date>-<letter>` naming, one source so local + CI agree). |
-| [`tools/psi.py`](../tools/psi.py) | 403 | PageSpeed Insights / Lighthouse capture → `raw/*.psi.json`; renders scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) from raw/ (`scorecard_sections`). Median-of-3, retry-resilient (survives PSI timeouts and truncated reads). |
-| [`tools/seo.py`](../tools/seo.py) | 372 | Per-page HTML SEO checklist → `raw/*.seo.json`; renders **§E** from raw/ (`scorecard_section`) — titles, meta, canonical, OG, structured data. |
-| [`tools/crawl.py`](../tools/crawl.py) | 468 | SiteOne sitemap crawl (stratified sample) → `raw/crawl.json`; renders **§F** from raw/ (`scorecard_section`) — site-wide SEO/a11y/security counts. |
-| [`tools/capture.py`](../tools/capture.py) | — | The **shared capture→render→metrics core** for `baseline.py` and `publish-review.py`: drives psi/seo/crawl `capture()` into a raw dir, renders §A–F via the tools' own renderers, collects the structured `metrics()`, and stamps the shared digest header. The two entry points differ only in target dir, header/intro, and §G — so they can't drift. |
-| [`tools/baseline.py`](../tools/baseline.py) | — | The pre-publish entry point: via `capture.py`, captures into `raw/` of one dated cycle folder (`<date>-<letter>`) and renders §A–F into the digest `01-baseline.md` (from `01-baseline-template.md`), **plus the committed before-metrics `01-baseline.metrics.json`** the review diffs. Honors `--run-dir`. |
-| [`tools/evaluation.py`](../tools/evaluation.py) | 1009 | The **problem catalog**: reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are deliberately left to the plan. |
-| [`tools/publish-review.py`](../tools/publish-review.py) | — | **REVIEW-ONLY**, a twin of `baseline.py` over the same `capture.py` core: captures the **live** site into the cycle's `raw-review/` (beside the pre-publish `raw/`), renders the after-digest `raw-review/review-baseline.md`, **and writes the after-metrics `review-baseline.metrics.json`**. Honors `--run-dir`; defaults to the latest cycle. |
-| [`tools/review.py`](../tools/review.py) | — | **REVIEW-ONLY** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated). **Diffs the structured metrics sidecars** — `01-baseline.metrics.json` (before) vs `raw-review/review-baseline.metrics.json` (after) — through `06-review-template.md` → `06-review.md`. No markdown re-parsing: the numbers are `psi.metrics()`/`crawl.metrics()`, the same the scorecard renders. |
+| [`tools/psi.py`](../tools/psi.py) | 403 | PageSpeed Insights / Lighthouse capture → `raw/*.psi.json`. Renders scorecard **§A–D** (lab perf/a11y/BP/SEO + CrUX field) from raw/ (`scorecard_sections`). Median-of-3, retry-resilient — survives PSI timeouts and truncated reads. |
+| [`tools/seo.py`](../tools/seo.py) | 372 | Per-page HTML SEO checklist → `raw/*.seo.json`. Renders **§E** from raw/ (`scorecard_section`) — titles, meta, canonical, OG, structured data. |
+| [`tools/crawl.py`](../tools/crawl.py) | 468 | SiteOne sitemap crawl (stratified sample) → `raw/crawl.json`. Renders **§F** from raw/ (`scorecard_section`) — site-wide SEO/a11y/security counts. |
+| [`tools/capture.py`](../tools/capture.py) | — | The **shared capture→render→metrics core** for `baseline.py` and `publish-review.py`. It drives psi/seo/crawl `capture()` into a raw dir, renders §A–F via the tools' own renderers, collects the structured `metrics()`, and stamps the shared digest header. The two entry points differ only in target dir, header/intro, and §G — so they can't drift. |
+| [`tools/baseline.py`](../tools/baseline.py) | — | The pre-publish entry point. Via `capture.py`, captures into `raw/` of one dated cycle folder (`<date>-<letter>`) and renders §A–F into the digest `01-baseline.md` (from `01-baseline-template.md`), **plus the committed before-metrics `01-baseline.metrics.json`** the review diffs. Honors `--run-dir`. |
+| [`tools/evaluation.py`](../tools/evaluation.py) | 1009 | The **problem catalog**. Reads raw/ → `02-evaluation.md`, every issue with verbatim evidence + a static knowledge overlay (what it is, why it matters). Deterministic — fix/effort/impact are left to the plan. |
+| [`tools/publish-review.py`](../tools/publish-review.py) | — | **REVIEW-ONLY**, a twin of `baseline.py` over the same `capture.py` core. Captures the **live** site into the cycle's `raw-review/` (beside the pre-publish `raw/`), renders the after-digest `raw-review/review-baseline.md`, **and writes the after-metrics `review-baseline.metrics.json`**. Honors `--run-dir` and defaults to the latest cycle. |
+| [`tools/review.py`](../tools/review.py) | — | **REVIEW-ONLY** before/after (not run in a cycle), **honest by tier**: Field (CrUX, trustworthy) / Lab (§A, volatile) / **§D axe a11y** / §F counts (coverage-gated). **Diffs the structured metrics sidecars** — `01-baseline.metrics.json` (before) vs `raw-review/review-baseline.metrics.json` (after) — through `06-review-template.md` → `06-review.md`. No markdown re-parsing — the numbers are `psi.metrics()`/`crawl.metrics()`, the same the scorecard renders. |
 
 ### The CLI
 | File | Lines | Role |
@@ -261,7 +266,7 @@ flowchart TD
 | [`../.github/workflows/hobbes-review.yml`](../../.github/workflows/hobbes-review.yml) | `published` label + dispatch (PR #) | Post-publish: `publish-review.py` re-captures the **live** site into the PR cycle's `raw-review/`, `review.py` diffs vs the pre-publish `01-baseline.md` → `06-review.md`, commented on the PR. No Claude. |
 
 ### Operator guides — `hobbes/guides/`
-*(Engine-generic — same across clients; read by the agent and the human operator.)*
+*(Engine-generic — same across clients. Read by the agent and the human operator.)*
 | File | Role |
 |---|---|
 | [`guides/SYSTEM.md`](SYSTEM.md) | **This file** — the map of the whole system: the pipeline, the data flow, every file's role, and the load-bearing design decisions. |
@@ -269,19 +274,19 @@ flowchart TD
 | [`guides/BASELINE.md`](BASELINE.md) | The operator's runbook for a baseline cycle — the tools, the run, the targets, the deliverables. Read by the agent during a cycle. |
 
 ### Cycle data — `hobbes/cycle/<YYYY-MM-DD>-<letter>/`
-Each cycle is a folder — the **filesystem is the state machine**. The folder name is the cycle date plus a letter (`2026-06-26-A`, `-B`, …), assigned upstream so more than one cycle can run on the same day. A folder accumulates, in order: `01-baseline.md` (+ its committed sidecar `01-baseline.metrics.json`) → `02-evaluation.md` → `03-plan.md` → `04-execute.md` (the cycle, beside `raw/`), then post-publish `raw-review/` → `06-review.md` (the review). `raw/` and `raw-review/` hold the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediates. The three capture tools write their raw JSON to `raw/` (cycle) or `raw-review/` (review); `baseline.py` and `publish-review.py` (over the shared `capture.py` core) render §A–F from those via each tool's own renderer **and emit a `*.metrics.json` sidecar of the structured numbers the review diffs**. The before-metrics is committed beside `01-baseline.md` (so a fresh CI review job still has it); the after-metrics rides in the git-ignored `raw-review/` (written and consumed in the same review job). So the before (`01-baseline.md`) and after (`raw-review/review-baseline.md`) of a fix live in **one** cycle folder. Which files exist tells you which stage the cycle reached (`cli.py status`).
+Each cycle is a folder — the **filesystem is the state machine**. The folder name is the cycle date plus a letter (`2026-06-26-A`, `-B`, …), assigned upstream so more than one cycle can run on the same day. A folder accumulates, in order: `01-baseline.md` (+ its committed sidecar `01-baseline.metrics.json`) → `02-evaluation.md` → `03-plan.md` → `04-execute.md` (the cycle, beside `raw/`), then post-publish `raw-review/` → `06-review.md` (the review). `raw/` and `raw-review/` hold the `*.psi.json` / `*.seo.json` / `crawl.json` captures — git-ignored, the only build intermediates. The three capture tools write their raw JSON to `raw/` (cycle) or `raw-review/` (review). Then `baseline.py` and `publish-review.py` (over the shared `capture.py` core) render §A–F from those via each tool's own renderer **and emit a `*.metrics.json` sidecar of the structured numbers the review diffs**. The before-metrics is committed beside `01-baseline.md` so a fresh CI review job still has it. The after-metrics rides in the git-ignored `raw-review/`, written and consumed in the same review job. So the before (`01-baseline.md`) and after (`raw-review/review-baseline.md`) of a fix live in **one** cycle folder. Which files exist tells you which stage the cycle reached (`cli.py status`).
 
 ---
 
 ## How it runs
 
 **Cloud (the default).** Both workflows run from the **default branch** in GitHub Actions:
-- **Measure + fix:** Actions → *Hobbes cycle* → Run (blank budget = `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings *and* the code change. Manual trigger only — there is no cron; a cycle fires when you ask for one.
+- **Measure + fix:** Actions → *Hobbes cycle* → Run (blank budget = `hobbes.toml` default). It measures, then plans and writes the fix → **one PR** with the scorecard/findings *and* the code change. Manual trigger only. There is no cron — a cycle fires when you ask for one.
 - **Verify:** add the **`published`** label to the merged PR (after you publish/go live). → before/after comment. Manual re-run: Actions → *Hobbes review* → Run → enter the PR number.
 
-GitHub emails you when a PR opens or a comment posts — that's the notification; you don't watch anything.
+GitHub emails you when a PR opens or a comment posts. That's the notification. You don't watch anything.
 
-**Local.** The deterministic half runs on a laptop with Python 3.11+ and the SiteOne crawler — `python3 hobbes/tools/cli.py cycle` produces the data (scorecard + findings) only. The agent half (plan + fix) runs as the cloud workflow, or as local Claude Code against the templates (no secret needed — uses your login).
+**Local.** The deterministic half runs on a laptop with Python 3.11+ and the SiteOne crawler — `python3 hobbes/tools/cli.py cycle` produces the data (scorecard + findings) only. The agent half (plan + fix) runs as the cloud workflow, or as local Claude Code against the templates. No secret needed — it uses your login.
 
 **The operator's loop:** run *Hobbes cycle* when you want work → one PR (data + fix) in your inbox · review + merge → publish (go live) → add `published` → the review posts the impact.
 
@@ -291,10 +296,10 @@ GitHub emails you when a PR opens or a comment posts — that's the notification
 
 - **GitHub-only.** Hobbes touches nothing but GitHub. No platform CLI, no deploy credentials. Going live is always a human on the platform.
 - **Claude Code, not the API.** The agent stage (plan + fix) authenticates with a **Claude Code subscription token** (`claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`), never a pay-per-token API key. The deterministic stages use no Claude at all.
-- **The determinism boundary.** Tools measure and compare (reproducible); the agent judges and builds (creative); the human publishes (irreversible). Each thing lives where it belongs.
-- **Measure and fix fire together, into one PR.** A CI cycle always runs the deterministic measure *and* the agent fix on one trigger, landing the scorecard/findings beside the code change in a single PR — so the fix is always planned against fresh measurements, never a stale cycle folder. There's no measure-only cron; a data-only run is the local `cli.py cycle`.
-- **The before/after is the review's, not the cycle's.** A cycle measures the current site and has no "after" — this cycle's fix isn't live yet — so it writes no review. The before/after lives entirely in the **review** phase (post-publish): `publish-review.py` re-captures the live site into the cycle's `raw-review/`, and `review.py` compares it to the same cycle's pre-publish `01-baseline.md` (the before — everything leading up to the PR). This also gives the 28-day CrUX field signal time to move, which an at-publish comparison can't.
-- **The review doesn't lie.** When it runs (post-publish), `review.py` separates the trustworthy field signal from volatile lab noise, gates site-wide counts on crawl coverage (a collapsed crawl can't read as "improvement"), and surfaces the §D a11y findings the agent actually targets — distinguishing a real win from noise from an *unfulfilled claim*.
+- **The determinism boundary.** Tools measure and compare, reproducibly. The agent judges and builds, creatively. The human publishes, irreversibly. Each thing lives where it belongs.
+- **Measure and fix fire together, into one PR.** A CI cycle always runs the deterministic measure *and* the agent fix on one trigger, landing the scorecard/findings beside the code change in a single PR. So the fix is always planned against fresh measurements, never a stale cycle folder. There's no measure-only cron — a data-only run is the local `cli.py cycle`.
+- **The before/after is the review's, not the cycle's.** A cycle measures the current site and has no "after" — this cycle's fix isn't live yet — so it writes no review. The before/after lives entirely in the **review** phase, post-publish. `publish-review.py` re-captures the live site into the cycle's `raw-review/`, and `review.py` compares it to the same cycle's pre-publish `01-baseline.md` (the before — everything leading up to the PR). This also gives the 28-day CrUX field signal time to move, which an at-publish comparison can't.
+- **The review doesn't lie.** When it runs (post-publish), `review.py` separates the trustworthy field signal from volatile lab noise, gates site-wide counts on crawl coverage (a collapsed crawl can't read as "improvement"), and surfaces the §D a11y findings the agent actually targets — telling a real win from noise from an *unfulfilled claim*.
 - **`published` is an explicit signal.** The review fires on a human-added label, not on merge — because "merged" doesn't mean "live," and every client's hosting/deploy is wired differently.
 - **Pinned-timezone dates.** Cycle folders are stamped in `[cycle].timezone`, so a local run and a UTC CI runner always land on the same calendar day.
-- **Effort budget is a ceiling, not a quota.** Execute fills it with leverage-ordered work and won't shoehorn; a high budget only produces a big PR when there's that much worthwhile work queued.
+- **Effort budget is a ceiling, not a quota.** Execute fills it with leverage-ordered work and won't shoehorn. A high budget only produces a big PR when there's that much worthwhile work queued.

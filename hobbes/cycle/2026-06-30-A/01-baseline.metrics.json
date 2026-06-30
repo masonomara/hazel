@@ -1,0 +1,76 @@
+{
+  "scores": {
+    "Home \u2014 mobile": {
+      "perf": 44,
+      "a11y": 100,
+      "bp": 96,
+      "seo": 100
+    },
+    "Home \u2014 desktop": {
+      "perf": 57,
+      "a11y": 100,
+      "bp": 92,
+      "seo": 100
+    },
+    "Collection \u2014 mobile": {
+      "perf": 47,
+      "a11y": 100,
+      "bp": 92,
+      "seo": 100
+    },
+    "Collection \u2014 desktop": {
+      "perf": 57,
+      "a11y": 100,
+      "bp": 96,
+      "seo": 100
+    },
+    "Product \u2014 mobile": {
+      "perf": 40,
+      "a11y": 100,
+      "bp": 96,
+      "seo": 100
+    },
+    "Product \u2014 desktop": {
+      "perf": 65,
+      "a11y": 100,
+      "bp": 96,
+      "seo": 100
+    }
+  },
+  "field": {
+    "Home": {
+      "lcp": 1.756,
+      "inp": 106.0,
+      "cls": 0.09
+    },
+    "Collection": {
+      "lcp": 0.721,
+      "inp": 77.0,
+      "cls": 0.01
+    },
+    "Product": {
+      "lcp": 1.128,
+      "inp": 104.0,
+      "cls": 0.0
+    }
+  },
+  "axe": {},
+  "counts": {
+    "Broken links (4xx)": 0,
+    "Redirects": 0,
+    "Missing titles": 0,
+    "Duplicate titles": 0,
+    "Missing meta descriptions": 0,
+    "Pages with multiple H1": 1,
+    "Pages with skipped heading levels": 1,
+    "Pages missing image alt": 0,
+    "Pages missing aria-labels": 1,
+    "Pages missing roles": 0,
+    "Pages missing html lang": 0,
+    "Pages with invalid inline SVG": 0,
+    "Pages with duplicate inline SVG": 9,
+    "Pages with non-clickable phone numbers": 0,
+    "Valid HTML": 179
+  },
+  "crawl_pages": 179
+}

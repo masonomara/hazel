@@ -30,7 +30,7 @@ Locations only — never the secrets themselves.
 - **Shopify admin** — owner's account; store `hazelboutiquenj.myshopify.com`. Theme ships via the Shopify CLI authed on Mason's machine.
 - **GitHub** — `github.com/masonomara/hazel.git` (Mason).
 - **Store CDN** — fonts and images under `cdn.shopify.com/s/files/1/0051/3264/8566/`.
-- **Apps** (configured in Shopify admin) — Judge.me, Instafeed, DA Restock, Route Insurance, AccessEase.
+- **Apps** (configured in Shopify admin) — Judge.me, Instafeed, DA Restock, Route Insurance, AccessEase, and more.
 - **Email** — `shop@hazelboutique.com` (contact + returns).
 
 ## 5. Hard constraints

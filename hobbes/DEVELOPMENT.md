@@ -8,7 +8,13 @@ The stack and the rules of the build. Hobbes reads this in full before it touche
 
 - **Platform:** Shopify **Advanced** plan (not Plus — that gates features like Cart Transform Functions). Store `hazelboutiquenj.myshopify.com` → `hazelboutique.com`.
 - **Framework & language:** Liquid + vanilla JavaScript (native Custom Elements / Web Components — no framework) + plain CSS. A fork of Shopify **Dawn v13.0.1**. No build toolchain: no npm, no bundler, no preprocessor.
-- **Key integrations:** Judge.me (reviews) · Instafeed (Instagram) · DA Restock (back-in-stock) · Route Insurance (shipping protection — flagged for removal) · AccessEase (a11y audit, admin-only) · Meta Pixel (purchase events, TikTok + Instagram). The cart is a **drawer** on Shopify's AJAX Cart API with a PubSub event bus (`assets/pubsub.js`).
+- **Key integrations:** All our integrations need an eventual manual aidit:
+  - Judge.me: reviews
+  - Instafeed: Instagram
+  - DA Restock: back-in-stock
+  - Route Insurance: shipping protection. Keep as a live, used feature that loads via legacy Shopify SScriptTag (`shopify-widget.route.com/shopify.widget.js`) and needs migrating to Route's modern theme-app-extension / web pixel before the non-Plus order-status.
+  - AccessEase: a11y audit, admin-only
+  - Meta Pixel: purchase events, TikTok + Instagram
 - **Hosting / deploy:** Shopify-hosted. Source in this Git repo (`github.com/masonomara/hazel.git`); ships to the store theme via the Shopify CLI (bidirectional — admin/editor edits pull back down). Fonts and images on the store CDN (`cdn.shopify.com/s/files/1/0051/3264/8566/`).
 
 ## Build & run

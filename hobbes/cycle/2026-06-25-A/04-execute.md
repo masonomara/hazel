@@ -64,4 +64,4 @@ The 32px `aria-hidden` decorative icon and admin-uploaded product images are del
 - SYS-2: confirm the secondary card image and multicolumn images now report alt present; confirm the screen-reader name of the card link is acceptable given the title already appears (mild redundancy — manual §G sign-off).
 - SYS-3: confirm every collection page H1 still shows the title and reads "Collection: <title>" once (no visual change expected).
 
-**Bucket 3 — handed to a human (see PR to-dos):** SYS-4 (content), SYS-5 (Route Insurance removal + HEIC re-export + browser-gated perf), SYS-6 (platform headers), SYS-7 (third-party/benign), and the A11Y-2 residual single-page heading/unnamed-link items needing a rendered-DOM follow-up.
+**Bucket 3 — handed to a human (see PR to-dos):** SYS-4 (content), SYS-5 (Route Insurance — **KEPT, not removed [superseded 2026-06-30; migrate off legacy ScriptTag instead, see DEVELOPMENT.md]** + HEIC re-export + browser-gated perf), SYS-6 (platform headers), SYS-7 (third-party/benign), and the A11Y-2 residual single-page heading/unnamed-link items needing a rendered-DOM follow-up.

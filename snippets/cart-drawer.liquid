@@ -22,6 +22,8 @@
     function renderUpsell(product) {
       const cartItemElement = document.querySelector('#CartDrawer-Item-1');
       if (!cartItemElement) return;
+      const rawImage = product.images && product.images[0];
+      const image = rawImage ? `${rawImage}${rawImage.includes('?') ? '&' : '?'}width=400` : '';
       cartItemElement.insertAdjacentHTML('beforeend', `
 <div class="cartUpsell__container">
   <div class="cartUpsell__arrow">
@@ -32,7 +34,7 @@
   </div>
   <div class="cartUpsell__label">Wear it with:</div>
   <a class="cartUpsell__container--inner" href="${product.url}">
-    <img class="cartUpsell__image" src="${product.images[0]}" alt="${product.title}" />
+    <img class="cartUpsell__image" src="${image}" alt="${product.title}" width="400" height="500" loading="lazy" />
     <div class="cartUpsell__content">
       <div class="cartUpsell__text">
         <div>${product.title}</div>

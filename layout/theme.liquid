@@ -35,8 +35,13 @@
           assign meta_description = product.description | strip_html | truncate: 160
         elsif request.page_type == 'article'
           assign meta_description = article.excerpt_or_content | strip_html | truncate: 160
+        elsif request.page_type == 'blog'
+          assign meta_description = blog.title | append: ' from ' | append: shop.name | append: '.'
         elsif request.page_type == 'page'
           assign meta_description = page.content | strip_html | truncate: 160
+          if meta_description == blank
+            assign meta_description = page.title | append: ' at ' | append: shop.name | append: '.'
+          endif
         endif
       endif
       if meta_description == blank

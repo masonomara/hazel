@@ -191,6 +191,11 @@
           "button_horizontal_position": "bottom_right",
           "button_vertical_position": "lowest"
         }
+      },
+      "18131037017812181619": {
+        "type": "shopify://apps/mailchimp-email-sms/blocks/mailchimp_for_shopify_script/e3b67dce-fd41-4b61-b3cf-961c12344cde",
+        "disabled": true,
+        "settings": {}
       }
     },
     "color_schemes": {

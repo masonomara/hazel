@@ -46,6 +46,8 @@
   if media.media_type == 'image'
     assign image_class = 'image-magnify-' | append: section.settings.image_zoom
   endif
+
+  assign media_alt = media.preview_image.alt | default: product.title
 -%}
 
 {%- capture sizes -%}
@@ -64,6 +66,7 @@
           media.preview_image
           | image_url: width: 1946
           | image_tag:
+            alt: media_alt,
             loading: lazy,
             sizes: sizes,
             widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1946'
@@ -83,6 +86,7 @@
           media.preview_image
           | image_url: width: 1946
           | image_tag:
+            alt: media_alt,
             loading: lazy,
             sizes: sizes,
             widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1946'
@@ -116,6 +120,7 @@
         media.preview_image
         | image_url: width: 1946
         | image_tag:
+          alt: media_alt,
           class: image_class,
           loading: lazy,
           fetchpriority: fetchpriority,
@@ -155,6 +160,7 @@
         media.preview_image
         | image_url: width: 1946
         | image_tag:
+          alt: media_alt,
           loading: lazy,
           sizes: sizes,
           widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1946'

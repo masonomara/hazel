@@ -38,11 +38,11 @@
         autocomplete="email"
         autocapitalize="off"
         autocorrect="off"
-        placeholder=" "
+        aria-label="Email"
+        placeholder="Email"
         required
         aria-required="true"
       >
-      <label class="field__label">Email<span aria-hidden="true"> *</span></label>
     </div>
 
     <div class="alerts-form__field field">
@@ -52,9 +52,9 @@
         name="SMSPHONE"
         inputmode="tel"
         autocomplete="tel"
-        placeholder=" "
+        aria-label="Mobile number (optional)"
+        placeholder="Mobile number (optional)"
       >
-      <label class="field__label">Mobile number (optional)</label>
     </div>
 
     <label class="alerts-form__consent" data-alerts-consent hidden>
@@ -74,7 +74,7 @@
       <input type="text" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="">
     </div>
 
-    <button type="submit" class="alerts-form__submit button button--full-width">Notify me</button>
+    <button type="submit" class="alerts-form__submit button button--full-width button--primary">Sign Up</button>
     <p class="alerts-form__msg form__message" role="status" aria-live="polite"></p>
   </form>
 </template>
@@ -92,9 +92,16 @@
     <button type="button" class="alerts-modal__close" data-alerts-close aria-label="Close">
       <span aria-hidden="true">&times;</span>
     </button>
-    <h2 id="AlertsModalTitle" class="alerts-modal__title h4">Sign up for alerts</h2>
-    <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales — by email, text, or both.</p>
-    <div class="alerts-modal__slot" data-alerts-slot></div>
+    <div class="alerts-modal__layout">
+      <div class="alerts-modal__media" data-alerts-media hidden>
+        <img alt="" loading="lazy" decoding="async" width="600" height="600">
+      </div>
+      <div class="alerts-modal__body">
+        <h2 id="AlertsModalTitle" class="alerts-modal__title">Sign up for alerts</h2>
+        <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales by email, text, or both.</p>
+        <div class="alerts-modal__slot" data-alerts-slot></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -114,25 +121,26 @@
   .alerts-modal__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(var(--color-shadow, 18 18 18), 0.55);
+    background: rgba(var(--color-foreground), 0.5);
     cursor: pointer;
+    display: flex!important;
   }
   .alerts-modal__content {
     position: relative;
     box-sizing: border-box;
     width: 100%;
-    max-width: 42rem;
+    max-width: 800px;
     max-height: calc(100vh - 3rem);
     overflow-y: auto;
-    padding: 3.5rem 3rem 3rem;
+    padding: 0;
     border-radius: var(--inputs-radius, 0.4rem);
     background-color: rgb(var(--color-background));
     color: rgb(var(--color-foreground));
-    border: 1px solid rgb(var(--color-foreground));
-    box-shadow: 0 4px 24px rgba(var(--color-shadow, 18 18 18), 0.05);
+
+
   }
   @media screen and (min-width: 750px) {
-    .alerts-modal__content { padding: 4rem 4rem 3.5rem; }
+    .alerts-modal__content { padding: 0px; }
   }
   .alerts-modal__close {
     position: absolute;
@@ -149,27 +157,138 @@
     background: transparent;
     border: 0;
     cursor: pointer;
-  }
-  .alerts-modal__title { margin: 0 0 0.6rem; }
-  .alerts-modal__intro { margin: 0 0 2rem; opacity: 0.85; }
+    font-family: "PragmaticaCondensed";
+    font-weight: 400;
 
-  .alerts-form { display: grid; gap: 1.4rem; }
+  }
+  .alerts-modal__title { text-align: left;
+    font-family: "PragmaticaCondensed";
+    font-weight: 400 !important;
+    font-size: 21px !important;
+    line-height: 26px !important;
+    letter-spacing: 0px !important;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground)) !important;
+    text-decoration-thickness: 1px !important;
+    margin: 0px 0px 0px;
+    font-weight: 400 !important; }
+  .alerts-modal__intro { font-family: "PragmaticaCondensed";
+    font-weight: 400;
+    font-size: 16px;
+    color: hsl(0deg, 0%, 0%, 100%);
+
+    line-height: 1.3;
+    margin: 0;
+       margin-top: 16px;
+    padding: 0; }
+
+  /* Image + form layout. Mobile: image on top (it's first in the DOM). Desktop: image left. */
+  .alerts-modal__layout { display: grid; gap: 0; }
+  .alerts-modal__media[hidden] { display: none; }
+  .alerts-modal__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 32vh;
+    object-fit: cover;
+    border-radius: var(--inputs-radius, 0.4rem);
+  }
+  .alerts-modal__body { min-width: 0; padding: 24px; }
+  @media screen and (min-width: 750px) {
+    .alerts-modal--has-media .alerts-modal__content { max-width: 800px; }
+    .alerts-modal--has-media .alerts-modal__layout {
+      grid-template-columns: 50% 1fr;
+      align-items: stretch;
+    }
+    .alerts-modal--has-media .alerts-modal__media img { max-height: none; }
+  }
+
+  .alerts-form { display: grid; gap: 12px; margin-top: 16px; margin-bottom: 16px;}
   .alerts-form__field { margin: 0; }
+  /* Match the custom-embroidery input exactly (border, height, visible placeholder). */
+  .alerts-form .field__input {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    min-height: 40px;
+    height: 40px;
+    max-height: 40px;
+    padding: 0px 8px !important;
+  }
+  .alerts-form .field__input:hover,
+  .alerts-form .field__input:focus {
+    border: 1px solid rgba(0, 0, 0, 1);
+  }
+  .alerts-form .field__input::placeholder {
+    opacity: 1;
+    color: rgba(var(--color-foreground), 0.5);
+  }
   .alerts-form__consent {
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: start;
     gap: 0.8rem;
-    font-size: 1.2rem;
+    font-size: 11px;
     line-height: 1.4;
-    opacity: 0.9;
+
+     cursor: pointer
   }
   .alerts-form__consent[hidden] { display: none; }
-  .alerts-form__consent input { margin-top: 0.2rem; }
-  .alerts-form__consent-text a { color: inherit; text-decoration: underline; }
+  .alerts-form__consent input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin: 0.1rem 0 0;
+    flex-shrink: 0;
+    border: 0.1rem solid rgb(var(--color-foreground));
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .alerts-form__consent input[type="checkbox"]:checked {
+    background: #000;
+  }
+  .alerts-form__consent input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 0.65rem;
+    top: 0.3rem;
+    width: 0.45rem;
+    height: 0.85rem;
+    border: solid rgb(var(--color-background));
+    border-width: 0 0.2rem 0.2rem 0;
+    transform: rotate(45deg);
+  }
+  .alerts-form__consent-text a { color: inherit; text-decoration: underline; font-size: 11px; }
   .alerts-form__hp { position: absolute; left: -5000px; }
-  .alerts-form__submit { margin-top: 0.4rem; }
+  .alerts-form__submit { font-size: 56px;
+    height: 46px !important;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
+    background-color: black;
+    border-radius: 16px;
+    font-size: 16px;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
+    color: rgb(var(--color-background));
+    letter-spacing: 0px;margin-top: 12px; }
+.alerts-form__submit:hover {
+font-size: 56px;
+    height: 46px !important;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
 
+    border-radius: 16px;
+    font-size: 16px;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
+    color: rgb(var(--color-background));
+    letter-spacing: 0px;margin-top: 12px;
+}
   .alerts-form__msg { margin: 0; min-height: 1.6rem; }
   .alerts-form__msg:empty { display: none; }
   .alerts-form__msg.is-error { color: rgb(var(--color-foreground)); }
@@ -177,21 +296,13 @@
 
   /* Footer mount inherits the footer color scheme. Lay email + phone side by side,
      with consent / button / message spanning the full width beneath them. */
-  .alerts-footer .alerts-form { max-width: 60rem; }
+  .alerts-footer .alerts-form { max-width: 800px; }
   @media screen and (min-width: 750px) {
     .alerts-footer .alerts-form { grid-template-columns: 1fr 1fr; }
     .alerts-footer .alerts-form__consent,
     .alerts-footer .alerts-form__hp,
     .alerts-footer .alerts-form__submit,
     .alerts-footer .alerts-form__msg { grid-column: 1 / -1; }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .alerts-modal__content { animation: alerts-pop var(--duration-short, 150ms) ease-out; }
-    @keyframes alerts-pop {
-      from { opacity: 0; transform: translateY(1rem); }
-      to { opacity: 1; transform: translateY(0); }
-    }
   }
 </style>
 
@@ -206,6 +317,63 @@
       fid: '{{ mc_fid }}',
       honeypot: '{{ mc_honeypot }}'
     };
+    var pageType = '{{ request.page_type }}';
+
+    // Resize a Shopify CDN image URL so we don't load the hero's 3840px source in a modal.
+    function resizeCdn(url, w) {
+      if (/[?&]width=\d+/.test(url)) return url.replace(/([?&]width=)\d+/, '$1' + w);
+      return url + (url.indexOf('?') === -1 ? '?' : '&') + 'width=' + w;
+    }
+
+    // Pull the first image from the homepage's featured "Hero" slideshow (.mobile-hero).
+    // Falls back to the first content image; skips the mouse-follower cursor image.
+    function pickHeroImage(root) {
+      var imgs = root.querySelectorAll('.mobile-hero img');
+      if (!imgs.length) imgs = root.querySelectorAll('#MainContent img');
+      for (var i = 0; i < imgs.length; i++) {
+        var im = imgs[i];
+        if (im.closest('#follower')) continue;
+        var src = im.getAttribute('src');
+        if (!src) {
+          var ss = im.getAttribute('srcset');
+          if (ss) src = ss.split(',')[0].trim().split(' ')[0];
+        }
+        if (!src) src = im.getAttribute('data-src');
+        if (src && src.indexOf('data:') !== 0) return resizeCdn(src, 800);
+      }
+      return null;
+    }
+
+    var imageRequested = false;
+    function loadModalImage() {
+      if (imageRequested) return;
+      imageRequested = true;
+      var media = modal.querySelector('[data-alerts-media]');
+      var img = media && media.querySelector('img');
+      if (!img) return;
+      function apply(src) {
+        if (!src) return;
+        img.src = src;
+        media.hidden = false;
+        modal.classList.add('alerts-modal--has-media');
+        try { sessionStorage.setItem('alertsHeroImg', src); } catch (e) {}
+      }
+      var cached;
+      try { cached = sessionStorage.getItem('alertsHeroImg'); } catch (e) {}
+      if (cached) { apply(cached); return; }
+      if (pageType === 'index') {
+        var here = pickHeroImage(document);
+        if (here) { apply(here); return; }
+      }
+      // Not on the homepage (or none found in DOM yet): fetch it once.
+      fetch('/', { credentials: 'same-origin' })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          apply(pickHeroImage(doc));
+        })
+        .catch(function () {});
+    }
 
     function subscribeUrl(params) {
       var q = 'u=' + encodeURIComponent(MC.u)
@@ -360,14 +528,16 @@
     function openModal() {
       var slot = modal.querySelector('[data-alerts-slot]');
       if (!slot.children.length) mountForm(slot);
+      loadModalImage();
       lastFocus = document.activeElement;
       modal.hidden = false;
       document.body.classList.add('overflow-hidden');
+      // Trap focus for accessibility, but focus the dialog itself — NOT the email input —
+      // so nothing is auto-selected when the popup appears.
       if (typeof trapFocus === 'function') {
-        trapFocus(content, content.querySelector('input:not([type="hidden"])'));
+        trapFocus(content, content);
       } else {
-        var first = content.querySelector('input:not([type="hidden"])');
-        if (first) first.focus();
+        content.focus();
       }
       swapBars(true);
       document.body.dispatchEvent(new CustomEvent('alerts:open'));
@@ -385,7 +555,8 @@
     }
 
     modal.addEventListener('click', function (e) {
-      if (e.target.closest('[data-alerts-close]')) closeModal();
+      // Close on the X, on the overlay, or on any click outside the dialog content.
+      if (e.target.closest('[data-alerts-close]') || !content.contains(e.target)) closeModal();
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !modal.hidden) closeModal();

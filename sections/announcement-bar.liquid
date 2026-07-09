@@ -252,10 +252,16 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem 0.6rem;
+    gap: 0rem 0.6rem;
+
   }
   .alerts-announcement .announcement-bar__message { margin: 0; }
   .alerts-announcement__btn {
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  margin-top: -10px;
+  margin-bottom: -10px;
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -269,6 +275,12 @@
     text-decoration: underline;
     text-underline-offset: 0.3rem;
     font-size: 14px!important;
+  }
+  @media (max-width: 438px) {
+    .alerts-announcement__btn {
+      margin-bottom: -4px;
+      margin-top: -20px;
+    }
   }
   .alerts-announcement__btn .icon-arrow { width: 1.2rem; }
 </style>

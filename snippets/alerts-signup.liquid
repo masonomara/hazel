@@ -1,0 +1,404 @@
+{%- comment -%}
+  snippets/alerts-signup.liquid
+  --------------------------------------------------------------------------
+  Reusable "Sign up for alerts" form (email + optional SMS) used by the
+  header popup (sections/alerts-bar.liquid) AND, optionally, the footer
+  (sections/footer.liquid -> [data-alerts-footer]).
+
+  Wiring to Mailchimp (no backend):
+    - Email only  -> JSONP to the classic post-json endpoint (real inline
+      success/error feedback).
+    - With a phone -> native POST to a hidden iframe using Mailchimp's own
+      SMSPHONE field + mc-SMSPHONE-ack consent checkbox. This is the only
+      no-backend path that records SMS consent compliantly. Uses the store's
+      approved SMS program language. Feedback is optimistic (an iframe POST
+      can't be read cross-origin), which is fine for single opt-in.
+
+  Identifiers below come from the Mailchimp handoff packet. Never place an
+  API key here — this file is public browser code.
+  Rendered once, before </body> in layout/theme.liquid.
+{%- endcomment -%}
+
+{%- liquid
+  assign mc_host = 'hazelboutique.us20.list-manage.com'
+  assign mc_u = 'bb68751aca24eb8005a87da31'
+  assign mc_id = '7488b9bad0'
+  assign mc_fid = '000e76eef0'
+  assign mc_honeypot = 'b_bb68751aca24eb8005a87da31_7488b9bad0'
+  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+-%}
+
+<template id="AlertsFormTemplate">
+  <form class="alerts-form" novalidate>
+    <div class="alerts-form__field field">
+      <input
+        class="field__input"
+        type="email"
+        name="EMAIL"
+        autocomplete="email"
+        autocapitalize="off"
+        autocorrect="off"
+        placeholder=" "
+        required
+        aria-required="true"
+      >
+      <label class="field__label">Email<span aria-hidden="true"> *</span></label>
+    </div>
+
+    <div class="alerts-form__field field">
+      <input
+        class="field__input"
+        type="tel"
+        name="SMSPHONE"
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder=" "
+      >
+      <label class="field__label">Mobile number (optional)</label>
+    </div>
+
+    <label class="alerts-form__consent" data-alerts-consent hidden>
+      <input type="checkbox" name="mc-SMSPHONE-ack" value="true">
+      <span class="alerts-form__consent-text">
+        By providing your phone number and checking the box, you agree to receive recurring
+        promotional and marketing text messages (e.g. cart reminders) from Hazel Boutique at the
+        number provided. Consent is not a condition of purchase. Msg &amp; data rates may apply.
+        Msg frequency varies. Reply HELP for help, STOP to cancel.
+        <a href="http://eepurl.com/iwthPw" target="_blank" rel="noopener noreferrer">See terms</a>,
+        <a href="{{ privacy_url }}" target="_blank" rel="noopener noreferrer">See privacy policy</a>.
+      </span>
+    </label>
+
+    {%- comment -%} Honeypot: real users never see or fill this. Name is the b_<u>_<id> value. {%- endcomment -%}
+    <div class="alerts-form__hp" aria-hidden="true">
+      <input type="text" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="">
+    </div>
+
+    <button type="submit" class="alerts-form__submit button button--full-width">Notify me</button>
+    <p class="alerts-form__msg form__message" role="status" aria-live="polite"></p>
+  </form>
+</template>
+
+{%- comment -%} Popup dialog. Triggers live elsewhere (bar button) and open it via the `alerts:open` API. {%- endcomment -%}
+<div id="AlertsModal" class="alerts-modal" hidden>
+  <div class="alerts-modal__overlay" data-alerts-close tabindex="-1"></div>
+  <div
+    class="alerts-modal__content color-scheme-1 gradient"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="AlertsModalTitle"
+    tabindex="-1"
+  >
+    <button type="button" class="alerts-modal__close" data-alerts-close aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h2 id="AlertsModalTitle" class="alerts-modal__title h4">Sign up for alerts</h2>
+    <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales — by email, text, or both.</p>
+    <div class="alerts-modal__slot" data-alerts-slot></div>
+  </div>
+</div>
+
+<style>
+  /* Alerts signup — styled with the theme's design tokens (Dawn color schemes,
+     inputs/buttons radii, page width). Scoped under .alerts-*; safe to restyle. */
+  .alerts-modal[hidden] { display: none; }
+  .alerts-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .alerts-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(var(--color-shadow, 18 18 18), 0.55);
+    cursor: pointer;
+  }
+  .alerts-modal__content {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 42rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding: 3.5rem 3rem 3rem;
+    border-radius: var(--inputs-radius, 0.4rem);
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    border: 1px solid rgb(var(--color-foreground));
+    box-shadow: 0 4px 24px rgba(var(--color-shadow, 18 18 18), 0.05);
+  }
+  @media screen and (min-width: 750px) {
+    .alerts-modal__content { padding: 4rem 4rem 3.5rem; }
+  }
+  .alerts-modal__close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 4.4rem;
+    height: 4.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    line-height: 1;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+  .alerts-modal__title { margin: 0 0 0.6rem; }
+  .alerts-modal__intro { margin: 0 0 2rem; opacity: 0.85; }
+
+  .alerts-form { display: grid; gap: 1.4rem; }
+  .alerts-form__field { margin: 0; }
+  .alerts-form__consent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0.8rem;
+    font-size: 1.2rem;
+    line-height: 1.4;
+    opacity: 0.9;
+  }
+  .alerts-form__consent[hidden] { display: none; }
+  .alerts-form__consent input { margin-top: 0.2rem; }
+  .alerts-form__consent-text a { color: inherit; text-decoration: underline; }
+  .alerts-form__hp { position: absolute; left: -5000px; }
+  .alerts-form__submit { margin-top: 0.4rem; }
+
+  .alerts-form__msg { margin: 0; min-height: 1.6rem; }
+  .alerts-form__msg:empty { display: none; }
+  .alerts-form__msg.is-error { color: rgb(var(--color-foreground)); }
+  .alerts-form__msg.is-success { color: rgb(var(--color-foreground)); font-weight: 600; }
+
+  /* Footer mount inherits the footer color scheme. Lay email + phone side by side,
+     with consent / button / message spanning the full width beneath them. */
+  .alerts-footer .alerts-form { max-width: 60rem; }
+  @media screen and (min-width: 750px) {
+    .alerts-footer .alerts-form { grid-template-columns: 1fr 1fr; }
+    .alerts-footer .alerts-form__consent,
+    .alerts-footer .alerts-form__hp,
+    .alerts-footer .alerts-form__submit,
+    .alerts-footer .alerts-form__msg { grid-column: 1 / -1; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .alerts-modal__content { animation: alerts-pop var(--duration-short, 150ms) ease-out; }
+    @keyframes alerts-pop {
+      from { opacity: 0; transform: translateY(1rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // Identifiers as discrete alphanumeric parts (no "&"), so Liquid's HTML-escaping
+    // can't corrupt the query string. The URL is assembled in JS below.
+    var MC = {
+      host: '{{ mc_host }}',
+      u: '{{ mc_u }}',
+      id: '{{ mc_id }}',
+      fid: '{{ mc_fid }}',
+      honeypot: '{{ mc_honeypot }}'
+    };
+
+    function subscribeUrl(params) {
+      var q = 'u=' + encodeURIComponent(MC.u)
+        + '&id=' + encodeURIComponent(MC.id)
+        + '&f_id=' + encodeURIComponent(MC.fid);
+      Object.keys(params).forEach(function (k) {
+        q += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+      });
+      return 'https://' + MC.host + '/subscribe/post-json?' + q;
+    }
+
+    var tpl = document.getElementById('AlertsFormTemplate');
+    var modal = document.getElementById('AlertsModal');
+    if (!tpl || !modal) return;
+
+    var content = modal.querySelector('.alerts-modal__content');
+    var lastFocus = null;
+    var mountCount = 0;
+
+    function mountForm(slot) {
+      var form = tpl.content.firstElementChild.cloneNode(true);
+      var idx = mountCount++;
+      // Unique ids so the floating label associates and no ids collide across instances.
+      form.querySelectorAll('.field').forEach(function (field, i) {
+        var input = field.querySelector('.field__input');
+        var label = field.querySelector('.field__label');
+        if (input && label) {
+          var id = 'Alerts-' + (input.getAttribute('name') || 'f').replace(/[^A-Za-z0-9]/g, '') + '-' + idx + '-' + i;
+          input.id = id;
+          label.setAttribute('for', id);
+        }
+      });
+      slot.appendChild(form);
+      wire(form);
+      return form;
+    }
+
+    function wire(form) {
+      var phone = form.querySelector('[name="SMSPHONE"]');
+      var consent = form.querySelector('[data-alerts-consent]');
+      // Reveal SMS consent only once a phone number is being entered.
+      phone.addEventListener('input', function () {
+        consent.hidden = phone.value.trim() === '';
+      });
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submit(form);
+      });
+    }
+
+    // Normalize a US-style phone to E.164 (+1XXXXXXXXXX). Leaves other +intl input as-is.
+    function normalizePhone(v) {
+      v = (v || '').trim();
+      if (!v) return v;
+      if (v.charAt(0) === '+') return v.replace(/[^\d+]/g, '');
+      var digits = v.replace(/\D/g, '');
+      if (digits.length === 10) return '+1' + digits;
+      if (digits.length === 11 && digits.charAt(0) === '1') return '+' + digits;
+      return '+' + digits;
+    }
+
+    function setMsg(form, text, kind) {
+      var el = form.querySelector('.alerts-form__msg');
+      el.textContent = text || '';
+      el.className = 'alerts-form__msg form__message' + (kind ? ' is-' + kind : '');
+    }
+
+    function submit(form) {
+      var email = form.querySelector('[name="EMAIL"]');
+      var phone = form.querySelector('[name="SMSPHONE"]');
+      var consent = form.querySelector('[data-alerts-consent] input');
+      var hp = form.querySelector('.alerts-form__hp input');
+      var emailVal = email.value.trim();
+      var phoneVal = phone.value.trim();
+      var btn = form.querySelector('.alerts-form__submit');
+
+      // Honeypot filled -> almost certainly a bot. Pretend success, send nothing.
+      if (hp && hp.value) { done(form, btn, true, "You're on the list!"); return; }
+
+      if (!emailVal) {
+        setMsg(form, 'Please enter your email.', 'error');
+        email.focus();
+        return;
+      }
+      if (phoneVal && !consent.checked) {
+        setMsg(form, 'Please agree to receive text messages to continue.', 'error');
+        consent.focus();
+        return;
+      }
+
+      btn.disabled = true;
+      setMsg(form, 'Submitting…');
+
+      // One JSONP call carries email and (when given) the SMS phone + consent. post-json
+      // returns a real success/error result and isn't blocked by reCAPTCHA.
+      // NOTE: the SMS phone field must be optional in the Mailchimp form, or email-only
+      // signups are rejected with "Please enter a value" for the required SMS field.
+      // Send SMSPHONE as a plain string. Do NOT add SMSPHONE[country] — the bracket
+      // notation makes Mailchimp parse SMSPHONE as an array ("must be a string, not
+      // an array"). Normalize to E.164 so "(732) 555-1234" etc. still work.
+      var params = { EMAIL: emailVal };
+      if (phoneVal) {
+        params.SMSPHONE = normalizePhone(phoneVal);
+        params['mc-SMSPHONE-ack'] = 'true';
+      }
+      params[MC.honeypot] = '';
+
+      jsonp(subscribeUrl(params), 'c').then(function (data) {
+        done(form, btn, data.result === 'success', stripHtml(data.msg));
+      }).catch(function () {
+        done(form, btn, false, 'Network error. Please try again.');
+      });
+    }
+
+    function done(form, btn, ok, message) {
+      btn.disabled = false;
+      setMsg(form, message || (ok ? "You're on the list!" : 'Please try again.'), ok ? 'success' : 'error');
+      if (ok) {
+        form.reset();
+        var consent = form.querySelector('[data-alerts-consent]');
+        if (consent) consent.hidden = true;
+      }
+    }
+
+    // Minimal JSONP (Mailchimp post-json uses ?c=<callback>).
+    function jsonp(url, cbParam) {
+      return new Promise(function (resolve, reject) {
+        var cb = 'mc_cb_' + Date.now() + Math.floor(Math.random() * 1e4);
+        var s = document.createElement('script');
+        var to = setTimeout(function () { cleanup(); reject(); }, 10000);
+        function cleanup() { clearTimeout(to); try { delete window[cb]; } catch (e) { window[cb] = undefined; } s.remove(); }
+        window[cb] = function (data) { cleanup(); resolve(data); };
+        s.onerror = function () { cleanup(); reject(); };
+        s.src = url + '&' + cbParam + '=' + cb;
+        document.body.appendChild(s);
+      });
+    }
+    function stripHtml(str) { var d = document.createElement('div'); d.innerHTML = str || ''; return d.textContent || d.innerText || ''; }
+
+    // ---- Modal open/close (reuses the theme's focus trap + scroll lock) ----
+    // Swap any bar message(s) between their default and "popup is open" text.
+    function swapBars(open) {
+      document.querySelectorAll('[data-alerts-bar]').forEach(function (bar) {
+        var def = bar.querySelector('[data-alerts-default]');
+        var swp = bar.querySelector('[data-alerts-swapped]');
+        if (!def || !swp) return;
+        def.hidden = open;
+        swp.hidden = !open;
+      });
+    }
+
+    function openModal() {
+      var slot = modal.querySelector('[data-alerts-slot]');
+      if (!slot.children.length) mountForm(slot);
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      document.body.classList.add('overflow-hidden');
+      if (typeof trapFocus === 'function') {
+        trapFocus(content, content.querySelector('input:not([type="hidden"])'));
+      } else {
+        var first = content.querySelector('input:not([type="hidden"])');
+        if (first) first.focus();
+      }
+      swapBars(true);
+      document.body.dispatchEvent(new CustomEvent('alerts:open'));
+    }
+    function closeModal() {
+      modal.hidden = true;
+      document.body.classList.remove('overflow-hidden');
+      if (typeof removeTrapFocus === 'function') {
+        removeTrapFocus(lastFocus);
+      } else if (lastFocus && lastFocus.focus) {
+        lastFocus.focus();
+      }
+      swapBars(false);
+      document.body.dispatchEvent(new CustomEvent('alerts:close'));
+    }
+
+    modal.addEventListener('click', function (e) {
+      if (e.target.closest('[data-alerts-close]')) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-alerts-open]');
+      if (trigger) { e.preventDefault(); openModal(); }
+    });
+
+    // Mount any footer (or other inline) forms present on load.
+    document.querySelectorAll('[data-alerts-footer]').forEach(mountForm);
+
+    // Public API for section scripts.
+    window.AlertsSignup = { open: openModal, close: closeModal };
+  })();
+</script>

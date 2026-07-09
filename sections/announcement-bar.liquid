@@ -19,13 +19,14 @@
 {% endif %}
 
 <div
-  class="utility-bar color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator and section.blocks.size > 0 %} utility-bar--bottom-border{% elsif section.settings.show_line_separator and section.settings.show_social and social_icons%} utility-bar--bottom-border-social-only{% endif %}{% if section.settings.enable_country_selector or section.settings.enable_language_selector %} header-localization{% endif %}"
+  class="utility-bar color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator and section.blocks.size > 0 or section.settings.show_line_separator and section.settings.show_alerts %} utility-bar--bottom-border{% elsif section.settings.show_line_separator and section.settings.show_social and social_icons%} utility-bar--bottom-border-social-only{% endif %}{% if section.settings.enable_country_selector or section.settings.enable_language_selector %} header-localization{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="page-width utility-bar__grid{% if announcement_bar and language_country_selector or section.settings.show_social and social_icons %} utility-bar__grid--3-col{% elsif language_country_selector or section.settings.show_social and social_icons %} utility-bar__grid--2-col{% endif %}">
     {%- if section.settings.show_social and social_icons -%}
       {%- render 'social-icons' -%}
     {%- endif -%}
+    {%- unless section.settings.show_alerts -%}
     {%- if section.blocks.size == 1 -%}
       <div
         class="announcement-bar{% if section.settings.show_social %} announcement-bar--one-announcement{% endif %}"
@@ -134,6 +135,29 @@
         </style>
       {%- endif -%}
     {%- endif -%}
+    {%- endunless -%}
+
+    {%- if section.settings.show_alerts -%}
+      {%- comment -%}
+        Mailchimp popup enabled: the bar shows only the preset "Get alerts" button, which opens
+        the email + text signup popup from snippets/alerts-signup.liquid. Regular announcements
+        are suppressed above while this is on.
+      {%- endcomment -%}
+      <div class="announcement-bar announcement-bar--one-announcement alerts-announcement">
+        {%- if section.settings.alerts_message != blank -%}
+          <p class="announcement-bar__message h5">{{ section.settings.alerts_message | escape }}</p>
+        {%- endif -%}
+        <button
+          type="button"
+          class="alerts-announcement__btn h5 link link--text focus-inset animate-arrow"
+          data-alerts-open
+        >
+          {{ section.settings.alerts_button_label | escape }}
+          {% render 'icon-arrow' %}
+        </button>
+      </div>
+    {%- endif -%}
+
     <div class="localization-wrapper">
       {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
         <noscript class="small-hide medium-hide">
@@ -222,6 +246,33 @@
   </div>
 </div>
 
+<style>
+  .alerts-announcement {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 0.6rem;
+  }
+  .alerts-announcement .announcement-bar__message { margin: 0; }
+  .alerts-announcement__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.3rem;
+    font-size: 14px!important;
+  }
+  .alerts-announcement__btn .icon-arrow { width: 1.2rem; }
+</style>
+
 {% schema %}
 {
   "name": "t:sections.announcement-bar.name",
@@ -236,6 +287,29 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-4"
+    },
+    {
+      "type": "header",
+      "content": "Mailchimp popup"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_alerts",
+      "default": true,
+      "label": "Enable Mailchimp popup",
+      "info": "Replaces the announcements with a lead-in message + a button that opens the email + text signup popup. Turn off to show your regular announcements instead."
+    },
+    {
+      "type": "text",
+      "id": "alerts_message",
+      "label": "Lead-in message",
+      "default": "Be the first to know about drops & restocks"
+    },
+    {
+      "type": "text",
+      "id": "alerts_button_label",
+      "label": "Button label",
+      "default": "Get alerts"
     },
     {
       "type": "checkbox",

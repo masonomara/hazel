@@ -1,7 +1,7 @@
 # Shopify × Mailchimp "Alerts" Signup — Persistent Header + Footer
 
 A complete, buildable guide for adding a header trigger that swaps the announcement‑bar
-message and opens a popup where a visitor can sign up for alerts by email, phone, or both,
+message and opens a popup where a visitor can Never miss a drop by email, phone, or both,
 with the identical form mirrored in the persistent footer.
 
 The first half explains how the two platforms actually fit together (so the code makes sense
@@ -172,7 +172,7 @@ Create `snippets/alerts-signup.liquid` and paste this. It contains: the modal, t
 ```liquid
 {%- comment -%} snippets/alerts-signup.liquid {%- endcomment -%}
 {%- comment -%}
-  Reusable "Sign up for alerts" form used by the header popup AND the footer.
+  Reusable "Never miss a drop" form used by the header popup AND the footer.
   Set your Mailchimp identifiers in the data-* attributes on the wrapper below.
 {%- endcomment -%}
 
@@ -214,7 +214,7 @@ Create `snippets/alerts-signup.liquid` and paste this. It contains: the modal, t
   <div class="alerts-modal__backdrop" data-close></div>
   <div class="alerts-modal__panel" role="document">
     <button class="alerts-modal__close" data-close aria-label="Close">&times;</button>
-    <h2 id="alerts-modal-title" class="alerts-modal__title">Sign up for alerts</h2>
+    <h2 id="alerts-modal-title" class="alerts-modal__title">Never miss a drop</h2>
     <div class="alerts-modal__body" data-form-slot></div>
   </div>
 </div>
@@ -500,7 +500,7 @@ In `sections/footer.liquid` (or a Custom Liquid block in the footer via the them
 a mount point where you want the form:
 
 ```liquid
-<div class="alerts-footer" data-alerts-footer aria-label="Sign up for alerts"></div>
+<div class="alerts-footer" data-alerts-footer aria-label="Never miss a drop"></div>
 ```
 
 The snippet's JS finds every `[data-alerts-footer]` on load and injects the same form, so the footer

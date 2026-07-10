@@ -35,7 +35,7 @@ Locations only — never the secrets themselves.
 
 ## 5. Hard constraints
 
-- **Shopify Advanced, not Plus.** No Plus-only mechanics (Cart Transform Functions, full checkout extensibility) — design features to work on Advanced (the embroidery upcharge uses a companion fee product, not a line-price transform).
+- **Shopify Advanced, not Plus.** No Plus-only mechanics (Cart Transform Functions, full checkout extensibility) — design features to work on Advanced (the embroidery upcharge is carried by a **higher-priced variant of the same product** — a hidden "Embroidery" option toggled "Standard"↔"Embroidered" — not a separate fee product or a line-price transform; the `embroidery_price` theme setting drives only the on-page "+$20" display label, per `config/settings_schema.json`).
 - **Keep the fork upgrade-safe.** Minimize edits to Dawn core; prefer self-contained snippets over scattered changes.
 - **Brand bar:** clean, product-forward. Premium licensed fonts (Pragmatica, PragmaticaCondensed, Millionare Script, Lustria) — rights secured, hosted on the store CDN; do not reintroduce unlicensed font use.
 - **Accessibility is a standing requirement** — every change holds the a11y bar.

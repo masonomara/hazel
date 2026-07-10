@@ -3,7 +3,7 @@
   --------------------------------------------------------------------------
   Reusable "Never miss a drop" form (email + optional SMS) used by the
   header popup (sections/alerts-bar.liquid) AND, optionally, the footer
-  (sections/footer.liquid -> [data-alerts-footer]).
+  (sections/footer.liquid, which renders the alerts-form snippet).
 
   Wiring to Mailchimp (no backend):
     - Email only  -> JSONP to the classic post-json endpoint (real inline
@@ -28,57 +28,6 @@
   assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
 -%}
 
-<template id="AlertsFormTemplate">
-  <form class="alerts-form" novalidate>
-    <div class="alerts-form__field field">
-      <input
-        class="field__input"
-        type="email"
-        name="EMAIL"
-        autocomplete="email"
-        autocapitalize="off"
-        autocorrect="off"
-        aria-label="Email"
-        placeholder="Email"
-        required
-        aria-required="true"
-      >
-    </div>
-
-    <div class="alerts-form__field field">
-      <input
-        class="field__input"
-        type="tel"
-        name="SMSPHONE"
-        inputmode="tel"
-        autocomplete="tel"
-        aria-label="Mobile number (optional)"
-        placeholder="Mobile number (optional)"
-      >
-    </div>
-
-    <label class="alerts-form__consent" data-alerts-consent hidden>
-      <input type="checkbox" name="mc-SMSPHONE-ack" value="true">
-      <span class="alerts-form__consent-text">
-        By providing your phone number and checking the box, you agree to receive recurring
-        promotional and marketing text messages (e.g. cart reminders) from Hazel Boutique at the
-        number provided. Consent is not a condition of purchase. Msg &amp; data rates may apply.
-        Msg frequency varies. Reply HELP for help, STOP to cancel.
-        <a href="http://eepurl.com/iwthPw" target="_blank" rel="noopener noreferrer">See terms</a>,
-        <a href="{{ privacy_url }}" target="_blank" rel="noopener noreferrer">See privacy policy</a>.
-      </span>
-    </label>
-
-    {%- comment -%} Honeypot: real users never see or fill this. Name is the b_<u>_<id> value. {%- endcomment -%}
-    <div class="alerts-form__hp" aria-hidden="true">
-      <input type="text" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="">
-    </div>
-
-    <button type="submit" class="alerts-form__submit button button--full-width button--primary">Sign Up</button>
-    <p class="alerts-form__msg form__message" role="status" aria-live="polite"></p>
-  </form>
-</template>
-
 {%- comment -%} Popup dialog. Triggers live elsewhere (bar button) and open it via the `alerts:open` API. {%- endcomment -%}
 <div id="AlertsModal" class="alerts-modal" hidden>
   <div class="alerts-modal__overlay" data-alerts-close tabindex="-1"></div>
@@ -99,7 +48,7 @@
       <div class="alerts-modal__body">
         <h2 id="AlertsModalTitle" class="alerts-modal__title">Never miss a drop</h2>
         <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales by email, text, or both.</p>
-        <div class="alerts-modal__slot" data-alerts-slot></div>
+        <div class="alerts-modal__slot">{% render 'alerts-form' %}</div>
       </div>
     </div>
   </div>
@@ -175,6 +124,7 @@
   .alerts-modal__intro { font-family: "PragmaticaCondensed";
     font-weight: 400;
     font-size: 16px;
+    text-align: left;
     color: hsl(0deg, 0%, 0%, 100%);
 
     line-height: 1.3;
@@ -207,19 +157,19 @@
   .alerts-form__field { margin: 0; }
   /* Match the custom-embroidery input exactly (border, height, visible placeholder). */
   .alerts-form .field__input {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    min-height: 40px;
-    height: 40px;
-    max-height: 40px;
-    padding: 0px 8px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
+    min-height: 32px;
+    height: 32px;
+    max-height: 32px;
+    padding: 0px 0px !important;
   }
   .alerts-form .field__input:hover,
   .alerts-form .field__input:focus {
-    border: 1px solid rgba(0, 0, 0, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
   }
   .alerts-form .field__input::placeholder {
     opacity: 1;
-    color: rgba(var(--color-foreground), 0.5);
+    color: rgba(var(--color-foreground), 0.6);
   }
   .alerts-form__consent {
     display: grid;
@@ -259,7 +209,7 @@
     border-width: 0 0.2rem 0.2rem 0;
     transform: rotate(45deg);
   }
-  .alerts-form__consent-text a { color: inherit; text-decoration: underline; font-size: 11px; }
+  .alerts-form__consent-text a { color: inherit; text-decoration: underline; font-size: 11px; text-align: left }
   .alerts-form__hp { position: absolute; left: -5000px; }
   .alerts-form__submit { font-size: 56px;
     height: 46px !important;
@@ -294,16 +244,10 @@ font-size: 56px;
   .alerts-form__msg.is-error { color: rgb(var(--color-foreground)); }
   .alerts-form__msg.is-success { color: rgb(var(--color-foreground)); font-weight: 600; }
 
-  /* Footer mount inherits the footer color scheme. Lay email + phone side by side,
-     with consent / button / message spanning the full width beneath them. */
-  .alerts-footer .alerts-form { max-width: 800px; }
-  @media screen and (min-width: 750px) {
-    .alerts-footer .alerts-form { grid-template-columns: 1fr 1fr; }
-    .alerts-footer .alerts-form__consent,
-    .alerts-footer .alerts-form__hp,
-    .alerts-footer .alerts-form__submit,
-    .alerts-footer .alerts-form__msg { grid-column: 1 / -1; }
-  }
+  /* Footer mount is on the same color scheme (scheme-1) as the modal and reuses the
+     modal title/intro/input/button classes, so it renders identically to the popup.
+     Single column, matched to the modal body width. */
+  .alerts-footer .alerts-form { max-width: 752px; }
 </style>
 
 <script>
@@ -385,43 +329,33 @@ font-size: 56px;
       return 'https://' + MC.host + '/subscribe/post-json?' + q;
     }
 
-    var tpl = document.getElementById('AlertsFormTemplate');
     var modal = document.getElementById('AlertsModal');
-    if (!tpl || !modal) return;
+    if (!modal) return;
 
     var content = modal.querySelector('.alerts-modal__content');
     var lastFocus = null;
-    var mountCount = 0;
 
-    function mountForm(slot) {
-      var form = tpl.content.firstElementChild.cloneNode(true);
-      var idx = mountCount++;
-      // Unique ids so the floating label associates and no ids collide across instances.
-      form.querySelectorAll('.field').forEach(function (field, i) {
-        var input = field.querySelector('.field__input');
-        var label = field.querySelector('.field__label');
-        if (input && label) {
-          var id = 'Alerts-' + (input.getAttribute('name') || 'f').replace(/[^A-Za-z0-9]/g, '') + '-' + idx + '-' + i;
-          input.id = id;
-          label.setAttribute('for', id);
-        }
-      });
-      slot.appendChild(form);
-      wire(form);
-      return form;
-    }
-
+    // Forms are server-rendered (snippets/alerts-form.liquid) in both the popup and the
+    // footer, so the inputs are always in the DOM. We only attach behavior here.
     function wire(form) {
+      if (form.getAttribute('data-alerts-wired')) return;
+      form.setAttribute('data-alerts-wired', '1');
       var phone = form.querySelector('[name="SMSPHONE"]');
       var consent = form.querySelector('[data-alerts-consent]');
       // Reveal SMS consent only once a phone number is being entered.
-      phone.addEventListener('input', function () {
-        consent.hidden = phone.value.trim() === '';
-      });
+      if (phone && consent) {
+        phone.addEventListener('input', function () {
+          consent.hidden = phone.value.trim() === '';
+        });
+      }
       form.addEventListener('submit', function (e) {
         e.preventDefault();
         submit(form);
       });
+    }
+
+    function wireAll() {
+      document.querySelectorAll('.alerts-form').forEach(wire);
     }
 
     // Normalize a US-style phone to E.164 (+1XXXXXXXXXX). Leaves other +intl input as-is.
@@ -526,8 +460,6 @@ font-size: 56px;
     }
 
     function openModal() {
-      var slot = modal.querySelector('[data-alerts-slot]');
-      if (!slot.children.length) mountForm(slot);
       loadModalImage();
       lastFocus = document.activeElement;
       modal.hidden = false;
@@ -566,8 +498,15 @@ font-size: 56px;
       if (trigger) { e.preventDefault(); openModal(); }
     });
 
-    // Mount any footer (or other inline) forms present on load.
-    document.querySelectorAll('[data-alerts-footer]').forEach(mountForm);
+    // Wire every form on the page (popup + footer). Idempotent, so safe to run repeatedly.
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wireAll);
+    } else {
+      wireAll();
+    }
+    // The theme editor re-renders a section's DOM without re-running this inline script,
+    // leaving a freshly-rendered footer form unwired. Re-wire on section load.
+    document.addEventListener('shopify:section:load', wireAll);
 
     // Public API for section scripts.
     window.AlertsSignup = { open: openModal, close: closeModal };

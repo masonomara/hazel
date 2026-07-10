@@ -255,63 +255,6 @@ class CartItems extends HTMLElement {
       .querySelector(selector).innerHTML;
   }
 
-  checkUpsells() {
-    const cartItems = this.querySelector(".drawer__items");
-    if (!cartItems) return;
-
-    const cartJson = JSON.parse(cartItems.getAttribute("data-json"));
-    if (!cartJson) return;
-    if (cartJson[0].product_title.indexOf(" - ") === -1) return;
-
-    const productTitle = cartJson[0].product_title.split(" - ");
-    const productId = cartJson[0].product_id;
-    const productTitleArray = productTitle[0].split(" ");
-    const productType = cartJson[0].product_type;
-    const productColor = productTitle[1];
-
-    if (productId === parseFloat(getCookie("hide_wear_with"))) return;
-
-    let globalEData = getCookie("GlobalE_Data");
-    let gwpWrapper = document.querySelector(".gwp__wrapper");
-    let globalEJson = JSON.parse(decodeURIComponent(globalEData));
-
-    if (globalEJson && globalEJson.countryISO !== "US" && gwpWrapper) {
-      gwpWrapper.style.display = "none";
-    }
-
-    const searchQuery = `${productColor} -${cartJson[0].handle}`;
-    const searchUrl = `/search?q=${searchQuery}&type=product&view=wear-with`;
-    const wearWithEl = document.querySelector(".wear-with__cart");
-    const wearWithWrapper = document.querySelector(".wear-with__wrapper");
-
-    fetch(searchUrl)
-      .then((response) => response.text())
-      .then((html) => {
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, "text/html");
-        var wearWithItem = doc.querySelector(".wear-with__item");
-
-        if (!wearWithItem) {
-          wearWithWrapper.style.display = "none";
-          return;
-        }
-        wearWithWrapper.style.display = "block";
-        wearWithEl.innerHTML = html;
-        wearWithEl
-          .querySelector(".quick-add-bar")
-          .classList.remove("small-hide");
-        lazyLoadImages();
-        wearWithWrapper
-          .querySelector(".wear-with__close")
-          .addEventListener("click", (event) => {
-            wearWithWrapper.style.display = "none";
-            setCookie("hide_wear_with", productId);
-          });
-        //       document.getElementById('cart-icon-bubble').click();
-      })
-      .catch(() => {});
-  }
-
   enableLoading(line) {
     const mainCartItems =
       document.getElementById("main-cart-items") ||

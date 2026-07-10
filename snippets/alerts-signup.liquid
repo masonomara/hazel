@@ -6,13 +6,11 @@
   (sections/footer.liquid, which renders the alerts-form snippet).
 
   Wiring to Mailchimp (no backend):
-    - Email only  -> JSONP to the classic post-json endpoint (real inline
-      success/error feedback).
-    - With a phone -> native POST to a hidden iframe using Mailchimp's own
-      SMSPHONE field + mc-SMSPHONE-ack consent checkbox. This is the only
-      no-backend path that records SMS consent compliantly. Uses the store's
-      approved SMS program language. Feedback is optimistic (an iframe POST
-      can't be read cross-origin), which is fine for single opt-in.
+    A single JSONP call to the classic post-json endpoint carries the email
+    and, when a phone is given, Mailchimp's own SMSPHONE field plus the
+    mc-SMSPHONE-ack consent flag (the store's approved SMS program language).
+    JSONP gives real inline success/error feedback and records SMS consent
+    compliantly for single opt-in — no iframe or backend needed.
 
   Identifiers below come from the Mailchimp handoff packet. Never place an
   API key here — this file is public browser code.
@@ -29,7 +27,8 @@
 -%}
 
 {%- comment -%} Popup dialog. Triggers live elsewhere (bar button) and open it via the `alerts:open` API. {%- endcomment -%}
-<div id="AlertsModal" class="alerts-modal" hidden>
+{%- assign alerts_image = settings.alerts_modal_image -%}
+<div id="AlertsModal" class="alerts-modal{% if alerts_image != blank %} alerts-modal--has-media{% endif %}" hidden>
   <div class="alerts-modal__overlay" data-alerts-close tabindex="-1"></div>
   <div
     class="alerts-modal__content color-scheme-1 gradient"
@@ -42,9 +41,18 @@
       <span aria-hidden="true">&times;</span>
     </button>
     <div class="alerts-modal__layout">
-      <div class="alerts-modal__media" data-alerts-media hidden>
-        <img alt="" loading="lazy" decoding="async" width="600" height="600">
-      </div>
+      {%- if alerts_image != blank -%}
+        <div class="alerts-modal__media" data-alerts-media>
+          <img
+            src="{{ alerts_image | image_url: width: 800 }}"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width="{{ alerts_image.width }}"
+            height="{{ alerts_image.height }}"
+          >
+        </div>
+      {%- endif -%}
       <div class="alerts-modal__body">
         <h2 id="AlertsModalTitle" class="alerts-modal__title">Never miss a drop</h2>
         <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales by email, text, or both.</p>
@@ -134,7 +142,6 @@
 
   /* Image + form layout. Mobile: image on top (it's first in the DOM). Desktop: image left. */
   .alerts-modal__layout { display: grid; gap: 0; }
-  .alerts-modal__media[hidden] { display: none; }
   .alerts-modal__media img {
     display: block;
     width: 100%;
@@ -261,64 +268,6 @@ font-size: 56px;
       fid: '{{ mc_fid }}',
       honeypot: '{{ mc_honeypot }}'
     };
-    var pageType = '{{ request.page_type }}';
-
-    // Resize a Shopify CDN image URL so we don't load the hero's 3840px source in a modal.
-    function resizeCdn(url, w) {
-      if (/[?&]width=\d+/.test(url)) return url.replace(/([?&]width=)\d+/, '$1' + w);
-      return url + (url.indexOf('?') === -1 ? '?' : '&') + 'width=' + w;
-    }
-
-    // Pull the first image from the homepage's featured "Hero" slideshow (.mobile-hero).
-    // Falls back to the first content image; skips the mouse-follower cursor image.
-    function pickHeroImage(root) {
-      var imgs = root.querySelectorAll('.mobile-hero img');
-      if (!imgs.length) imgs = root.querySelectorAll('#MainContent img');
-      for (var i = 0; i < imgs.length; i++) {
-        var im = imgs[i];
-        if (im.closest('#follower')) continue;
-        var src = im.getAttribute('src');
-        if (!src) {
-          var ss = im.getAttribute('srcset');
-          if (ss) src = ss.split(',')[0].trim().split(' ')[0];
-        }
-        if (!src) src = im.getAttribute('data-src');
-        if (src && src.indexOf('data:') !== 0) return resizeCdn(src, 800);
-      }
-      return null;
-    }
-
-    var imageRequested = false;
-    function loadModalImage() {
-      if (imageRequested) return;
-      imageRequested = true;
-      var media = modal.querySelector('[data-alerts-media]');
-      var img = media && media.querySelector('img');
-      if (!img) return;
-      function apply(src) {
-        if (!src) return;
-        img.src = src;
-        media.hidden = false;
-        modal.classList.add('alerts-modal--has-media');
-        try { sessionStorage.setItem('alertsHeroImg', src); } catch (e) {}
-      }
-      var cached;
-      try { cached = sessionStorage.getItem('alertsHeroImg'); } catch (e) {}
-      if (cached) { apply(cached); return; }
-      if (pageType === 'index') {
-        var here = pickHeroImage(document);
-        if (here) { apply(here); return; }
-      }
-      // Not on the homepage (or none found in DOM yet): fetch it once.
-      fetch('/', { credentials: 'same-origin' })
-        .then(function (r) { return r.text(); })
-        .then(function (html) {
-          var doc = new DOMParser().parseFromString(html, 'text/html');
-          apply(pickHeroImage(doc));
-        })
-        .catch(function () {});
-    }
-
     function subscribeUrl(params) {
       var q = 'u=' + encodeURIComponent(MC.u)
         + '&id=' + encodeURIComponent(MC.id)
@@ -460,7 +409,6 @@ font-size: 56px;
     }
 
     function openModal() {
-      loadModalImage();
       lastFocus = document.activeElement;
       modal.hidden = false;
       document.body.classList.add('overflow-hidden');

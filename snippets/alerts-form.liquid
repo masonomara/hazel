@@ -38,7 +38,12 @@
   </div>
 
   <label class="alerts-form__consent" data-alerts-consent hidden>
-    <input type="checkbox" name="mc-SMSPHONE-ack" value="true">
+    <input
+      type="checkbox"
+      name="mc-SMSPHONE-ack"
+      value="true"
+      aria-label="I agree to receive recurring promotional and marketing text messages from Hazel Boutique"
+    >
     <span class="alerts-form__consent-text" style="text-align: left">
       By providing your phone number and checking the box, you agree to receive recurring
       promotional and marketing text messages (e.g. cart reminders) from Hazel Boutique at the
@@ -51,7 +56,7 @@
 
   {%- comment -%} Honeypot: real users never see or fill this. Name is the b_<u>_<id> value. {%- endcomment -%}
   <div class="alerts-form__hp" aria-hidden="true">
-    <input type="text" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="">
+    <input type="text" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="" aria-hidden="true" aria-label="Leave this field empty">
   </div>
 
   <button type="submit" class="alerts-form__submit button button--full-width button--primary">Sign Up</button>

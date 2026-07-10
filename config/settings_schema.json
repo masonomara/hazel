@@ -1541,5 +1541,16 @@
         "default": 50
       }
     ]
+  },
+  {
+    "name": "Alerts signup",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "alerts_modal_image",
+        "label": "Popup image",
+        "info": "Shown beside the \"Never miss a drop\" signup popup. Leave blank to show the form only."
+      }
+    ]
   }
 ]

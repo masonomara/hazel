@@ -15,6 +15,7 @@
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
 
+
   @media screen and (min-width: 750px) {
     .footer {
       margin-top: {{ section.settings.margin_top }}px;
@@ -126,7 +127,7 @@
       if (item.productTitle === '' | item.productImg === null ) {
         recentViewHtml.push(`
           <li class="grid__item noShow">
-            
+
           </li>
         `);
       } else {
@@ -181,7 +182,7 @@
   getRecentPdp();
 </script>
 
-<footer class="footer color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
+<footer role="contentinfo" class="footer color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding">
   {%- liquid
     assign has_social_icons = true
     if settings.social_facebook_link == blank and settings.social_instagram_link == blank and settings.social_youtube_link == blank and settings.social_tiktok_link == blank and settings.social_twitter_link == blank and settings.social_pinterest_link == blank and settings.social_snapchat_link == blank and settings.social_tumblr_link == blank and settings.social_vimeo_link == blank
@@ -340,71 +341,17 @@
           {% endif %}
         >
           {%- if section.settings.newsletter_enable -%}
-            <div class="footer-block__newsletter">
-              {%- if section.settings.newsletter_heading != blank -%}
-                <h2 class="footer-block__heading inline-richtext">{{ section.settings.newsletter_heading }}</h2>
-              {%- endif -%}
-              {%- form 'customer', id: 'ContactFooter', class: 'footer__newsletter newsletter-form' -%}
-                <input type="hidden" name="contact[tags]" value="newsletter">
-                <div class="newsletter-form__field-wrapper">
-                  <div class="field">
-                    <input
-                      id="NewsletterForm--{{ section.id }}"
-                      type="email"
-                      name="contact[email]"
-                      class="field__input"
-                      value="{{ form.email }}"
-                      aria-label="{{ 'newsletter.label' | t }}"
-                      aria-required="true"
-                      autocorrect="off"
-                      autocapitalize="off"
-                      autocomplete="email"
-                      {% if form.errors %}
-                        autofocus
-                        aria-invalid="true"
-                        aria-describedby="ContactFooter-error"
-                      {% elsif form.posted_successfully? %}
-                        aria-describedby="ContactFooter-success"
-                      {% endif %}
-                      placeholder="{{ 'newsletter.label' | t }}"
-                      required
-                    >
-                    <label class="field__label" for="NewsletterForm--{{ section.id }}">
-                      {{ 'newsletter.label' | t }}
-                    </label>
-                    <button
-                      type="submit"
-                      class="newsletter-form__button field__button"
-                      name="commit"
-                      id="Sign Up"
-                      aria-label="Sign Up"
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-                  {%- if form.errors -%}
-                    <small class="newsletter-form__message form__message" id="ContactFooter-error">
-                      {%- render 'icon-error' -%}
-                      {{- form.errors.translated_fields.email | capitalize }}
-                      {{ form.errors.messages.email -}}
-                    </small>
-                  {%- endif -%}
-                </div>
-                {%- if form.posted_successfully? -%}
-                  <h3
-                    class="newsletter-form__message newsletter-form__message--success form__message"
-                    id="ContactFooter-success"
-                    tabindex="-1"
-                    autofocus
-                  >
-                    {% render 'icon-success' -%}
-                    {{- 'newsletter.success' | t }}
-                  </h3>
-                {%- endif -%}
-              {%- endform -%}
+            {%- comment -%}
+              "Never miss a drop" alerts signup (email + SMS). Replaces the native
+              newsletter form. Same server-rendered form as the popup; behavior is
+              wired by snippets/alerts-signup.liquid.
+            {%- endcomment -%}
+            <div class="footer-block__newsletter alerts-footer">
+              <h2 class="alerts-modal__title">Never miss a drop</h2>
+              <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales by email, text, or both.</p>
+              {% render 'alerts-form' %}
             </div>
           {%- endif -%}
-
           {%- if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop -%}
             <div class="footer__follow-on-shop">
               {% comment %} TODO: enable theme-check once `login_button` is accepted as valid filter {% endcomment %}
@@ -541,7 +488,7 @@
             {%- endfor -%}
             <li>
               <small class="copyright__content"
-                ><a href="https://opnsrcsolutions.com" target="_blank">Site Credit</a></small
+                ><a href="https://omaratechnology.com" target="_blank">Site Credit</a></small
               >
             </li>
           </ul>

@@ -1,0 +1,514 @@
+{%- comment -%}
+  snippets/alerts-signup.liquid
+  --------------------------------------------------------------------------
+  Reusable "Never miss a drop" form (email + optional SMS) used by the
+  header popup (sections/alerts-bar.liquid) AND, optionally, the footer
+  (sections/footer.liquid, which renders the alerts-form snippet).
+
+  Wiring to Mailchimp (no backend):
+    - Email only  -> JSONP to the classic post-json endpoint (real inline
+      success/error feedback).
+    - With a phone -> native POST to a hidden iframe using Mailchimp's own
+      SMSPHONE field + mc-SMSPHONE-ack consent checkbox. This is the only
+      no-backend path that records SMS consent compliantly. Uses the store's
+      approved SMS program language. Feedback is optimistic (an iframe POST
+      can't be read cross-origin), which is fine for single opt-in.
+
+  Identifiers below come from the Mailchimp handoff packet. Never place an
+  API key here — this file is public browser code.
+  Rendered once, before </body> in layout/theme.liquid.
+{%- endcomment -%}
+
+{%- liquid
+  assign mc_host = 'hazelboutique.us20.list-manage.com'
+  assign mc_u = 'bb68751aca24eb8005a87da31'
+  assign mc_id = '7488b9bad0'
+  assign mc_fid = '000e76eef0'
+  assign mc_honeypot = 'b_bb68751aca24eb8005a87da31_7488b9bad0'
+  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+-%}
+
+{%- comment -%} Popup dialog. Triggers live elsewhere (bar button) and open it via the `alerts:open` API. {%- endcomment -%}
+<div id="AlertsModal" class="alerts-modal" hidden>
+  <div class="alerts-modal__overlay" data-alerts-close tabindex="-1"></div>
+  <div
+    class="alerts-modal__content color-scheme-1 gradient"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="AlertsModalTitle"
+    tabindex="-1"
+  >
+    <button type="button" class="alerts-modal__close" data-alerts-close aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <div class="alerts-modal__layout">
+      <div class="alerts-modal__media" data-alerts-media hidden>
+        <img alt="" loading="lazy" decoding="async" width="600" height="600">
+      </div>
+      <div class="alerts-modal__body">
+        <h2 id="AlertsModalTitle" class="alerts-modal__title">Never miss a drop</h2>
+        <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales by email, text, or both.</p>
+        <div class="alerts-modal__slot">{% render 'alerts-form' %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Alerts signup — styled with the theme's design tokens (Dawn color schemes,
+     inputs/buttons radii, page width). Scoped under .alerts-*; safe to restyle. */
+  .alerts-modal[hidden] { display: none; }
+  .alerts-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .alerts-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(var(--color-foreground), 0.5);
+    cursor: pointer;
+    display: flex!important;
+  }
+  .alerts-modal__content {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 800px;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding: 0;
+    border-radius: var(--inputs-radius, 0.4rem);
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+
+
+  }
+  @media screen and (min-width: 750px) {
+    .alerts-modal__content { padding: 0px; }
+  }
+  .alerts-modal__close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 4.4rem;
+    height: 4.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    line-height: 1;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: "PragmaticaCondensed";
+    font-weight: 400;
+
+  }
+  .alerts-modal__title { text-align: left;
+    font-family: "PragmaticaCondensed";
+    font-weight: 400 !important;
+    font-size: 21px !important;
+    line-height: 26px !important;
+    letter-spacing: 0px !important;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground)) !important;
+    text-decoration-thickness: 1px !important;
+    margin: 0px 0px 0px;
+    font-weight: 400 !important; }
+  .alerts-modal__intro { font-family: "PragmaticaCondensed";
+    font-weight: 400;
+    font-size: 16px;
+    text-align: left;
+    color: hsl(0deg, 0%, 0%, 100%);
+
+    line-height: 1.3;
+    margin: 0;
+       margin-top: 16px;
+    padding: 0; }
+
+  /* Image + form layout. Mobile: image on top (it's first in the DOM). Desktop: image left. */
+  .alerts-modal__layout { display: grid; gap: 0; }
+  .alerts-modal__media[hidden] { display: none; }
+  .alerts-modal__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 32vh;
+    object-fit: cover;
+    border-radius: var(--inputs-radius, 0.4rem);
+  }
+  .alerts-modal__body { min-width: 0; padding: 24px; }
+  @media screen and (min-width: 750px) {
+    .alerts-modal--has-media .alerts-modal__content { max-width: 800px; }
+    .alerts-modal--has-media .alerts-modal__layout {
+      grid-template-columns: 50% 1fr;
+      align-items: stretch;
+    }
+    .alerts-modal--has-media .alerts-modal__media img { max-height: none; }
+  }
+
+  .alerts-form { display: grid; gap: 12px; margin-top: 16px; margin-bottom: 16px;}
+  .alerts-form__field { margin: 0; }
+  /* Match the custom-embroidery input exactly (border, height, visible placeholder). */
+  .alerts-form .field__input {
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
+    min-height: 32px;
+    height: 32px;
+    max-height: 32px;
+    padding: 0px 0px !important;
+  }
+  .alerts-form .field__input:hover,
+  .alerts-form .field__input:focus {
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
+  }
+  .alerts-form .field__input::placeholder {
+    opacity: 1;
+    color: rgba(var(--color-foreground), 0.6);
+  }
+  .alerts-form__consent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0.8rem;
+    font-size: 11px;
+    line-height: 1.4;
+
+     cursor: pointer
+  }
+  .alerts-form__consent[hidden] { display: none; }
+  .alerts-form__consent input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin: 0.1rem 0 0;
+    flex-shrink: 0;
+    border: 0.1rem solid rgb(var(--color-foreground));
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .alerts-form__consent input[type="checkbox"]:checked {
+    background: #000;
+  }
+  .alerts-form__consent input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 0.65rem;
+    top: 0.3rem;
+    width: 0.45rem;
+    height: 0.85rem;
+    border: solid rgb(var(--color-background));
+    border-width: 0 0.2rem 0.2rem 0;
+    transform: rotate(45deg);
+  }
+  .alerts-form__consent-text a { color: inherit; text-decoration: underline; font-size: 11px; text-align: left }
+  .alerts-form__hp { position: absolute; left: -5000px; }
+  .alerts-form__submit { font-size: 56px;
+    height: 46px !important;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
+    background-color: black;
+    border-radius: 16px;
+    font-size: 16px;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
+    color: rgb(var(--color-background));
+    letter-spacing: 0px;margin-top: 12px; }
+.alerts-form__submit:hover {
+font-size: 56px;
+    height: 46px !important;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
+
+    border-radius: 16px;
+    font-size: 16px;
+    font-family: "PragmaticaCondensed";
+    text-transform: uppercase;
+    line-height: 100%;
+    color: rgb(var(--color-background));
+    letter-spacing: 0px;margin-top: 12px;
+}
+  .alerts-form__msg { margin: 0; min-height: 1.6rem; }
+  .alerts-form__msg:empty { display: none; }
+  .alerts-form__msg.is-error { color: rgb(var(--color-foreground)); }
+  .alerts-form__msg.is-success { color: rgb(var(--color-foreground)); font-weight: 600; }
+
+  /* Footer mount is on the same color scheme (scheme-1) as the modal and reuses the
+     modal title/intro/input/button classes, so it renders identically to the popup.
+     Single column, matched to the modal body width. */
+  .alerts-footer .alerts-form { max-width: 752px; }
+</style>
+
+<script>
+  (function () {
+    // Identifiers as discrete alphanumeric parts (no "&"), so Liquid's HTML-escaping
+    // can't corrupt the query string. The URL is assembled in JS below.
+    var MC = {
+      host: '{{ mc_host }}',
+      u: '{{ mc_u }}',
+      id: '{{ mc_id }}',
+      fid: '{{ mc_fid }}',
+      honeypot: '{{ mc_honeypot }}'
+    };
+    var pageType = '{{ request.page_type }}';
+
+    // Resize a Shopify CDN image URL so we don't load the hero's 3840px source in a modal.
+    function resizeCdn(url, w) {
+      if (/[?&]width=\d+/.test(url)) return url.replace(/([?&]width=)\d+/, '$1' + w);
+      return url + (url.indexOf('?') === -1 ? '?' : '&') + 'width=' + w;
+    }
+
+    // Pull the first image from the homepage's featured "Hero" slideshow (.mobile-hero).
+    // Falls back to the first content image; skips the mouse-follower cursor image.
+    function pickHeroImage(root) {
+      var imgs = root.querySelectorAll('.mobile-hero img');
+      if (!imgs.length) imgs = root.querySelectorAll('#MainContent img');
+      for (var i = 0; i < imgs.length; i++) {
+        var im = imgs[i];
+        if (im.closest('#follower')) continue;
+        var src = im.getAttribute('src');
+        if (!src) {
+          var ss = im.getAttribute('srcset');
+          if (ss) src = ss.split(',')[0].trim().split(' ')[0];
+        }
+        if (!src) src = im.getAttribute('data-src');
+        if (src && src.indexOf('data:') !== 0) return resizeCdn(src, 800);
+      }
+      return null;
+    }
+
+    var imageRequested = false;
+    function loadModalImage() {
+      if (imageRequested) return;
+      imageRequested = true;
+      var media = modal.querySelector('[data-alerts-media]');
+      var img = media && media.querySelector('img');
+      if (!img) return;
+      function apply(src) {
+        if (!src) return;
+        img.src = src;
+        media.hidden = false;
+        modal.classList.add('alerts-modal--has-media');
+        try { sessionStorage.setItem('alertsHeroImg', src); } catch (e) {}
+      }
+      var cached;
+      try { cached = sessionStorage.getItem('alertsHeroImg'); } catch (e) {}
+      if (cached) { apply(cached); return; }
+      if (pageType === 'index') {
+        var here = pickHeroImage(document);
+        if (here) { apply(here); return; }
+      }
+      // Not on the homepage (or none found in DOM yet): fetch it once.
+      fetch('/', { credentials: 'same-origin' })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          apply(pickHeroImage(doc));
+        })
+        .catch(function () {});
+    }
+
+    function subscribeUrl(params) {
+      var q = 'u=' + encodeURIComponent(MC.u)
+        + '&id=' + encodeURIComponent(MC.id)
+        + '&f_id=' + encodeURIComponent(MC.fid);
+      Object.keys(params).forEach(function (k) {
+        q += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+      });
+      return 'https://' + MC.host + '/subscribe/post-json?' + q;
+    }
+
+    var modal = document.getElementById('AlertsModal');
+    if (!modal) return;
+
+    var content = modal.querySelector('.alerts-modal__content');
+    var lastFocus = null;
+
+    // Forms are server-rendered (snippets/alerts-form.liquid) in both the popup and the
+    // footer, so the inputs are always in the DOM. We only attach behavior here.
+    function wire(form) {
+      if (form.getAttribute('data-alerts-wired')) return;
+      form.setAttribute('data-alerts-wired', '1');
+      var phone = form.querySelector('[name="SMSPHONE"]');
+      var consent = form.querySelector('[data-alerts-consent]');
+      // Reveal SMS consent only once a phone number is being entered.
+      if (phone && consent) {
+        phone.addEventListener('input', function () {
+          consent.hidden = phone.value.trim() === '';
+        });
+      }
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submit(form);
+      });
+    }
+
+    function wireAll() {
+      document.querySelectorAll('.alerts-form').forEach(wire);
+    }
+
+    // Normalize a US-style phone to E.164 (+1XXXXXXXXXX). Leaves other +intl input as-is.
+    function normalizePhone(v) {
+      v = (v || '').trim();
+      if (!v) return v;
+      if (v.charAt(0) === '+') return v.replace(/[^\d+]/g, '');
+      var digits = v.replace(/\D/g, '');
+      if (digits.length === 10) return '+1' + digits;
+      if (digits.length === 11 && digits.charAt(0) === '1') return '+' + digits;
+      return '+' + digits;
+    }
+
+    function setMsg(form, text, kind) {
+      var el = form.querySelector('.alerts-form__msg');
+      el.textContent = text || '';
+      el.className = 'alerts-form__msg form__message' + (kind ? ' is-' + kind : '');
+    }
+
+    function submit(form) {
+      var email = form.querySelector('[name="EMAIL"]');
+      var phone = form.querySelector('[name="SMSPHONE"]');
+      var consent = form.querySelector('[data-alerts-consent] input');
+      var hp = form.querySelector('.alerts-form__hp input');
+      var emailVal = email.value.trim();
+      var phoneVal = phone.value.trim();
+      var btn = form.querySelector('.alerts-form__submit');
+
+      // Honeypot filled -> almost certainly a bot. Pretend success, send nothing.
+      if (hp && hp.value) { done(form, btn, true, "You're on the list!"); return; }
+
+      if (!emailVal) {
+        setMsg(form, 'Please enter your email.', 'error');
+        email.focus();
+        return;
+      }
+      if (phoneVal && !consent.checked) {
+        setMsg(form, 'Please agree to receive text messages to continue.', 'error');
+        consent.focus();
+        return;
+      }
+
+      btn.disabled = true;
+      setMsg(form, 'Submitting…');
+
+      // One JSONP call carries email and (when given) the SMS phone + consent. post-json
+      // returns a real success/error result and isn't blocked by reCAPTCHA.
+      // NOTE: the SMS phone field must be optional in the Mailchimp form, or email-only
+      // signups are rejected with "Please enter a value" for the required SMS field.
+      // Send SMSPHONE as a plain string. Do NOT add SMSPHONE[country] — the bracket
+      // notation makes Mailchimp parse SMSPHONE as an array ("must be a string, not
+      // an array"). Normalize to E.164 so "(732) 555-1234" etc. still work.
+      var params = { EMAIL: emailVal };
+      if (phoneVal) {
+        params.SMSPHONE = normalizePhone(phoneVal);
+        params['mc-SMSPHONE-ack'] = 'true';
+      }
+      params[MC.honeypot] = '';
+
+      jsonp(subscribeUrl(params), 'c').then(function (data) {
+        done(form, btn, data.result === 'success', stripHtml(data.msg));
+      }).catch(function () {
+        done(form, btn, false, 'Network error. Please try again.');
+      });
+    }
+
+    function done(form, btn, ok, message) {
+      btn.disabled = false;
+      setMsg(form, message || (ok ? "You're on the list!" : 'Please try again.'), ok ? 'success' : 'error');
+      if (ok) {
+        form.reset();
+        var consent = form.querySelector('[data-alerts-consent]');
+        if (consent) consent.hidden = true;
+      }
+    }
+
+    // Minimal JSONP (Mailchimp post-json uses ?c=<callback>).
+    function jsonp(url, cbParam) {
+      return new Promise(function (resolve, reject) {
+        var cb = 'mc_cb_' + Date.now() + Math.floor(Math.random() * 1e4);
+        var s = document.createElement('script');
+        var to = setTimeout(function () { cleanup(); reject(); }, 10000);
+        function cleanup() { clearTimeout(to); try { delete window[cb]; } catch (e) { window[cb] = undefined; } s.remove(); }
+        window[cb] = function (data) { cleanup(); resolve(data); };
+        s.onerror = function () { cleanup(); reject(); };
+        s.src = url + '&' + cbParam + '=' + cb;
+        document.body.appendChild(s);
+      });
+    }
+    function stripHtml(str) { var d = document.createElement('div'); d.innerHTML = str || ''; return d.textContent || d.innerText || ''; }
+
+    // ---- Modal open/close (reuses the theme's focus trap + scroll lock) ----
+    // Swap any bar message(s) between their default and "popup is open" text.
+    function swapBars(open) {
+      document.querySelectorAll('[data-alerts-bar]').forEach(function (bar) {
+        var def = bar.querySelector('[data-alerts-default]');
+        var swp = bar.querySelector('[data-alerts-swapped]');
+        if (!def || !swp) return;
+        def.hidden = open;
+        swp.hidden = !open;
+      });
+    }
+
+    function openModal() {
+      loadModalImage();
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      document.body.classList.add('overflow-hidden');
+      // Trap focus for accessibility, but focus the dialog itself — NOT the email input —
+      // so nothing is auto-selected when the popup appears.
+      if (typeof trapFocus === 'function') {
+        trapFocus(content, content);
+      } else {
+        content.focus();
+      }
+      swapBars(true);
+      document.body.dispatchEvent(new CustomEvent('alerts:open'));
+    }
+    function closeModal() {
+      modal.hidden = true;
+      document.body.classList.remove('overflow-hidden');
+      if (typeof removeTrapFocus === 'function') {
+        removeTrapFocus(lastFocus);
+      } else if (lastFocus && lastFocus.focus) {
+        lastFocus.focus();
+      }
+      swapBars(false);
+      document.body.dispatchEvent(new CustomEvent('alerts:close'));
+    }
+
+    modal.addEventListener('click', function (e) {
+      // Close on the X, on the overlay, or on any click outside the dialog content.
+      if (e.target.closest('[data-alerts-close]') || !content.contains(e.target)) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-alerts-open]');
+      if (trigger) { e.preventDefault(); openModal(); }
+    });
+
+    // Wire every form on the page (popup + footer). Idempotent, so safe to run repeatedly.
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wireAll);
+    } else {
+      wireAll();
+    }
+    // The theme editor re-renders a section's DOM without re-running this inline script,
+    // leaving a freshly-rendered footer form unwired. Re-wire on section load.
+    document.addEventListener('shopify:section:load', wireAll);
+
+    // Public API for section scripts.
+    window.AlertsSignup = { open: openModal, close: closeModal };
+  })();
+</script>

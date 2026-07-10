@@ -209,21 +209,21 @@
 }
 
 .embroidery__input.field__input {
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    min-height: 40px;
-    height: 40px;
-    max-height: 40px;
-    padding: 0px 8px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
+    min-height: 32px;
+    height: 32px;
+    max-height: 32px;
+    padding: 0px 0px !important;
 }
 
 .embroidery__input.field__input:hover,
 .embroidery__input.field__input:focus {
-    border: 1px solid rgba(0, 0, 0, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
 }
 
 .embroidery__input::placeholder {
     opacity: 1;
-    color: rgba(var(--color-foreground), 0.5);
+    color: rgba(var(--color-foreground), 0.6);
 }
 
 .embroidery__thread-field {
@@ -237,18 +237,18 @@
 
 .embroidery__thread {
     border-radius: 0;
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
     font-size: 1.6rem;
     color: black;
-    padding: 0px 8px !important;
-    min-height: 40px;
-    height: 40px;
-    max-height: 40px;
+    padding: 0px 0px !important;
+    min-height: 32px;
+    height: 32px;
+    max-height: 32px;
 }
 
 .embroidery__thread:hover,
 .embroidery__thread:focus {
-    border: 1px solid rgba(0, 0, 0, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 1);
     box-shadow: none !important;
 }
 

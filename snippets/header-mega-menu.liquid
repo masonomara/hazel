@@ -6,7 +6,7 @@
   {% render 'header-mega-menu' %}
 {% endcomment %}
 
-<nav class="header__inline-menu">
+<nav class="header__inline-menu" role="navigation" aria-label="Main">
   <ul class="list-menu list-menu--inline" role="list">
     {%- for link in section.settings.menu.links -%}
       <li>

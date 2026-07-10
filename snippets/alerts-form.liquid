@@ -1,0 +1,59 @@
+{%- comment -%}
+  snippets/alerts-form.liquid
+  Shared "Never miss a drop" signup form (email + optional SMS), rendered
+  server-side in BOTH the popup (snippets/alerts-signup.liquid) and the footer
+  (sections/footer.liquid). Behavior (submit, SMS consent reveal) is wired by
+  the script in alerts-signup.liquid, which finds every .alerts-form on the page.
+{%- endcomment -%}
+{%- liquid
+  assign mc_honeypot = 'b_bb68751aca24eb8005a87da31_7488b9bad0'
+  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+-%}
+<form class="alerts-form" novalidate>
+  <div class="alerts-form__field field">
+    <input
+      class="field__input"
+      type="email"
+      name="EMAIL"
+      autocomplete="email"
+      autocapitalize="off"
+      autocorrect="off"
+      aria-label="Email"
+      placeholder="Email"
+      required
+      aria-required="true"
+    >
+  </div>
+
+  <div class="alerts-form__field field">
+    <input
+      class="field__input"
+      type="tel"
+      name="SMSPHONE"
+      inputmode="tel"
+      autocomplete="tel"
+      aria-label="Mobile number (optional)"
+      placeholder="Mobile number (optional)"
+    >
+  </div>
+
+  <label class="alerts-form__consent" data-alerts-consent hidden>
+    <input type="checkbox" name="mc-SMSPHONE-ack" value="true">
+    <span class="alerts-form__consent-text" style="text-align: left">
+      By providing your phone number and checking the box, you agree to receive recurring
+      promotional and marketing text messages (e.g. cart reminders) from Hazel Boutique at the
+      number provided. Consent is not a condition of purchase. Msg &amp; data rates may apply.
+      Msg frequency varies. Reply HELP for help, STOP to cancel.
+      <a href="http://eepurl.com/iwthPw" target="_blank" rel="noopener noreferrer">See terms</a>,
+      <a href="{{ privacy_url }}" target="_blank" rel="noopener noreferrer">See privacy policy</a>.
+    </span>
+  </label>
+
+  {%- comment -%} Honeypot: real users never see or fill this. Name is the b_<u>_<id> value. {%- endcomment -%}
+  <div class="alerts-form__hp" aria-hidden="true">
+    <input type="text" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="">
+  </div>
+
+  <button type="submit" class="alerts-form__submit button button--full-width button--primary">Sign Up</button>
+  <p class="alerts-form__msg form__message" role="status" aria-live="polite"></p>
+</form>

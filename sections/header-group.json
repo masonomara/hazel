@@ -13,23 +13,21 @@
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
-      "blocks": {},
-      "block_order": [],
       "custom_css": [
         ".utility-bar--bottom-border {border-bottom-color: #000; font-family: \"PragmaticaCondensed\"; font-weight: 400;}",
         ".utility-bar--bottom-border * {font-family: \"PragmaticaCondensed\"; font-weight: 400; text-transform: uppercase; font-size: 16px;}"
       ],
       "settings": {
         "color_scheme": "scheme-1",
+        "show_alerts": true,
+        "alerts_message": "Be the first to know about drops & restocks",
+        "alerts_button_label": "Get alerts",
         "show_line_separator": true,
         "show_social": false,
         "auto_rotate": false,
         "change_slides_speed": 5,
         "enable_country_selector": false,
-        "enable_language_selector": false,
-        "show_alerts": true,
-        "alerts_message": "Be the first to know about drops & restocks",
-        "alerts_button_label": "Get alerts"
+        "enable_language_selector": false
       }
     },
     "header": {
@@ -54,12 +52,12 @@
         "link_one_b": "",
         "text_one_b": "",
         "megamenu_title_two": "Hazel Brand",
-        "link_two_a": "shopify://products/the-hzl-polly-mockneck",
-        "image_two_a": "shopify://shop_images/E30CD770-43BC-4641-A2C6-C7814C095A9F.jpg",
-        "text_two_a": "The Polly Mock",
-        "link_two_b": "shopify://products/the-hzl-sally-mockneck",
-        "image_two_b": "shopify://shop_images/352970BB-1DB1-4496-87D4-64EB4A53F015.jpg",
-        "text_two_b": "The Sally Mock",
+        "link_two_a": "shopify://products/the-hzl-honeysuckle-mockneck",
+        "image_two_a": "shopify://shop_images/CC289AD1-EC23-48F6-B756-24F35C5B6931.jpg",
+        "text_two_a": "The Honeysuckle Mock",
+        "link_two_b": "shopify://products/the-hzl-pink-lemonade-hoodie",
+        "image_two_b": "shopify://shop_images/010740D6-CA59-4500-BEB4-89BF8BC7C18D.jpg",
+        "text_two_b": "The Pink Lemonade Hoodie",
         "megamenu_title_three": "Clothing",
         "link_three_a": "shopify://products/the-sunday-brunch-mockneck-dusty-blue",
         "image_three_a": "shopify://shop_images/CE14AA70-1751-4BDF-AE75-AA8FC29ED1CE.jpg",

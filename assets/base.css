@@ -1441,6 +1441,7 @@ button.shopify-payment-button__button--unbranded {
 .button--full-width {
     display: flex;
     width: 100%;
+    font-family: "PragmaticaCondensed";
 }
 
 .button.loading {

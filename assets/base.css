@@ -7319,3 +7319,50 @@ cart-remove-button .swym-button-bar {
         flex-direction: column !important;
     }
 }
+
+/* ------------------------------------------------------------------
+ * Coming soon
+ *
+ * Products tagged "coming-soon" behave exactly like sold-out products —
+ * price replaced, add to cart disabled — but they read "Coming soon" and
+ * are never dimmed. Everything below exists to hold them at full opacity.
+ * ------------------------------------------------------------------ */
+
+.button--coming-soon:disabled,
+.button--coming-soon[aria-disabled="true"],
+.button--coming-soon.disabled {
+    opacity: 1;
+}
+
+/* A coming-soon product can still be in stock, so its variants stay legible:
+   no strikethrough, no faded label, no greyed-out swatch. */
+.product--coming-soon
+    .product-form__input--pill
+    input[type="radio"]:disabled
+    + label,
+.product--coming-soon
+    .product-form__input--pill
+    input[type="radio"].disabled
+    + label {
+    border-color: rgba(var(--color-foreground), 0.55);
+    color: rgb(var(--color-foreground));
+    text-decoration: none;
+}
+
+.product--coming-soon
+    .product-form__input--pill
+    input[type="radio"].disabled:checked
+    + label,
+.product--coming-soon
+    .product-form__input--pill
+    input[type="radio"]:disabled:checked
+    + label {
+    color: rgb(var(--color-background));
+}
+
+.product--coming-soon .swatch-input__input:disabled + .swatch-input__label > .swatch::before,
+.product--coming-soon .swatch-input__input.disabled + .swatch-input__label > .swatch::before,
+.product--coming-soon .swatch-input__input:disabled + .swatch-input__label > .swatch::after,
+.product--coming-soon .swatch-input__input.disabled + .swatch-input__label > .swatch::after {
+    display: none;
+}

@@ -137,6 +137,7 @@
       },
       "share": "Dela den här produkten",
       "sold_out": "Slutsåld",
+      "coming_soon": "Kommer snart",
       "unavailable": "Ej tillgänglig",
       "vendor": "Säljare",
       "video_exit_message": "{{ title }} öppnar helskärmsvideo i samma fönster.",

@@ -40,12 +40,14 @@
     assign discount_percent = compare_at_price | minus: price | times: 100 | divided_by: compare_at_price
   endif
 -%}
+{%- capture coming_soon %}{% render 'coming-soon', product: product %}{% endcapture -%}
 
 <div
   class="
     price
     {%- if price_class %} {{ price_class }}{% endif -%}
-    {%- if available == false %} price--sold-out{% endif -%}
+    {%- if available == false or coming_soon contains 'true' %} price--sold-out{% endif -%}
+    {%- if coming_soon contains 'true' %} price--coming-soon{% endif -%}
     {%- if compare_at_price > price and product.quantity_price_breaks_configured? != true %} price--on-sale{% endif -%}
     {%- if compare_at_price > price and product.quantity_price_breaks_configured? %} volume-pricing--sale-badge{% endif -%}
     {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
@@ -53,7 +55,11 @@
   "
 >
   <div class="price__container">
-    {%- if available == false -%}
+    {%- if coming_soon contains 'true' -%}
+      <span class="price-item price-item--sold-out price-item--coming-soon">
+        {{- 'products.product.coming_soon' | t -}}
+      </span>
+    {%- elsif available == false -%}
       <span class="price-item price-item--sold-out">SOLD OUT</span>
     {%- else -%}
     {%- comment -%}
@@ -132,7 +138,11 @@
     </span>
 
     <span class="badge price__badge-sold-out color-{{ settings.sold_out_badge_color_scheme }}">
-      {{ 'products.product.sold_out' | t }}
+      {%- if coming_soon contains 'true' -%}
+        {{ 'products.product.coming_soon' | t }}
+      {%- else -%}
+        {{ 'products.product.sold_out' | t }}
+      {%- endif -%}
     </span>
   {%- endif -%}
 </div>

@@ -122,6 +122,7 @@
       "on_sale": "Sleva",
       "share": "Sdílet tento produkt",
       "sold_out": "Vyprodáno",
+      "coming_soon": "Již brzy",
       "unavailable": "Není k dispozici",
       "vendor": "Dodavatel",
       "video_exit_message": "{{ title }} otevře ve stejném okně video na celé obrazovce.",

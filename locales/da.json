@@ -137,6 +137,7 @@
       },
       "share": "Del dette produkt",
       "sold_out": "Udsolgt",
+      "coming_soon": "Kommer snart",
       "unavailable": "Ikke tilgængelig",
       "vendor": "Forhandler",
       "video_exit_message": "{{ title }} åbner video i fuld skærm i samme vindue.",

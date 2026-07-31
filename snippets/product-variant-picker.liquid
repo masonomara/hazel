@@ -96,6 +96,11 @@
   </variant-selects>
 {%- endunless -%}
 
+{%- capture coming_soon %}{% render 'coming-soon', product: product %}{% endcapture -%}
+{%- if coming_soon contains 'true' -%}
+  {%- assign is_coming_soon = true -%}
+{%- endif -%}
+
 <noscript class="product-form__noscript-wrapper-{{ section.id }}">
   <div class="product-form__input{% if product.has_only_default_variant %} hidden{% endif %}">
     <label class="form__label" for="Variants-{{ section.id }}">
@@ -113,7 +118,7 @@
             {% if variant == product.selected_or_first_available_variant %}
               selected="selected"
             {% endif %}
-            {% if variant.available == false %}
+            {% if variant.available == false or is_coming_soon %}
               disabled
             {% endif %}
             value="{{ variant.id }}"
@@ -121,7 +126,9 @@
             {%- liquid
               echo variant.title
               echo variant.price | money | strip_html | prepend: ' - '
-              if variant.available == false
+              if is_coming_soon
+                echo 'products.product.coming_soon' | t | prepend: ' - '
+              elsif variant.available == false
                 echo 'products.product.sold_out' | t | prepend: ' - '
               endif
               if variant.quantity_rule.increment > 1

@@ -66,8 +66,12 @@
   {%- endif -%}
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+  {%- capture coming_soon %}{% render 'coming-soon', product: product %}{% endcapture -%}
+  {%- if coming_soon contains 'true' -%}
+    {%- assign is_coming_soon = true -%}
+  {%- endif -%}
   <div class="page-width">
-    <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+    <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}{% if is_coming_soon %} product--coming-soon{% endif %}">
       <div class="grid__item product__media-wrapper{% if section.settings.media_position == 'right' %} medium-hide large-up-hide{% endif %}">
         {% render 'product-media-gallery', variant_images: variant_images %}
       </div>
@@ -777,7 +781,11 @@
               {%- if variant.barcode.size == 14 -%}
                 "gtin14": {{ variant.barcode }},
               {%- endif -%}
-              "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+              {%- comment -%}
+                A coming-soon product can still be in stock, but it cannot be bought —
+                don't advertise it as InStock to search or Merchant Center.
+              {%- endcomment -%}
+              "availability" : "http://schema.org/{% if variant.available and is_coming_soon != true %}InStock{% else %}OutOfStock{% endif %}",
               "price" : {{ variant.price | divided_by: 100.00 | json }},
               "priceCurrency" : {{ cart.currency.iso_code | json }},
               "url" : {{ request.origin | append: variant.url | json }}

@@ -23,6 +23,10 @@
         assign show_dynamic_checkout = true
       endif
     -%}
+    {%- capture coming_soon %}{% render 'coming-soon', product: product %}{% endcapture -%}
+    {%- if coming_soon contains 'true' -%}
+      {%- assign is_coming_soon = true -%}
+    {%- endif -%}
 
     <product-form
       class="product-form"
@@ -55,7 +59,7 @@
           type="hidden"
           name="id"
           value="{{ product.selected_or_first_available_variant.id }}"
-          {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
+          {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout or is_coming_soon %}
             disabled
           {% endif %}
           class="product-variant-id"
@@ -79,13 +83,15 @@
             id="ProductSubmitButton-{{ section_id }}"
             type="submit"
             name="add"
-            class="product-form__submit button button--full-width {% if show_dynamic_checkout %}button--secondary{% else %}button--primary{% endif %}"
-            {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
+            class="product-form__submit button button--full-width {% if show_dynamic_checkout %}button--secondary{% else %}button--primary{% endif %}{% if is_coming_soon %} button--coming-soon{% endif %}"
+            {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout or is_coming_soon %}
               disabled
             {% endif %}
           >
             <span>
-              {%- if product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
+              {%- if is_coming_soon -%}
+                {{ 'products.product.coming_soon' | t }}
+              {%- elsif product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
                 {{ 'products.product.sold_out' | t }}
               {%- else -%}
                 {{ 'products.product.add_to_cart' | t }}
@@ -93,7 +99,11 @@
             </span>
             {%- render 'loading-spinner' -%}
           </button>
-          {%- if show_dynamic_checkout -%}
+          {%- comment -%}
+            No dynamic checkout for a coming-soon product: it may still be in stock,
+            and Shopify would render the payment button live and buyable.
+          {%- endcomment -%}
+          {%- if show_dynamic_checkout and is_coming_soon != true -%}
             {{ form | payment_button }}
           {%- endif -%}
         </div>
@@ -123,7 +133,7 @@
 
     <pickup-availability
       class="product__pickup-availabilities no-js-hidden quick-add-hidden"
-      {% if product.selected_or_first_available_variant.available and pick_up_availabilities.size > 0 %}
+      {% if product.selected_or_first_available_variant.available and pick_up_availabilities.size > 0 and is_coming_soon != true %}
         available
       {% endif %}
       data-root-url="{{ routes.root_url }}"

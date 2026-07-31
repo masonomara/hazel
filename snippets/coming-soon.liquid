@@ -1,0 +1,23 @@
+{% comment %}
+  Renders the string "true" when a product is flagged "coming soon", nothing otherwise.
+
+  A "coming soon" product behaves exactly like a sold-out one — price replaced,
+  add-to-cart disabled — but reads "Coming soon" and is never dimmed. The tag
+  match lives here alone so the rule has one home.
+
+  Matched tags (case-insensitive): "coming-soon", "coming soon".
+
+  Accepts:
+  - product: {Object} Product Liquid object
+
+  Usage — capture the render, then test it with `contains` so stray whitespace
+  can never flip the result:
+    {%- capture coming_soon %}{% render 'coming-soon', product: product %}{% endcapture -%}
+    {%- if coming_soon contains 'true' -%}
+{% endcomment %}
+{%- liquid
+  assign coming_soon_tags = product.tags | join: ',' | downcase
+  if coming_soon_tags contains 'coming-soon' or coming_soon_tags contains 'coming soon'
+    echo 'true'
+  endif
+-%}

@@ -40,6 +40,10 @@
       assign ratio = 1
     endif
   -%}
+  {%- capture coming_soon %}{% render 'coming-soon', product: card_product %}{% endcapture -%}
+  {%- if coming_soon contains 'true' -%}
+    {%- assign is_coming_soon = true -%}
+  {%- endif -%}
 
   <a
     class="card-wrapper product-card-wrapper underline-links-hover"
@@ -380,7 +384,7 @@
           name="id"
           value="{{ card_product.selected_or_first_available_variant.id }}"
           class="product-variant-id"
-          {% if card_product.selected_or_first_available_variant.available == false %}
+          {% if card_product.selected_or_first_available_variant.available == false or is_coming_soon %}
             disabled
           {% endif %}
         >
@@ -388,24 +392,30 @@
           id="{{ product_form_id }}-submit"
           type="submit"
           name="add"
-          class="quick-add__submit button button--full-width button--secondary{% if horizontal_quick_add %} card--horizontal__quick-add{% endif %}"
+          class="quick-add__submit button button--full-width button--secondary{% if horizontal_quick_add %} card--horizontal__quick-add{% endif %}{% if is_coming_soon %} button--coming-soon{% endif %}"
           aria-haspopup="dialog"
           aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
           aria-live="polite"
           data-sold-out-message="true"
-          {% if card_product.selected_or_first_available_variant.available == false %}
+          {% if card_product.selected_or_first_available_variant.available == false or is_coming_soon %}
             disabled
           {% endif %}
         >
           <span>
-            {%- if card_product.selected_or_first_available_variant.available -%}
+            {%- if is_coming_soon -%}
+              {{ 'products.product.coming_soon' | t }}
+            {%- elsif card_product.selected_or_first_available_variant.available -%}
               {{ 'products.product.add_to_cart' | t }}
             {%- else -%}
               {{ 'products.product.sold_out' | t }}
             {%- endif -%}
           </span>
           <span class="sold-out-message hidden">
-            {{ 'products.product.sold_out' | t }}
+            {%- if is_coming_soon -%}
+              {{ 'products.product.coming_soon' | t }}
+            {%- else -%}
+              {{ 'products.product.sold_out' | t }}
+            {%- endif -%}
           </span>
           {%- if horizontal_quick_add -%}
             <span class="icon-wrap">{% render 'icon-plus' %}</span>

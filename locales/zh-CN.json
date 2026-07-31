@@ -138,6 +138,7 @@
       },
       "share": "分享此产品",
       "sold_out": "售罄",
+      "coming_soon": "即将上市",
       "unavailable": "不可用",
       "vendor": "厂商",
       "video_exit_message": "{{ title }} 在同一窗口中打开全屏视频。",

@@ -1173,9 +1173,13 @@ class VariantSelects extends HTMLElement {
         if (inventoryDestination) inventoryDestination.classList.toggle('hidden', inventorySource.innerText === '');
 
         const addButtonUpdated = html.getElementById(`ProductSubmitButton-${sectionId}`);
+        // Take the disabled label from the freshly rendered button rather than a
+        // fixed string, so a "coming soon" product keeps saying "Coming soon"
+        // instead of flipping to "Sold out" on every variant change.
+        const disabledLabel = addButtonUpdated?.querySelector('span')?.textContent.trim();
         this.toggleAddButton(
           addButtonUpdated ? addButtonUpdated.hasAttribute('disabled') : true,
-          window.variantStrings.soldOut
+          disabledLabel || window.variantStrings.soldOut
         );
 
         publish(PUB_SUB_EVENTS.variantChange, {

@@ -138,6 +138,7 @@
       },
       "share": "Bagikan produk ini",
       "sold_out": "Habis",
+      "coming_soon": "Segera hadir",
       "unavailable": "Tidak Tersedia",
       "vendor": "Vendor",
       "video_exit_message": "{{ title }} membuka video layar penuh di jendela yang sama.",

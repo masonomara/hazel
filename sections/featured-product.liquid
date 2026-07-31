@@ -64,7 +64,11 @@
 
 <section class="color-{{ section.settings.color_scheme }} {% if section.settings.secondary_background %}background-secondary{% else %}gradient{% endif %}">
   <div class="page-width section-{{ section.id }}-padding{% if section.settings.secondary_background %} isolate{% endif %}">
-    <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col gradient color-{{ section.settings.color_scheme }} product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+    {%- capture coming_soon %}{% render 'coming-soon', product: product %}{% endcapture -%}
+    {%- if coming_soon contains 'true' -%}
+      {%- assign is_coming_soon = true -%}
+    {%- endif -%}
+    <div class="featured-product product product--{{ section.settings.media_size }} grid grid--1-col gradient color-{{ section.settings.color_scheme }} product--{{ section.settings.media_position }}{% if section.settings.secondary_background == false %} isolate{% endif %} {% if product.media.size > 0 or section.settings.product == blank %}grid--2-col-tablet{% else %}product--no-media{% endif %}{% if is_coming_soon %} product--coming-soon{% endif %}">
       <div class="grid__item product__media-wrapper{% if section.settings.media_position == 'right' %} medium-hide large-up-hide{% endif %}">
         <media-gallery
           id="MediaGallery-{{ section.id }}"
@@ -657,7 +661,7 @@
           {%- if variant.barcode.size == 14 -%}
             "gtin14": {{ variant.barcode | json }},
           {%- endif -%}
-          "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+          "availability" : "http://schema.org/{% if variant.available and is_coming_soon != true %}InStock{% else %}OutOfStock{% endif %}",
           "price" : {{ variant.price | divided_by: 100.00 | json }},
           "priceCurrency" : {{ cart.currency.iso_code | json }},
           "url" : {{ request.origin | append: variant.url | json }}

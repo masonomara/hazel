@@ -13,6 +13,18 @@
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
+      "blocks": {
+        "announcement_BALzUB": {
+          "type": "announcement",
+          "settings": {
+            "text": "All On Sale Items Are Final Sale",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "announcement_BALzUB"
+      ],
       "custom_css": [
         ".utility-bar--bottom-border {border-bottom-color: #000; font-family: \"PragmaticaCondensed\"; font-weight: 400;}",
         ".utility-bar--bottom-border * {font-family: \"PragmaticaCondensed\"; font-weight: 400; text-transform: uppercase; font-size: 16px;}"

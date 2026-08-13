@@ -184,7 +184,7 @@
       "xr_button_label": "View in your space, loads item in augmented reality window",
       "include_taxes": "Tax included.",
       "shipping_policy_html": "<a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
-      "final_sale": "Final sale",
+      "final_sale": "FINAL SALE: ",
       "final_sale_note": "This item can't be returned or exchanged.",
       "final_sale_note_html": "This item can't be returned or exchanged. <a href=\"{{ link }}\">Read our return policy</a>",
       "final_sale_property": "No returns or exchanges",

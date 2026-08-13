@@ -1,0 +1,42 @@
+{% comment %}
+  Renders the short reassurance stack that sits directly under the buy button:
+  what the return terms are for this specific product, then shipping.
+
+  The return line is the point of this snippet. The policy pages say sale items
+  are final sale and nobody reads policy pages, so the rule is stated at the
+  moment of purchase instead. See `snippets/final-sale.liquid` for the rule.
+
+  Accepts:
+  - product: {Object} Product Liquid object
+
+  Usage:
+    {%- render 'product-assurances', product: product -%}
+{% endcomment %}
+{%- capture final_sale %}{% render 'final-sale', product: product %}{% endcapture -%}
+<div class="product__assurances quick-add-hidden">
+  {%- if final_sale contains 'true' -%}
+    <p class="product__assurance product__assurance--final-sale">
+      <strong>{{ 'products.product.final_sale' | t }}</strong>
+      {%- if shop.refund_policy.url != blank -%}
+        {{ ' ' }}{{ 'products.product.final_sale_note_html' | t: link: shop.refund_policy.url }}
+      {%- else -%}
+        {{ ' ' }}{{ 'products.product.final_sale_note' | t }}
+      {%- endif -%}
+    </p>
+  {%- elsif shop.refund_policy.url != blank -%}
+    <p class="product__assurance">
+      {{ 'products.product.returns_note_html' | t: link: shop.refund_policy.url }}
+    </p>
+  {%- endif -%}
+
+  {%- if cart.taxes_included or shop.shipping_policy.body != blank -%}
+    <p class="product__assurance product__tax caption rte">
+      {%- if cart.taxes_included -%}
+        {{ 'products.product.include_taxes' | t }}
+      {%- endif -%}
+      {%- if shop.shipping_policy.body != blank -%}
+        {{ ' ' }}{{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
+      {%- endif -%}
+    </p>
+  {%- endif -%}
+</div>

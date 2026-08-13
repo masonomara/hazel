@@ -7367,3 +7367,58 @@ cart-remove-button .swym-button-bar {
 .product--coming-soon .swatch-input__input.disabled + .swatch-input__label > .swatch::after {
     display: none;
 }
+
+/* ------------------------------------------------------------------
+ * Product assurances
+ *
+ * The short stack under the buy button: return terms for this product,
+ * then shipping. Quiet by default; the final-sale line gets a rule and a
+ * faint tint so it reads as a condition of the sale, not body copy.
+ * ------------------------------------------------------------------ */
+
+.product__assurances {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1.4rem;
+}
+
+.product__assurance {
+    margin: 0 !important;
+    font-family: "PragmaticaCondensed", sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 17px;
+    color: rgb(var(--color-foreground));
+}
+
+.product__assurances .product__tax.caption {
+    margin: 0 !important;
+}
+
+.product__assurance a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.product__assurance--final-sale {
+    padding: 0.9rem 1.1rem;
+    border-left: 2px solid rgb(var(--color-foreground));
+    background-color: rgba(var(--color-foreground), 0.05);
+}
+
+/* PragmaticaCondensed ships at weights 300 and 400 only, so the label is set
+   apart with case and tracking rather than a synthesised bold. */
+.product__assurance--final-sale strong {
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+@media screen and (min-width: 750px) {
+    .product__assurance {
+        font-size: 14px;
+        line-height: 19px;
+    }
+}

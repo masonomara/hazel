@@ -1,0 +1,63 @@
+{% comment %}
+  Renders the string "true" when a product is final sale, nothing otherwise.
+
+  Final sale means no return and no exchange. The rule lives here alone so the
+  product page, the add-to-cart property, and anything added later all agree.
+
+  A product is final sale when ANY of these hold:
+    1. It is on sale — any variant priced below its compare-at price.
+    2. Its product type is in FINAL_SALE_TYPES below.
+    3. It belongs to a collection in FINAL_SALE_COLLECTIONS below.
+    4. It is tagged "final-sale" or "final sale".
+
+  The tag "returnable" overrides everything and forces the product back to
+  returnable. Use it for the one-off exception.
+
+  To widen the rule, add to the two lists below — lowercase, comma-separated,
+  no spaces around the commas. Nothing else needs to change.
+    - Types come from the product's "Product type" field in the admin.
+    - Collections are handles (the last part of the collection URL).
+
+  Accepts:
+  - product: {Object} Product Liquid object
+
+  Usage — capture the render, then test it with `contains` so stray whitespace
+  can never flip the result:
+    {%- capture final_sale %}{% render 'final-sale', product: product %}{% endcapture -%}
+    {%- if final_sale contains 'true' -%}
+{% endcomment %}
+{%- liquid
+  assign final_sale_types = 'vintage,home decor'
+  assign final_sale_collections = 'swimwear'
+
+  assign tags = product.tags | join: ',' | downcase | prepend: ',' | append: ','
+  assign is_final_sale = false
+
+  unless tags contains ',returnable,'
+    if product.compare_at_price_max > product.price_min
+      assign is_final_sale = true
+    endif
+
+    if tags contains ',final-sale,' or tags contains ',final sale,'
+      assign is_final_sale = true
+    endif
+
+    assign product_type = product.type | downcase
+    assign type_list = final_sale_types | split: ','
+    if product_type != blank and type_list contains product_type
+      assign is_final_sale = true
+    endif
+
+    assign collection_list = final_sale_collections | split: ','
+    for collection in product.collections
+      if collection_list contains collection.handle
+        assign is_final_sale = true
+        break
+      endif
+    endfor
+  endunless
+
+  if is_final_sale
+    echo 'true'
+  endif
+-%}

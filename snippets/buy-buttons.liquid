@@ -27,6 +27,7 @@
     {%- if coming_soon contains 'true' -%}
       {%- assign is_coming_soon = true -%}
     {%- endif -%}
+    {%- capture final_sale %}{% render 'final-sale', product: product %}{% endcapture -%}
 
     <product-form
       class="product-form"
@@ -64,6 +65,19 @@
           {% endif %}
           class="product-variant-id"
         >
+
+        {%- comment -%}
+          Carries the final-sale terms into the cart drawer and onto the order,
+          so the buyer sees it once more before they pay. The rule lives in
+          `snippets/final-sale.liquid`.
+        {%- endcomment -%}
+        {%- if final_sale contains 'true' -%}
+          <input
+            type="hidden"
+            name="properties[{{ 'products.product.final_sale' | t }}]"
+            value="{{ 'products.product.final_sale_property' | t }}"
+          >
+        {%- endif -%}
 
         {%- if gift_card_recipient_feature_active -%}
           {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}

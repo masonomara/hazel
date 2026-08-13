@@ -83,8 +83,8 @@ html.no-js .no-js:not(html) {
 
 html {
     letter-spacing: 0px !important;
-    text-underline-offset: 0.5rem !important;
-    text-decoration-thickness: 1.33px !important;
+    text-underline-offset: 0.4rem !important;
+    text-decoration-thickness: 0.115rem !important;
     text-rendering: optimizeLegibility;
     /* cursor: url("strawberryHazel.png"), auto; */
 }
@@ -96,8 +96,8 @@ html {
 
 html * {
     letter-spacing: 0px !important;
-    text-underline-offset: 0.5rem !important;
-    text-decoration-thickness: 1.33px !important;
+    text-underline-offset: 0.4rem !important;
+    text-decoration-thickness: 0.115rem !important;
     text-rendering: optimizeLegibility;
 }
 .no-js-inline {
@@ -545,7 +545,7 @@ h6:empty {
     border: none;
     box-shadow: none;
     text-decoration: underline;
-    text-underline-offset: 0.5rem;
+    text-underline-offset: 0.4rem;
     color: rgb(var(--color-link));
     background-color: transparent;
     font-size: 1.4rem;
@@ -650,8 +650,8 @@ details > * {
 .underlined-link,
 .customer a,
 .inline-richtext a {
-    text-underline-offset: 0.5rem;
-    text-decoration-thickness: 0.1rem;
+    text-underline-offset: 0.4rem;
+    text-decoration-thickness: 0.115rem;
     transition: text-decoration-thickness ease 100ms;
 }
 
@@ -1500,7 +1500,7 @@ details[open] > .share-button__fallback {
 
 .share-button__button:hover {
     text-decoration: underline;
-    text-underline-offset: 0.5rem;
+    text-underline-offset: 0.4rem;
 }
 
 .share-button__button,
@@ -7366,4 +7366,55 @@ cart-remove-button .swym-button-bar {
 .product--coming-soon .swatch-input__input:disabled + .swatch-input__label > .swatch::after,
 .product--coming-soon .swatch-input__input.disabled + .swatch-input__label > .swatch::after {
     display: none;
+}
+
+/* ------------------------------------------------------------------
+ * Product assurances
+ *
+ * The short stack under the buy button: return terms for this product,
+ * then shipping. Quiet by default; the final-sale line gets a rule and a
+ * faint tint so it reads as a condition of the sale, not body copy.
+ * ------------------------------------------------------------------ */
+
+.product__assurances {
+    display: flex;
+    flex-direction: column;
+    opacity: .87;
+    gap: 4px;
+    margin-top: -7px!important;
+}
+
+.product__assurance {
+    margin: 0 !important;
+    font-family: "PragmaticaCondensed", sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 17px;
+    color: rgb(var(--color-foreground));
+}
+
+.product__assurances .product__tax.caption {
+    margin: 0 !important;
+}
+
+.product__assurance a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+
+
+/* PragmaticaCondensed ships at weights 300 and 400 only, so the label is set
+   apart with case and tracking rather than a synthesised bold. */
+.product__assurance--final-sale strong {
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+@media screen and (min-width: 750px) {
+    .product__assurance {
+        font-size: 14px;
+        line-height: 19px;
+    }
 }

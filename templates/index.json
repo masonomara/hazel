@@ -59,8 +59,8 @@
         "slide_a7wBaG": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/A1F48941-30F6-4EF7-BCE4-2AF813640CC4.jpg",
-            "heading": "Shop New!",
+            "image": "shopify://shop_images/IMG_3335.jpg",
+            "heading": "Coming soon!",
             "enable_video_looping": true,
             "video_url": "",
             "description": "",
@@ -79,6 +79,7 @@
         },
         "slide_UQmn8n": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/IMG_3016.jpg",
             "heading": "",
@@ -100,6 +101,7 @@
         },
         "slide_Vwba6W": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/3B3D6F3F-DED1-4BB4-A674-E07E635C5EE9.jpg",
             "heading": "",

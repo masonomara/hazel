@@ -238,6 +238,15 @@
       threadField.hidden = false;
     }
 
+    // The line-item text field always starts empty on a fresh page load
+    // (embroidery.liquid hardcodes value=""), so there's never a legitimate
+    // reason to land on the Embroidered variant by default. If Shopify's
+    // initial variant selection (a sold-out Standard combo) skipped ahead to
+    // an available Embroidered one instead, correct it back to Standard.
+    if (optionControl && currentOptionValue(optionControl) !== offOptionValue()) {
+      setEmbroidery(false);
+    }
+
     // Live preview: text follows the input, color follows the selected thread,
     // background follows the selected Color variant (hex_color) or display_color.
     var preview = root.querySelector("[data-embroidery-preview]");

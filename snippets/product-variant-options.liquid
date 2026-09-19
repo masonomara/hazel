@@ -23,6 +23,35 @@
   assign variants_option3_arr = product.variants | map: 'option3'
 
   assign product_form_id = 'product-form-' | append: section.id
+
+  # Embroidery is a hidden product option, not a real variant axis. Left
+  # alone, a Size (option 1) counts as "available" if either its Standard
+  # or its Embroidered variant has stock — so a size can show in stock on
+  # the web while the real (Standard) garment is sold out on the backend,
+  # or the reverse. Resolve the embroidery option's position so the Size
+  # check below can require the Standard variant specifically, everywhere
+  # else falls back to stock Dawn behavior unchanged.
+  assign embroidery_enabled = false
+  if product.tags contains 'embroidery' or product.metafields.custom.embroidery_enabled
+    assign embroidery_enabled = true
+  endif
+  assign embroidery_option_name = settings.embroidery_option_name | default: 'Embroidery'
+  assign embroidery_no_value = settings.embroidery_no_value | default: 'Standard'
+  assign embroidery_option_position = 0
+  if embroidery_enabled
+    for embroidery_opt in product.options_with_values
+      if embroidery_opt.name == embroidery_option_name
+        assign embroidery_option_position = embroidery_opt.position
+      endif
+    endfor
+  endif
+  assign variants_embroidery_axis_arr = variants_option1_arr
+  case embroidery_option_position
+    when 2
+      assign variants_embroidery_axis_arr = variants_option2_arr
+    when 3
+      assign variants_embroidery_axis_arr = variants_option3_arr
+  endcase
 -%}
 
 {%- for value in option.values -%}
@@ -30,9 +59,14 @@
     assign option_disabled = true
 
     for option1_name in variants_option1_arr
+      assign counts_toward_stock = true
+      if embroidery_enabled and embroidery_option_position > 0 and embroidery_option_position != 1 and option.position == 1 and variants_embroidery_axis_arr[forloop.index0] != embroidery_no_value
+        assign counts_toward_stock = false
+      endif
+
       case option.position
         when 1
-          if variants_option1_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+          if variants_option1_arr[forloop.index0] == value and variants_available_arr[forloop.index0] and counts_toward_stock
             assign option_disabled = false
           endif
         when 2

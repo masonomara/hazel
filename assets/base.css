@@ -7418,3 +7418,11 @@ cart-remove-button .swym-button-bar {
         line-height: 19px;
     }
 }
+
+/* Header: "Locations" + "Return Policy" share one grid item (.storeLocations
+   still owns the hide rules for mobile and the sticky secondary bar). */
+.header__store-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}

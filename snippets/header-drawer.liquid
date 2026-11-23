@@ -369,7 +369,7 @@
               <div class="footer__copyright caption">
                 <ul class="policies list-unstyled">
                   {%- for policy in shop.policies -%}
-                    {%- if policy != blank -%}
+                    {%- if policy != blank and policy.url != shop.refund_policy.url -%}
                       <li>
                         <small class="copyright__content"
                           ><a href="{{ policy.url }}">{{ policy.title }}</a></small

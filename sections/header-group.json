@@ -34,6 +34,8 @@
         "show_alerts": true,
         "alerts_message": "Be the first to know about drops & restocks",
         "alerts_button_label": "Get alerts",
+        "policy_link": "/policies/refund-policy",
+        "policy_link_label": "Return policy",
         "show_line_separator": true,
         "show_social": false,
         "auto_rotate": false,

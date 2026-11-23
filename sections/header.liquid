@@ -180,7 +180,12 @@
       endif
     -%}
    </div>
-    <a class="header__menu-item list-menu__item link link--text storeLocations" target="_top" href="/pages/store-locations">Locations</a>
+    <div class="header__store-links storeLocations">
+      <a class="header__menu-item list-menu__item link link--text" target="_top" href="/pages/store-locations">Locations</a>
+      {%- if shop.refund_policy != blank -%}
+        <a class="header__menu-item list-menu__item link link--text" target="_top" href="{{ shop.refund_policy.url }}">Returns</a>
+      {%- endif -%}
+    </div>
 
     {%- if section.settings.logo_position != 'middle-center' -%}
       {%- if request.page_type == 'index' -%}

@@ -4,7 +4,7 @@
   - product: {Object} product object.
   - section_id: {String} id of the product section, used to bind to the add-to-cart form.
 
-  Pause: tag a product 'embroidery-paused' to hide the button and modal while
+  Pause: tag a product 'embroidery-pause' to hide the button and modal while
   keeping the rest of the build running. The Embroidery/Thread pickers stay
   hidden and the JS keeps the Standard variant selected, so nothing is
   chargeable. Remove the tag to resume.
@@ -18,7 +18,7 @@
   assign no_value = settings.embroidery_no_value | default: 'No'
   assign thread_option_name = settings.embroidery_thread_option_name | default: 'Embroidery Thread color'
   assign fee_money = fee | times: 100 | money
-  assign paused = product.tags contains 'embroidery-paused'
+  assign paused = product.tags contains 'embroidery-pause'
   assign color_option_name = 'Color'
   assign display_color = product.metafields.custom.display_color
   assign color_pairs = ''

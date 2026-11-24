@@ -155,14 +155,6 @@
           {{ section.settings.alerts_button_label | escape }}
           {% render 'icon-arrow' %}
         </button>
-        {%- if section.settings.policy_link != blank and section.settings.policy_link_label != blank -%}
-          <a
-            href="{{ section.settings.policy_link }}"
-            class="alerts-announcement__btn h5 link link--text focus-inset"
-          >
-            {{ section.settings.policy_link_label | escape }}
-          </a>
-        {%- endif -%}
       </div>
     {%- endif -%}
 
@@ -330,18 +322,6 @@
       "id": "alerts_button_label",
       "label": "Button label",
       "default": "Get alerts"
-    },
-    {
-      "type": "url",
-      "id": "policy_link",
-      "label": "Policy link",
-      "info": "Shown next to the button while the Mailchimp popup is on. Leave blank to hide."
-    },
-    {
-      "type": "text",
-      "id": "policy_link_label",
-      "label": "Policy link label",
-      "default": "Return policy"
     },
     {
       "type": "checkbox",

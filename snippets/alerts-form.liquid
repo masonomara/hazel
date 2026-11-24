@@ -2,23 +2,26 @@
   snippets/alerts-form.liquid
   Shared "Never miss a drop" signup form (email + optional SMS), rendered
   server-side in BOTH the popup (snippets/alerts-signup.liquid) and the footer
-  (sections/footer.liquid). Behavior (submit, SMS consent reveal) is wired by
+  (sections/footer.liquid). Accepts id_prefix (required, unique per render) so
+  each control gets a unique id for its <label for>. Behavior (submit, SMS consent reveal) is wired by
   the script in alerts-signup.liquid, which finds every .alerts-form on the page.
 {%- endcomment -%}
 {%- liquid
   assign mc_honeypot = 'b_bb68751aca24eb8005a87da31_7488b9bad0'
+  assign uid = id_prefix | default: 'alerts-form'
   assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
 -%}
 <form class="alerts-form" novalidate>
   <div class="alerts-form__field field">
+    <label class="visually-hidden" for="{{ uid }}-email">Email</label>
     <input
       class="field__input"
+      id="{{ uid }}-email"
       type="email"
       name="EMAIL"
       autocomplete="email"
       autocapitalize="off"
       autocorrect="off"
-      aria-label="Email"
       placeholder="Email"
       required
       aria-required="true"
@@ -26,23 +29,24 @@
   </div>
 
   <div class="alerts-form__field field">
+    <label class="visually-hidden" for="{{ uid }}-phone">Mobile number (optional)</label>
     <input
       class="field__input"
+      id="{{ uid }}-phone"
       type="tel"
       name="SMSPHONE"
       inputmode="tel"
       autocomplete="tel"
-      aria-label="Mobile number (optional)"
       placeholder="Mobile number (optional)"
     >
   </div>
 
-  <label class="alerts-form__consent" data-alerts-consent hidden>
+  <label class="alerts-form__consent" data-alerts-consent for="{{ uid }}-sms-ack" hidden>
     <input
+      id="{{ uid }}-sms-ack"
       type="checkbox"
       name="mc-SMSPHONE-ack"
       value="true"
-      aria-label="I agree to receive recurring promotional and marketing text messages from Hazel Boutique"
     >
     <span class="alerts-form__consent-text" style="text-align: left">
       By providing your phone number and checking the box, you agree to receive recurring
@@ -56,7 +60,8 @@
 
   {%- comment -%} Honeypot: real users never see or fill this. Name is the b_<u>_<id> value. {%- endcomment -%}
   <div class="alerts-form__hp" aria-hidden="true">
-    <input type="text" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="" aria-hidden="true" aria-label="Leave this field empty">
+    <label for="{{ uid }}-hp">Leave this field empty</label>
+    <input type="text" id="{{ uid }}-hp" name="{{ mc_honeypot }}" tabindex="-1" autocomplete="off" value="" aria-hidden="true">
   </div>
 
   <button type="submit" class="alerts-form__submit button button--full-width button--primary">Sign Up</button>

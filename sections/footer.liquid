@@ -349,7 +349,7 @@
             <div class="footer-block__newsletter alerts-footer">
               <h2 class="alerts-modal__title">Never miss a drop</h2>
               <p class="alerts-modal__intro">Get first dibs on drops, restocks, and sales by email, text, or both.</p>
-              {% render 'alerts-form' %}
+              {% render 'alerts-form', id_prefix: 'alerts-footer' %}
             </div>
           {%- endif -%}
           {%- if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop -%}

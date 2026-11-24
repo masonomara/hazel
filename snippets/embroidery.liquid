@@ -18,7 +18,10 @@
   assign no_value = settings.embroidery_no_value | default: 'No'
   assign thread_option_name = settings.embroidery_thread_option_name | default: 'Embroidery Thread color'
   assign fee_money = fee | times: 100 | money
-  assign paused = product.tags contains 'embroidery-pause'
+  assign paused = false
+  if product.tags contains 'embroidery-pause'
+    assign paused = true
+  endif
   assign color_option_name = 'Color'
   assign display_color = product.metafields.custom.display_color
   assign color_pairs = ''
